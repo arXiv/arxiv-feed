@@ -78,3 +78,15 @@ Papers indexed
 
 Done indexing 3 papers.
 ```
+
+You can verify that the papers were indexed by running the following query in
+Kibana's dev tools interface (or making the request directly to the ES API):
+
+```
+GET arxiv/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+```
