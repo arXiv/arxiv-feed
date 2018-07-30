@@ -41,10 +41,10 @@ should be able to add documents to the index using (note that you'll need to
 update paths):
 
 ```bash
-docker run -e ELASTICSEARCH_HOST=arxiv-rss-elasticsearch \
+docker run -e ELASTICSEARCH_SERVICE_HOST=arxiv-rss-elasticsearch \
     --network=arxivrss_es_stack \
     -v /Full/Path/To/arxiv-rss/example:/to_index \
-    arxiv/search-index /to_index/paper_ids.txt
+    arxiv/search-index:0.4 /to_index/paper_ids.txt
 ```
 
 This runs the arxiv/search-index image in a container on the network created
