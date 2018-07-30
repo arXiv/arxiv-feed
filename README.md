@@ -42,7 +42,7 @@ update paths):
 
 ```bash
 docker run -e ELASTICSEARCH_SERVICE_HOST=arxiv-rss-elasticsearch \
-    --network=arxivrss_es_stack \
+    --network=arxiv-rss_es_stack \
     -v /Full/Path/To/arxiv-rss/example:/to_index \
     arxiv/search-index:0.4 /to_index/paper_ids.txt
 ```
