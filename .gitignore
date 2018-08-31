@@ -102,6 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+mypy_test_errors.txt
 
 # PyCharm files
 .idea/
