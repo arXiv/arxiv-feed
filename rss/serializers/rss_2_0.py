@@ -4,11 +4,13 @@ from typing import Tuple, Optional
 from arxiv import status
 from rss.serializers.serializer import Serializer
 from elasticsearch_dsl.response import Response
-import datetime
 from rfeed import *
+from flask import url_for
+
+import datetime
 
 
-# rfeed Extensions are used to add namespaces to the rss element.
+# Rfeed Extensions are used to add namespaces to the rss element.
 class Content(rfeed.Extension):
     def get_namespace(self):
         return {"xmlns:content": "http://purl.org/rss/1.0/modules/content/"}
@@ -29,10 +31,9 @@ class Admin(rfeed.Extension):
         return {"xmlns:admin": "http://webns.net/mvcb/"}
 
 
-class Rss_2_0(Serializer):
+class RSS_2_0(Serializer):
 
-    # TODO - Where to get correct value for pubDate?
-    # TODO - Is it OK to let rfeed add elements for "generator" and "docs"?
+    # TODO - Use the correct value for pubDate
     def get_xml(self, response: Response) -> Tuple[Optional[dict], int]:
         """
         Serializes the provided response data into RSS, version 2.0.
@@ -52,35 +53,55 @@ class Rss_2_0(Serializer):
 
         # Get the archive info from the first hit.  Is this OK?
         archive = response.hits[0]["primary_classification"]["archive"]
+        archive_id = archive["id"]
+        archive_name = archive["name"]
         feed = Feed(
-            title=archive["id"] + " updates on arXiv.org",
+            title=f"{archive_id} updates on arXiv.org",
             link="http://arxiv.org/",
-            description=archive["name"] + " (" + archive["id"] + ") updates on the arXiv.org e-print archive",
+            description=f"{archive_name} ({archive_id}) updates on the arXiv.org e-print archive",
             language="en-us",
             pubDate=datetime.datetime.now(),
             lastBuildDate=datetime.datetime.now(),
             managingEditor="www-admin@arxiv.org"
         )
+
+        # Remove two elements added by the Rfeed package
+        feed.generator = None
+        feed.docs = None
+
+        # Add extensions that will show up as attributes of the rss element
         feed.extensions.append(Content())
         feed.extensions.append(Taxonomy())
         feed.extensions.append(Syndication())
         feed.extensions.append(Admin())
         feed.image = Image(url="http://arxiv.org/icons/sfx.gif", title="arXiv.org", link="http://arxiv.org")
 
+        # Add each search result "hit" to the feed
         for hit in response:
-            descr = "<p>Authors: "
+            # Add links for each author and the abstract to the description element
+            description = "<p>Authors: "
+            first = True
             for author in hit['authors']:
-                # TODO - Where do we get links for the authors?
-                descr += author['full_name'] + ", "
-            descr += "</p><p>" + hit['abstract'] + "</p>"
+                if first:
+                    first = False
+                else:
+                    description += ", "
+                name = f"{author['last_name']},+{author['initials'].replace(' ', '+')}"
+                description += f"<a href='http://arxiv.org/search/?query={name}&searchtype=author'>"
+                description += f"{author['full_name']}</a>"
+            description += f"</p><p>{hit['abstract']}</p>"
+
+            # Create the item element for the "hit"
             item = Item(
                 title=hit['title'],
-                link="http://arxiv.org/abs/"+hit['paper_id'],
-                description=descr,
-                guid=Guid("oai:arXiv.org:"+hit['paper_id'], isPermaLink=False)
+                link=url_for("abs_by_id", paper_id=hit['paper_id']),
+                # link=f"http://arxiv.org/abs/{hit['paper_id']}",
+                description=description,
+                guid=Guid(f"oai:arXiv.org:{hit['paper_id']}", isPermaLink=False)
             )
             feed.items.append(item)
 
+        # Print and return the feed content
         data = feed.rss()
         status_code = status.HTTP_200_OK
         return data, status_code

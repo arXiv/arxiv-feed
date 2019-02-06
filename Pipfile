@@ -4,12 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-elasticsearch = "*"
-elasticsearch-dsl = "*"
-flask = "*"
-arxiv = "*"
-arxiv-base = "*"
-rfeed = "*"
+elasticsearch = "==6.3.1"
+elasticsearch-dsl = "==6.3.1"
+flask = "==1.0.2"
+arxiv = "==0.3.1"
+arxiv-base = "==0.12.1"
+rfeed = "==1.1.1"
 
 [dev-packages]
 

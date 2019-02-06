@@ -1,11 +1,16 @@
 """Controller for RSS Feeds"""
 
 from typing import Tuple, Optional
-import datetime
+from pytz import UTC
 from arxiv import status
 from rss import index
-from rss.serializers.rss_2_0 import Rss_2_0
+from rss.serializers.rss_2_0 import RSS_2_0
 from rss.serializers.atom_1_0 import Atom_1_0
+
+import datetime
+
+VER_RSS_2_0 = "2.0"
+VER_ATOM_1_0 = "atom_1.0"
 
 
 def get_xml(archive_id: str, version: str) -> Tuple[Optional[dict], int, dict]:
@@ -30,12 +35,12 @@ def get_xml(archive_id: str, version: str) -> Tuple[Optional[dict], int, dict]:
     """
 
     # Get the current date and time
-    date_time = datetime.datetime.now()
+    date_time = datetime.datetime.now(UTC)
 
     # Create the correct serializer
-    if version == "2.0":
-        serializer = Rss_2_0()
-    elif version == "atom_1.0":
+    if version == VER_RSS_2_0:
+        serializer = RSS_2_0()
+    elif version == VER_ATOM_1_0:
         serializer = Atom_1_0()
     else:
         return None, status.HTTP_400_BAD_REQUEST, {}
@@ -43,9 +48,6 @@ def get_xml(archive_id: str, version: str) -> Tuple[Optional[dict], int, dict]:
     # Get the search results, pass them to the serializer, return the results
     response = index.perform_search(archive_id, date_time)
     data, status_code = serializer.get_xml(response)
-
-    # TODO - temporary, for debugging
-    print(data)
 
     # TODO - We may eventually want to return an etag in the header
     return data, status_code, {}
