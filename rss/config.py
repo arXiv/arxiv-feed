@@ -19,3 +19,12 @@ SQLALCHEMY_DATABASE_URI = os.environ.get('RSS_SQLALCHEMY_DATABASE_URI',
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 JWT_SECRET = os.environ.get('JWT_SECRET', 'foosecret')
+
+BASE_SERVER = os.environ.get('BASE_SERVER', 'arxiv.org')
+
+URLS = [
+    ("pdf", "/pdf/<arxiv:paper_id>v<string:version>", BASE_SERVER),
+    ("abs", "/abs/<arxiv:paper_id>v<string:version>", BASE_SERVER),
+    ("abs_by_id", "/abs/<arxiv:paper_id>", BASE_SERVER),
+    ("pdfonly", "/pdf/<arxiv:paper_id>v<string:version>", BASE_SERVER),
+]
