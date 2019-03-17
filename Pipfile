@@ -12,6 +12,16 @@ arxiv-base = "==0.12.1"
 rfeed = "==1.1.1"
 
 [dev-packages]
+mypy = "*"
+"nose2" = "*"
+Flask-Testing = "*"
+pycodestyle = "*"
+pydocstyle = "*"
+pylint = "*"
+pytest = "*"
+pyhamcrest = "*"
+pytest-easyread = "*"
+
 
 [requires]
 python_version = "3.6"
