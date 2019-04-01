@@ -13,6 +13,16 @@ rfeed = "==1.1.1"
 feedgen = "*"
 
 [dev-packages]
+mypy = "*"
+"nose2" = "*"
+Flask-Testing = "*"
+pycodestyle = "*"
+pydocstyle = "*"
+pylint = "*"
+pytest = "*"
+pyhamcrest = "*"
+pytest-easyread = "*"
+
 
 [requires]
 python_version = "3.6"
