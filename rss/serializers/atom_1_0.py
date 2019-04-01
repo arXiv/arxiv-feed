@@ -1,33 +1,50 @@
-"""Serializer for Atom 1.0"""
+"""Serializer for Atom 1.0."""
 
+from typing import Tuple
+from datetime import datetime
 from feedgen.feed import FeedGenerator
 from flask import url_for
-from typing import Tuple, Optional
 from arxiv import status
+from pytz import utc
+from elasticsearch_dsl.response import Response
 from rss.serializers.serializer import Serializer
-from rss.serializers.atom_extensions import ArxivExtension, ArxivEntryExtension
-from elasticsearch_dsl.response import *
-
-import datetime
-import pytz
+from rss.serializers.atom_extensions import ArxivEntryExtension, ArxivExtension
 
 
-class Atom_1_0(Serializer):
+class Atom_1_0(Serializer): # pylint: disable=too-few-public-methods
+    """RSS serializer that produces XML results in the Atom v1.0 format."""
 
-    def get_xml(self, response: Response) -> Tuple[Optional[dict], int]:
+    def get_xml(self: Serializer, response: Response) -> Tuple[str, int]:
+        """
+        Serialize the provided response data into Atom, version 1.0.
 
+        Parameters
+        ----------
+        response : Response
+            The search response data to be serialized.
+
+        Returns
+        -------
+        data : str
+            The serialized XML results.
+        status
+            The HTTP status code for the operation.
+
+        """
         fg = FeedGenerator()
         fg.register_extension("arxiv", ArxivExtension, ArxivEntryExtension, rss=False)
         fg.id("http://arxiv.org/rss/version=atom_1.0")
         archive = response.hits[0]["primary_classification"]["archive"]
         fg.title(archive["id"] + " updates on arXiv.org")
-        fg.link(href='http://arxiv.org/rss/version=atom_1.0', rel='self', type='application/atom+xml')
-        fg.updated(datetime.datetime.utcnow().replace(tzinfo=pytz.utc))
+        fg.link(href='http://arxiv.org/rss/version=atom_1.0', rel='self',
+                type='application/atom+xml')
+        fg.updated(datetime.utcnow().replace(tzinfo=utc))
 
         # TODO - Try to remove generator element?  This doesn't work - code ignores "None"
         # fg.generator(None)
         # TODO - We don't currently set "subtitle", but could do it like this
-        # fg.subtitle(f"{archive['name']} ({archive['id']}) updates on the arXiv.org e-print archive")
+        # fg.subtitle(
+        #     f"{archive['name']} ({archive['id']}) updates on the arXiv.org e-print archive")
 
         # Add each search result "hit" to the feed
         for hit in response:
@@ -49,21 +66,25 @@ class Atom_1_0(Serializer):
                 categories += [dict['category'].to_dict()]
             for cat in categories:
                 label = cat['name'] + " (" + cat['id'] + ")"
-                category = {"term": cat['id'], "scheme": "http://arxiv.org/schemas/atom", "label": label}
+                category = {"term": cat['id'],
+                            "scheme": "http://arxiv.org/schemas/atom",
+                            "label": label}
                 entry.category(category)
 
             # Add arXiv-specific element "comment"
-            if len(hit['comments'].strip()):
+            if not hit['comments'].strip():
                 entry.arxiv.comment(hit['comments'])
 
             # Add arXiv-specific element "journal_ref"
-            if len(hit['journal_ref'].strip()):
+            if not hit['journal_ref'].strip():
                 entry.arxiv.journal_ref(hit['journal_ref'])
 
             # Add arXiv-specific element "primary_category"
             prim_cat = hit['primary_classification'].to_dict()['category']
             label = prim_cat['name'] + " (" + prim_cat['id'] + ")"
-            category = {"term": prim_cat['id'], "scheme": "http://arxiv.org/schemas/atom", "label": label}
+            category = {"term": prim_cat['id'],
+                        "scheme": "http://arxiv.org/schemas/atom",
+                        "label": label}
             entry.arxiv.primary_category(category)
 
             # Add arXiv-specific element "doi"

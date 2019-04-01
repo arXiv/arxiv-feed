@@ -1,18 +1,21 @@
-"""Base class for RSS serializers"""
+"""Base class for RSS serializers."""
 
 from abc import ABC, abstractmethod
+from typing import Tuple
 from elasticsearch_dsl.response import Response
 
 
-class Serializer(ABC):
+class Serializer(ABC): # pylint: disable=too-few-public-methods
+    """Abstract base class for RSS serializers that produce XML results."""
 
-    def __init__(self):
+    def __init__(self: ABC):
+        """Noop initialization."""
         pass
 
     @abstractmethod
-    def get_xml(self, response: Response):
+    def get_xml(self: ABC, response: Response) -> Tuple[str, int]:
         """
-        Serializes the provided search results.
+        Serialize the provided search results.
 
         Parameters
         ----------
@@ -23,7 +26,6 @@ class Serializer(ABC):
         -------
         data : str
             The serialized results of the search.
+
         """
-
         pass
-

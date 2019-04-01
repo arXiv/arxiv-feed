@@ -1,1 +1,1 @@
-"""Tests for RSS feed package"""
+"""Tests for RSS feed package."""

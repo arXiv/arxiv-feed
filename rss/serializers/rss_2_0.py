@@ -1,42 +1,110 @@
-"""Serializer for RSS 2.0"""
+"""Serializer for RSS 2.0."""
 
-from typing import Tuple, Optional
+from typing import Dict, Tuple
+from datetime import datetime
 from arxiv import status
-from rss.serializers.serializer import Serializer
 from elasticsearch_dsl.response import Response
-from rfeed import *
+from rfeed import Extension, Feed, Guid, Image, Item
 from flask import url_for
-
-import datetime
+from rss.serializers.serializer import Serializer
 
 
 # Rfeed Extensions are used to add namespaces to the rss element.
-class Content(rfeed.Extension):
-    def get_namespace(self):
+class Content(Extension): # pylint: disable=too-few-public-methods
+    """
+    Adds "content" namespace to RSS output.
+
+    A derivation of the rfeed.Extension class that adds a "content" namespace attribute
+    to the top-level RSS element of the output.
+    """
+
+    @staticmethod
+    def get_namespace() -> Dict[str, str]:
+        """
+        Return the namespace string for this extension class.
+
+        Returns
+        -------
+        str
+            The string defining the "content" namespace.
+
+        """
         return {"xmlns:content": "http://purl.org/rss/1.0/modules/content/"}
 
 
-class Taxonomy(rfeed.Extension):
-    def get_namespace(self):
+class Taxonomy(Extension): # pylint: disable=too-few-public-methods
+    """
+    Adds "taxonomy" namespace to RSS output.
+
+    A derivation of the rfeed.Extension class that adds a "taxonomy" namespace attribute
+    to the top-level RSS element of the output.
+    """
+
+    @staticmethod
+    def get_namespace() -> Dict[str, str]:
+        """
+        Return the namespace string for this extension class.
+
+        Returns
+        -------
+        str
+            The string defining the "taxonomy" namespace.
+
+        """
         return {"xmlns:taxo": "http://purl.org/rss/1.0/modules/taxonomy/"}
 
 
-class Syndication(rfeed.Extension):
-    def get_namespace(self):
+class Syndication(Extension): # pylint: disable=too-few-public-methods
+    """
+    Adds "syndication" namespace to RSS output.
+
+    A derivation of the rfeed.Extension class that adds a "syndication" namespace attribute
+    to the top-level RSS element of the output.
+    """
+
+    @staticmethod
+    def get_namespace() -> Dict[str, str]:
+        """
+        Return the namespace string for this extension class.
+
+        Returns
+        -------
+        str
+            The string defining the "syndication" namespace.
+
+        """
         return {"xmlns:syn": "http://purl.org/rss/1.0/modules/syndication/"}
 
 
-class Admin(rfeed.Extension):
-    def get_namespace(self):
+class Admin(Extension): # pylint: disable=too-few-public-methods
+    """
+    Adds "admin" namespace to RSS output.
+
+    A derivation of the rfeed.Extension class that adds a "admin" namespace attribute
+    to the top-level RSS element of the output.
+    """
+
+    @staticmethod
+    def get_namespace() -> Dict[str, str]:
+        """
+        Return the namespace string for this extension class.
+
+        Returns
+        -------
+        str
+            The string defining the "admin" namespace.
+
+        """
         return {"xmlns:admin": "http://webns.net/mvcb/"}
 
 
-class RSS_2_0(Serializer):
+class RSS_2_0(Serializer): # pylint: disable=too-few-public-methods
+    """RSS serializer that produces XML results in the RSS v2.0 format."""
 
     # TODO - Use the correct value for pubDate
-    def get_xml(self, response: Response) -> Tuple[Optional[dict], int]:
+    def get_xml(self: Serializer, response: Response) -> Tuple[str, int]:
         """
-        Serializes the provided response data into RSS, version 2.0.
+        Serialize the provided response data into RSS, version 2.0.
 
         Parameters
         ----------
@@ -49,8 +117,8 @@ class RSS_2_0(Serializer):
             The serialized XML results.
         status
             The HTTP status code for the operation.
-        """
 
+        """
         # Get the archive info from the first hit.  Is this OK?
         archive = response.hits[0]["primary_classification"]["archive"]
         archive_id = archive["id"]
@@ -60,8 +128,8 @@ class RSS_2_0(Serializer):
             link="http://arxiv.org/",
             description=f"{archive_name} ({archive_id}) updates on the arXiv.org e-print archive",
             language="en-us",
-            pubDate=datetime.datetime.now(),
-            lastBuildDate=datetime.datetime.now(),
+            pubDate=datetime.now(),
+            lastBuildDate=datetime.now(),
             managingEditor="www-admin@arxiv.org"
         )
 
@@ -74,7 +142,8 @@ class RSS_2_0(Serializer):
         feed.extensions.append(Taxonomy())
         feed.extensions.append(Syndication())
         feed.extensions.append(Admin())
-        feed.image = Image(url="http://arxiv.org/icons/sfx.gif", title="arXiv.org", link="http://arxiv.org")
+        feed.image = Image(url="http://arxiv.org/icons/sfx.gif",
+                           title="arXiv.org", link="http://arxiv.org")
 
         # Add each search result "hit" to the feed
         for hit in response:

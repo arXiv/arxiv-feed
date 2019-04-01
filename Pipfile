@@ -10,6 +10,7 @@ flask = "==1.0.2"
 arxiv = "==0.3.1"
 arxiv-base = "==0.12.1"
 rfeed = "==1.1.1"
+feedgen = "*"
 
 [dev-packages]
 
