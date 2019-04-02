@@ -1,1 +1,1 @@
-"""RSS serializers"""
+"""RSS serializers."""

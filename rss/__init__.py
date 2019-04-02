@@ -1,1 +1,1 @@
-"""RSS feeds"""
+"""RSS feeds."""
