@@ -26,5 +26,6 @@ URLS = [
     ("pdf", "/pdf/<arxiv:paper_id>v<string:version>", BASE_SERVER),
     ("abs", "/abs/<arxiv:paper_id>v<string:version>", BASE_SERVER),
     ("abs_by_id", "/abs/<arxiv:paper_id>", BASE_SERVER),
+    ("pdf_by_id", "/pdf/<arxiv:paper_id>", BASE_SERVER),
     ("pdfonly", "/pdf/<arxiv:paper_id>v<string:version>", BASE_SERVER),
 ]

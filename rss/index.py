@@ -1,13 +1,15 @@
-"""Interface to Index Service for RSS feeds"""
+"""Interface to Index Service for RSS feeds."""
 
 from elasticsearch import Elasticsearch, ElasticsearchException
 from elasticsearch.connection import Urllib3HttpConnection
 from elasticsearch_dsl import Search, Q
 import datetime
+from typing import Any
 
 
-def perform_search(archive: str, date_time: datetime):
+def perform_search(archive: str, date_time: datetime.datetime) -> Any:
     """
+    Search the index for records with the archive ID and dated within 24 hours of date_time.
 
     Parameters
     ----------
@@ -20,8 +22,8 @@ def perform_search(archive: str, date_time: datetime):
     -------
     response : Response
         The results of the Elasticsearch search.
-    """
 
+    """
     try:
         es = Elasticsearch([{'host': 'localhost', 'port': 9200,
                              'use_ssl': False,

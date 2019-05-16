@@ -1,1 +1,1 @@
-"""Domain classes for the RSS feed"""
+"""Domain classes for the RSS feed."""

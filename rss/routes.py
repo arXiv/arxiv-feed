@@ -1,4 +1,4 @@
-"""URL routes for RSS feeds"""
+"""URL routes for RSS feeds."""
 
 from flask import Blueprint
 from flask import request
@@ -27,7 +27,6 @@ def rss(archive_id: str) -> tuple:
         Headers associated with the response.
 
     """
-
     version = request.args.get('version')
     data, status, headers = controller.get_xml(archive_id, version)
     # TODO: create a flask response object to hold the data?
