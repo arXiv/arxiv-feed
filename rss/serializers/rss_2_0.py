@@ -6,7 +6,7 @@ from arxiv import status
 from rfeed import Extension, Feed, Guid, Image, Item
 from flask import url_for
 from rss.serializers.serializer import Serializer
-
+from typing import List
 
 # Rfeed Extensions are used to add namespaces to the rss element.
 class Content(Extension):  # pylint: disable=too-few-public-methods
@@ -101,13 +101,13 @@ class RSS_2_0(Serializer):  # pylint: disable=too-few-public-methods
     """RSS serializer that produces XML results in the RSS v2.0 format."""
 
     # TODO - Use the correct value for pubDate
-    def get_xml(self: Serializer, hits: []) -> Tuple[str, int]:
+    def get_xml(self: Serializer, hits: List) -> Tuple[str, int]:
         """
         Serialize the provided response data into RSS, version 2.0.
 
         Parameters
         ----------
-        hits : []
+        hits : List
             The search response data to be serialized.
 
         Returns

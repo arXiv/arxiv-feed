@@ -8,18 +8,19 @@ from arxiv import status
 from pytz import utc
 from rss.serializers.serializer import Serializer
 from rss.serializers.atom_extensions import ArxivEntryExtension, ArxivExtension
+from typing import List
 
 
 class Atom_1_0(Serializer):  # pylint: disable=too-few-public-methods
     """RSS serializer that produces XML results in the Atom v1.0 format."""
 
-    def get_xml(self: Serializer, hits: []) -> Tuple[str, int]:
+    def get_xml(self: Serializer, hits: List) -> Tuple[str, int]:
         """
         Serialize the provided response data into Atom, version 1.0.
 
         Parameters
         ----------
-        hits : []
+        hits : List
             The search response data to be serialized.
 
         Returns
