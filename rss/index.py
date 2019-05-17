@@ -4,10 +4,9 @@ from elasticsearch import Elasticsearch, ElasticsearchException
 from elasticsearch.connection import Urllib3HttpConnection
 from elasticsearch_dsl import Search, Q
 import datetime
-from typing import Any
 
 
-def perform_search(archive: str, date_time: datetime.datetime) -> Any:
+def perform_search(archive: str, date_time: datetime.datetime) -> []:
     """
     Search the index for records with the archive ID and dated within 24 hours of date_time.
 
@@ -20,8 +19,8 @@ def perform_search(archive: str, date_time: datetime.datetime) -> Any:
 
     Returns
     -------
-    response : Response
-        The results of the Elasticsearch search.
+    hits : []
+        The results of the Elasticsearch search as a list of .
 
     """
     try:
@@ -35,7 +34,10 @@ def perform_search(archive: str, date_time: datetime.datetime) -> Any:
         q = Q("match_all")
 
         response = Search(index='arxiv').using(es).query(q).execute()
-        return response
+        hits = []
+        for hit in response:
+            hits.append(hit)
+        return hits
 
     except ElasticsearchException as e:
         pass

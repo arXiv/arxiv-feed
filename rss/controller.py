@@ -40,15 +40,15 @@ def get_xml(archive_id: str, version: Optional[Any]) -> Tuple[str, int, dict]:
 
     # Create the correct serializer
     if version in (VER_RSS_2_0, None):
-        serializer = RSS_2_0() # type: Serializer
+        serializer = RSS_2_0()  # type: Serializer
     elif version == VER_ATOM_1_0:
         serializer = Atom_1_0()
     else:
         return "", status.HTTP_400_BAD_REQUEST, {}
 
     # Get the search results, pass them to the serializer, return the results
-    response = index.perform_search(archive_id, date_time)
-    data, status_code = serializer.get_xml(response)
+    hits = index.perform_search(archive_id, date_time)
+    data, status_code = serializer.get_xml(hits)
 
     # TODO - We may eventually want to return an etag in the header
     return data, status_code, {}
