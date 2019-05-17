@@ -47,7 +47,7 @@ class MyPyTest(TestCase):
 
     def __init__(self, *args: str, **kwargs: Dict) -> None:
         """Set up some common variables."""
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)  # type: ignore
         self.pkgname: str = "rss"
         my_env = os.environ.copy()
         self.pypath: str = my_env.get("PYTHONPATH", os.getcwd())
