@@ -34,16 +34,16 @@ class EPrint(NamedTuple):
 
     authors: List[Author]
 
-    """The categories under which this eprint is filed."""
     primary_category: Category
     secondary_categories: List[Category]
+    """The categories under which this eprint is filed."""
 
 
 class EPrintSet(NamedTuple):
     """A set of :class:`.EPrint`s for responding to a specific RSS feed."""
 
-    """The categories that were searched to produce these results."""
     categories: List[str]
+    """The categories that were searched to produce these results."""
 
-    """Data for all the eprints that were found by the search."""
     eprints: List[EPrint]
+    """Data for all the eprints that were found by the search."""
