@@ -3,14 +3,15 @@
 from typing import Dict, Tuple
 from datetime import datetime
 from arxiv import status
-from elasticsearch_dsl.response import Response
 from rfeed import Extension, Feed, Guid, Image, Item
 from flask import url_for
 from rss.serializers.serializer import Serializer
+from typing import List
+from rss.domain import Author, EPrint, EPrintSet
 
 
 # Rfeed Extensions are used to add namespaces to the rss element.
-class Content(Extension): # pylint: disable=too-few-public-methods
+class Content(Extension):  # pylint: disable=too-few-public-methods
     """
     Adds "content" namespace to RSS output.
 
@@ -19,7 +20,7 @@ class Content(Extension): # pylint: disable=too-few-public-methods
     """
 
     @staticmethod
-    def get_namespace() -> Dict[str, str]:
+    def get_namespace(**kwargs: Dict) -> Dict[str, str]:
         """
         Return the namespace string for this extension class.
 
@@ -32,7 +33,7 @@ class Content(Extension): # pylint: disable=too-few-public-methods
         return {"xmlns:content": "http://purl.org/rss/1.0/modules/content/"}
 
 
-class Taxonomy(Extension): # pylint: disable=too-few-public-methods
+class Taxonomy(Extension):  # pylint: disable=too-few-public-methods
     """
     Adds "taxonomy" namespace to RSS output.
 
@@ -41,7 +42,7 @@ class Taxonomy(Extension): # pylint: disable=too-few-public-methods
     """
 
     @staticmethod
-    def get_namespace() -> Dict[str, str]:
+    def get_namespace(**kwargs: Dict) -> Dict[str, str]:
         """
         Return the namespace string for this extension class.
 
@@ -54,7 +55,7 @@ class Taxonomy(Extension): # pylint: disable=too-few-public-methods
         return {"xmlns:taxo": "http://purl.org/rss/1.0/modules/taxonomy/"}
 
 
-class Syndication(Extension): # pylint: disable=too-few-public-methods
+class Syndication(Extension):  # pylint: disable=too-few-public-methods
     """
     Adds "syndication" namespace to RSS output.
 
@@ -63,7 +64,7 @@ class Syndication(Extension): # pylint: disable=too-few-public-methods
     """
 
     @staticmethod
-    def get_namespace() -> Dict[str, str]:
+    def get_namespace(**kwargs: Dict) -> Dict[str, str]:
         """
         Return the namespace string for this extension class.
 
@@ -76,7 +77,7 @@ class Syndication(Extension): # pylint: disable=too-few-public-methods
         return {"xmlns:syn": "http://purl.org/rss/1.0/modules/syndication/"}
 
 
-class Admin(Extension): # pylint: disable=too-few-public-methods
+class Admin(Extension):  # pylint: disable=too-few-public-methods
     """
     Adds "admin" namespace to RSS output.
 
@@ -85,7 +86,7 @@ class Admin(Extension): # pylint: disable=too-few-public-methods
     """
 
     @staticmethod
-    def get_namespace() -> Dict[str, str]:
+    def get_namespace(**kwargs: Dict) -> Dict[str, str]:
         """
         Return the namespace string for this extension class.
 
@@ -98,17 +99,17 @@ class Admin(Extension): # pylint: disable=too-few-public-methods
         return {"xmlns:admin": "http://webns.net/mvcb/"}
 
 
-class RSS_2_0(Serializer): # pylint: disable=too-few-public-methods
+class RSS_2_0(Serializer):  # pylint: disable=too-few-public-methods
     """RSS serializer that produces XML results in the RSS v2.0 format."""
 
     # TODO - Use the correct value for pubDate
-    def get_xml(self: Serializer, response: Response) -> Tuple[str, int]:
+    def get_xml(self: Serializer, eprints: EPrintSet) -> Tuple[str, int]:
         """
         Serialize the provided response data into RSS, version 2.0.
 
         Parameters
         ----------
-        response : Response
+        eprints : EPrintSet
             The search response data to be serialized.
 
         Returns
@@ -120,9 +121,8 @@ class RSS_2_0(Serializer): # pylint: disable=too-few-public-methods
 
         """
         # Get the archive info from the first hit.  Is this OK?
-        archive = response.hits[0]["primary_classification"]["archive"]
-        archive_id = archive["id"]
-        archive_name = archive["name"]
+        archive_id = eprints.eprints[0].arxiv_id
+        archive_name = eprints.eprints[0].archive_name
         feed = Feed(
             title=f"{archive_id} updates on arXiv.org",
             link="http://arxiv.org/",
@@ -145,28 +145,28 @@ class RSS_2_0(Serializer): # pylint: disable=too-few-public-methods
         feed.image = Image(url="http://arxiv.org/icons/sfx.gif",
                            title="arXiv.org", link="http://arxiv.org")
 
-        # Add each search result "hit" to the feed
-        for hit in response:
+        # Add each search result to the feed
+        for eprint in eprints.eprints:
             # Add links for each author and the abstract to the description element
             description = "<p>Authors: "
             first = True
-            for author in hit['authors']:
+            for author in eprint.authors:
                 if first:
                     first = False
                 else:
                     description += ", "
-                name = f"{author['last_name']},+{author['initials'].replace(' ', '+')}"
+                name = f"{author.last_name},+{author.initials.replace(' ', '+')}"
                 description += f"<a href='http://arxiv.org/search/?query={name}&searchtype=author'>"
-                description += f"{author['full_name']}</a>"
-            description += f"</p><p>{hit['abstract']}</p>"
+                description += f"{author.full_name}</a>"
+            description += f"</p><p>{eprint.abstract}</p>"
 
-            # Create the item element for the "hit"
+            # Create the item element for the eprint
             item = Item(
-                title=hit['title'],
-                link=url_for("abs_by_id", paper_id=hit['paper_id']),
+                title=eprint.title,
+                link=url_for("abs_by_id", paper_id=eprint.paper_id),
                 # link=f"http://arxiv.org/abs/{hit['paper_id']}",
                 description=description,
-                guid=Guid(f"oai:arXiv.org:{hit['paper_id']}", isPermaLink=False)
+                guid=Guid(f"oai:arXiv.org:{eprint.paper_id}", isPermaLink=False)
             )
             feed.items.append(item)
 

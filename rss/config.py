@@ -22,6 +22,9 @@ JWT_SECRET = os.environ.get('JWT_SECRET', 'foosecret')
 
 BASE_SERVER = os.environ.get('BASE_SERVER', 'arxiv.org')
 
+METADATA_ENDPOINT = os.environ.get('METADATA_ENDPOINT',
+                                   'https://beta.arxiv.org/')
+
 URLS = [
     ("pdf", "/pdf/<arxiv:paper_id>v<string:version>", BASE_SERVER),
     ("abs", "/abs/<arxiv:paper_id>v<string:version>", BASE_SERVER),
