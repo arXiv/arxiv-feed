@@ -37,6 +37,7 @@ def get_xml(archive_id: str, version: Optional[Any]) -> Tuple[str, int, dict]:
     """
     # Get the current date and time
     date_time = datetime.datetime.now(UTC)
+    days = 1
 
     # Create the correct serializer
     if version in (VER_RSS_2_0, None):
@@ -44,11 +45,16 @@ def get_xml(archive_id: str, version: Optional[Any]) -> Tuple[str, int, dict]:
     elif version == VER_ATOM_1_0:
         serializer = Atom_1_0()
     else:
-        return "", status.HTTP_400_BAD_REQUEST, {}
+        msg = "Unsupported RSS version '" + str(version) + "' requested." + \
+              "Valid options are '" + VER_RSS_2_0 + "' and '" + VER_ATOM_1_0 + "'."
+        return msg, status.HTTP_400_BAD_REQUEST, {}
 
     # Get the search results, pass them to the serializer, return the results
-    hits = index.perform_search(archive_id, date_time)
-    data, status_code = serializer.get_xml(hits)
+    status_code, eprints, msg = index.perform_search(archive_id, date_time, days)
+    if status_code == status.HTTP_200_OK:
+        data, status_code = serializer.get_xml(eprints)
+    else:
+        data = msg
 
     # TODO - We may eventually want to return an etag in the header
     return data, status_code, {}

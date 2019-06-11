@@ -8,8 +8,7 @@ from arxiv import status
 from pytz import utc
 from rss.serializers.serializer import Serializer
 from rss.serializers.atom_extensions import ArxivEntryExtension, ArxivExtension
-from typing import List
-from rss.domain import Author, EPrint, EPrintSet
+from rss.domain import EPrintSet
 
 
 class Atom_1_0(Serializer):  # pylint: disable=too-few-public-methods
@@ -35,12 +34,8 @@ class Atom_1_0(Serializer):  # pylint: disable=too-few-public-methods
         fg = FeedGenerator()
         fg.register_extension("arxiv", ArxivExtension, ArxivEntryExtension, rss=False)
         fg.id("http://arxiv.org/rss/version=atom_1.0")
-        # TODO - Get archive name from somewhere else in case there are no hits
-        if len(eprints):
-            archive = eprints.eprints[0]
-            fg.title(archive.arxiv_id + " updates on arXiv.org")
-        fg.link(href='http://arxiv.org/rss/version=atom_1.0', rel='self',
-                type='application/atom+xml')
+        fg.title(str.join(', ', eprints.categories) + " updates on arXiv.org")
+        fg.link(href='http://arxiv.org/rss/version=atom_1.0', rel='self', type='application/atom+xml')
         fg.updated(datetime.utcnow().replace(tzinfo=utc))
 
         # TODO - Try to remove generator element.  This doesn't work - code ignores "None"
