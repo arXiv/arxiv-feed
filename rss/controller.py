@@ -1,14 +1,17 @@
 """Controller for RSS Feeds."""
 
-from typing import Tuple, Optional, Any
+from typing import Tuple, Optional, Any, cast
 from pytz import UTC
 from arxiv import status
 from rss import index
+from rss.index import RssIndexerError
 from rss.serializers.serializer import Serializer
 from rss.serializers.rss_2_0 import RSS_2_0
 from rss.serializers.atom_1_0 import Atom_1_0
+from werkzeug.exceptions import BadRequest
 
 import datetime
+import os
 
 VER_RSS_2_0 = "2.0"
 VER_ATOM_1_0 = "atom_1.0"
@@ -37,7 +40,10 @@ def get_xml(archive_id: str, version: Optional[Any]) -> Tuple[str, int, dict]:
     """
     # Get the current date and time
     date_time = datetime.datetime.now(UTC)
-    days = 1
+
+    # Get the number of days for which results are to be returned
+    os.environ.setdefault("RSS_NUM_DAYS", "1")
+    days = int(cast(str, os.environ.get("RSS_NUM_DAYS")))
 
     # Create the correct serializer
     if version in (VER_RSS_2_0, None):
@@ -47,14 +53,14 @@ def get_xml(archive_id: str, version: Optional[Any]) -> Tuple[str, int, dict]:
     else:
         msg = "Unsupported RSS version '" + str(version) + "' requested." + \
               "Valid options are '" + VER_RSS_2_0 + "' and '" + VER_ATOM_1_0 + "'."
-        return msg, status.HTTP_400_BAD_REQUEST, {}
+        raise BadRequest(msg)
 
     # Get the search results, pass them to the serializer, return the results
-    status_code, eprints, msg = index.perform_search(archive_id, date_time, days)
-    if status_code == status.HTTP_200_OK:
-        data, status_code = serializer.get_xml(eprints)
-    else:
-        data = msg
+    try:
+        eprints = index.perform_search(archive_id, date_time, days)
+        data = serializer.get_xml(eprints)
+    except RssIndexerError as e:
+        raise BadRequest(e.message)
 
     # TODO - We may eventually want to return an etag in the header
-    return data, status_code, {}
+    return data, status.HTTP_200_OK, {}

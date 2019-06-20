@@ -1,18 +1,34 @@
 """Interface to Index Service for RSS feeds."""
 
-from arxiv import taxonomy, status
+from arxiv import taxonomy
 from elasticsearch import Elasticsearch, ElasticsearchException
 from elasticsearch.connection import Urllib3HttpConnection
 from elasticsearch_dsl import Search, Q
 from elasticsearch_dsl.response import Hit
 import datetime
-from typing import List, Tuple
+from typing import List
 from .domain import Author, Category, EPrint, EPrintSet
 
 DELIMITER = '+'
 
 
-def perform_search(archives: str, date_time: datetime.datetime, days: int) -> Tuple[int, EPrintSet, str]:
+class RssIndexerError(Exception):
+    """An exception for returning errors from the RSS feed's indexer."""
+
+    def __init__(self, message: str):
+        """
+        Initialize an exception.
+
+        Parameters
+        ----------
+        message : str
+            The error message for the exception.
+
+        """
+        self.message = message
+
+
+def perform_search(archives: str, date_time: datetime.datetime, days: int) -> EPrintSet:
     """
     Search the index for records with the archive ID and dated within 24 hours of date_time.
 
@@ -27,31 +43,25 @@ def perform_search(archives: str, date_time: datetime.datetime, days: int) -> Tu
 
     Returns
     -------
-    status : int
-        The HTTP status of the request after retrieving data from the indexer
     eprints : EPrintSet
         The results of the Elasticsearch search as a collection of EPrints
-    error_msg : str
-        The error message to display if there was a problem, otherwise an empty string
 
     """
     eprints: List[EPrint] = list()
 
-    request_status, msg, request_categories = validate_request(archives)
+    request_categories = validate_request(archives)
 
-    if request_status == status.HTTP_200_OK:
-        request_status, records = get_records_from_indexer(request_categories, date_time, days)
-        msg = ""
+    records = get_records_from_indexer(request_categories, date_time, days)
 
-        # Create an EPrint object for every hit that was found
-        for record in records:
-            eprint = create_eprint(record)
-            eprints.append(eprint)
+    # Create an EPrint object for every hit that was found
+    for record in records:
+        eprint = create_eprint(record)
+        eprints.append(eprint)
 
-    return request_status, EPrintSet(request_categories, eprints), msg
+    return EPrintSet(request_categories, eprints)
 
 
-def validate_request(archives: str) -> Tuple[int, str, List[str]]:
+def validate_request(archives: str) -> List[str]:
     """
     Validate the provided archive/category specification and return a list of its named archives and categories.
 
@@ -60,12 +70,13 @@ def validate_request(archives: str) -> Tuple[int, str, List[str]]:
     archives : str
         A concatenation of archive/category specifiers separated by delimiter characters.
 
+    Raises
+    ------
+    RssIndexerError
+        If the provided archive string is malformed or specifies an invalid archive or category name.
+
     Returns
     -------
-    status : int
-        The HTTP status code for the validation effort, either 200 (OK) or 400 (BAD).
-    msg : str
-        If the status is 400, an error message explaining the validation failure.  Otherwise, an empty string.
     request_categories : List[str]
         If validation was as successful, a list of archive/category names.  Otherwise, and empty list.
 
@@ -79,7 +90,7 @@ def validate_request(archives: str) -> Tuple[int, str, List[str]]:
               "Correct format is one or more archive names delimited by '" + DELIMITER + "'.  " + \
               "Each name can be either of the form 'archive' or 'archive.category'.  " + \
               "For example: 'math+cs.CG' (all from math and only computational geometry from computer science)."
-        return status.HTTP_400_BAD_REQUEST, msg, request_categories
+        raise RssIndexerError(msg)
 
     # Are each of the archives and subjects valid?
     for category in request_categories:
@@ -87,20 +98,20 @@ def validate_request(archives: str) -> Tuple[int, str, List[str]]:
         if not parts[0] in taxonomy.ARCHIVES:
             msg = "Bad archive '" + parts[0] + "'.  Valid archive names are: " + \
                   str.join(', ', taxonomy.ARCHIVES.keys()) + "."
-            return status.HTTP_400_BAD_REQUEST, msg, request_categories
+            raise RssIndexerError(msg)
         if len(parts) == 2 and category not in taxonomy.CATEGORIES:
             skip = len(parts[0]) + 1
             groups = [key[skip:] for key in taxonomy.CATEGORIES.keys() if key.startswith(parts[0] + '.')]
             msg = "Bad subject class '" + parts[1] + "'.  " + \
                   "Valid subject classes for the archive '" + parts[0] + "' are: " + \
                   str.join(', ', groups) + "."
-            return status.HTTP_400_BAD_REQUEST, msg, request_categories
+            raise RssIndexerError(msg)
 
-    return status.HTTP_200_OK, "", request_categories
+    return request_categories
 
 
 def get_records_from_indexer(request_categories: List[str],
-                             date_time: datetime.datetime, days: int) -> Tuple[int, List[Hit]]:
+                             date_time: datetime.datetime, days: int) -> List[Hit]:
     """
     Retrieve all records from the indexer that match the list of categories and date range.
 
@@ -115,8 +126,6 @@ def get_records_from_indexer(request_categories: List[str],
 
     Returns
     -------
-    status : int
-        The HTTP status code for the record retrieval operation, either 200 (OK) or 500 (server error).
     records : List[Hit]
         A list of Elasticsearch Hit objects that were returned by the query.  The list is empty when status is 500.
 
@@ -144,16 +153,15 @@ def get_records_from_indexer(request_categories: List[str],
         # Perform the search, filtering to only return the last day's papers
         start_date = (date_time - datetime.timedelta(days=days)).strftime('%Y-%m-%d')
         end_date = date_time.strftime('%Y-%m-%d')
-        response = Search(index='arxiv')\
+        response: List[Hit] = Search(index='arxiv')\
             .using(es) \
             .query(q) \
             .filter("range", submitted_date={'gte': start_date, 'lte': end_date, 'format': 'date'}) \
             .execute()
-        return status.HTTP_200_OK, response
-        # .filter("range", submitted_date={'gte': 'now-1d/d', 'lt': 'now/d'})
+        return response
 
-    except ElasticsearchException:
-        return status.HTTP_500_INTERNAL_SERVER_ERROR, list()
+    except ElasticsearchException as e:
+        raise RssIndexerError("Search engine error.")
 
 
 def create_eprint(record: Hit) -> EPrint:

@@ -1,10 +1,8 @@
 """Serializer for Atom 1.0."""
 
-from typing import Tuple
 from datetime import datetime
 from feedgen.feed import FeedGenerator
 from flask import url_for
-from arxiv import status
 from pytz import utc
 from rss.serializers.serializer import Serializer
 from rss.serializers.atom_extensions import ArxivEntryExtension, ArxivExtension
@@ -14,7 +12,7 @@ from rss.domain import EPrintSet
 class Atom_1_0(Serializer):  # pylint: disable=too-few-public-methods
     """RSS serializer that produces XML results in the Atom v1.0 format."""
 
-    def get_xml(self: Serializer, eprints: EPrintSet) -> Tuple[str, int]:
+    def get_xml(self: Serializer, eprints: EPrintSet) -> str:
         """
         Serialize the provided response data into Atom, version 1.0.
 
@@ -27,8 +25,6 @@ class Atom_1_0(Serializer):  # pylint: disable=too-few-public-methods
         -------
         data : str
             The serialized XML results.
-        status
-            The HTTP status code for the operation.
 
         """
         fg = FeedGenerator()
@@ -93,6 +89,5 @@ class Atom_1_0(Serializer):  # pylint: disable=too-few-public-methods
                 entry.author(author_list)
                 # TODO - How can arxiv-specific affiliation elements be added to authors?
 
-        data = fg.atom_str(pretty=True)
-        status_code = status.HTTP_200_OK
-        return data, status_code
+        results: str = fg.atom_str(pretty=True)
+        return results

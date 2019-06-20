@@ -2,7 +2,6 @@
 
 from abc import ABC, abstractmethod
 from rss.domain import EPrintSet
-from typing import Tuple
 
 
 class Serializer(ABC):  # pylint: disable=too-few-public-methods
@@ -13,13 +12,13 @@ class Serializer(ABC):  # pylint: disable=too-few-public-methods
         pass
 
     @abstractmethod
-    def get_xml(self: ABC, response: EPrintSet) -> Tuple[str, int]:
+    def get_xml(self: ABC, response: EPrintSet) -> str:
         """
         Serialize the provided search results.
 
         Parameters
         ----------
-        response
+        response : EPrintSet
             The Elasticsearch search results to serialize.
 
         Returns
