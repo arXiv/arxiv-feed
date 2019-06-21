@@ -1,13 +1,11 @@
 """Serializer for RSS 2.0."""
 
-from typing import Dict, Tuple
+from typing import Dict
 from datetime import datetime
-from arxiv import status
 from rfeed import Extension, Feed, Guid, Image, Item
 from flask import url_for
 from rss.serializers.serializer import Serializer
-from typing import List
-from rss.domain import Author, EPrint, EPrintSet
+from rss.domain import EPrintSet
 
 
 # Rfeed Extensions are used to add namespaces to the rss element.
@@ -103,7 +101,7 @@ class RSS_2_0(Serializer):  # pylint: disable=too-few-public-methods
     """RSS serializer that produces XML results in the RSS v2.0 format."""
 
     # TODO - Use the correct value for pubDate
-    def get_xml(self: Serializer, eprints: EPrintSet) -> Tuple[str, int]:
+    def get_xml(self: Serializer, eprints: EPrintSet) -> str:
         """
         Serialize the provided response data into RSS, version 2.0.
 
@@ -116,17 +114,12 @@ class RSS_2_0(Serializer):  # pylint: disable=too-few-public-methods
         -------
         data : str
             The serialized XML results.
-        status
-            The HTTP status code for the operation.
 
         """
-        # Get the archive info from the first hit.  Is this OK?
-        archive_id = eprints.eprints[0].arxiv_id
-        archive_name = eprints.eprints[0].archive_name
         feed = Feed(
-            title=f"{archive_id} updates on arXiv.org",
+            title=f"{str.join(', ', eprints.categories)} updates on arXiv.org",
             link="http://arxiv.org/",
-            description=f"{archive_name} ({archive_id}) updates on the arXiv.org e-print archive",
+            description=f"{str.join(', ', eprints.categories)} updates on the arXiv.org e-print archive",
             language="en-us",
             pubDate=datetime.now(),
             lastBuildDate=datetime.now(),
@@ -171,6 +164,5 @@ class RSS_2_0(Serializer):  # pylint: disable=too-few-public-methods
             feed.items.append(item)
 
         # Print and return the feed content
-        data = feed.rss()
-        status_code = status.HTTP_200_OK
-        return data, status_code
+        results: str = feed.rss()
+        return results

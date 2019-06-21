@@ -1,11 +1,10 @@
 """Base class for RSS serializers."""
 
 from abc import ABC, abstractmethod
-from typing import Tuple
-from elasticsearch_dsl.response import Response
+from rss.domain import EPrintSet
 
 
-class Serializer(ABC): # pylint: disable=too-few-public-methods
+class Serializer(ABC):  # pylint: disable=too-few-public-methods
     """Abstract base class for RSS serializers that produce XML results."""
 
     def __init__(self: ABC):
@@ -13,13 +12,13 @@ class Serializer(ABC): # pylint: disable=too-few-public-methods
         pass
 
     @abstractmethod
-    def get_xml(self: ABC, response: Response) -> Tuple[str, int]:
+    def get_xml(self: ABC, response: EPrintSet) -> str:
         """
         Serialize the provided search results.
 
         Parameters
         ----------
-        response
+        response : EPrintSet
             The Elasticsearch search results to serialize.
 
         Returns
