@@ -23,8 +23,8 @@ class Serializer(ABC):  # pylint: disable=too-few-public-methods
 
         Returns
         -------
-        data : str
-            The serialized results of the search.
+        data : Tuple[str, int]
+            The serialized results of the search plus the operation's HTTP status code.
 
         """
         pass
