@@ -1,6 +1,7 @@
 """Controller for RSS Feeds."""
 
 from typing import Tuple, Optional, Any, cast
+from flask import current_app
 from pytz import UTC
 from arxiv import status
 from rss import index
@@ -11,7 +12,6 @@ from rss.serializers.atom_1_0 import Atom_1_0
 from werkzeug.exceptions import BadRequest
 
 import datetime
-import os
 
 VER_RSS_2_0 = "2.0"
 VER_ATOM_1_0 = "atom_1.0"
@@ -42,8 +42,7 @@ def get_xml(archive_id: str, version: Optional[Any]) -> Tuple[str, int, dict]:
     date_time = datetime.datetime.now(UTC)
 
     # Get the number of days for which results are to be returned
-    os.environ.setdefault("RSS_NUM_DAYS", "1")
-    days = int(cast(str, os.environ.get("RSS_NUM_DAYS")))
+    days = int(cast(str, current_app.config['RSS_NUM_DAYS']))
 
     # Create the correct serializer
     if version in (VER_RSS_2_0, None):

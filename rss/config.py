@@ -25,6 +25,8 @@ BASE_SERVER = os.environ.get('BASE_SERVER', 'arxiv.org')
 METADATA_ENDPOINT = os.environ.get('METADATA_ENDPOINT',
                                    'https://beta.arxiv.org/')
 
+RSS_NUM_DAYS = os.environ.get('RSS_NUM_DAYS', '1')
+
 URLS = [
     ("pdf", "/pdf/<arxiv:paper_id>v<string:version>", BASE_SERVER),
     ("abs", "/abs/<arxiv:paper_id>v<string:version>", BASE_SERVER),
