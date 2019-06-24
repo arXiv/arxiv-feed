@@ -84,7 +84,7 @@ class Atom_1_0(Serializer):  # pylint: disable=too-few-public-methods
             for author in eprint.authors:
                 author_list = {"name": author.full_name}
                 entry.author(author_list)
-                if len(author.affiliations):
+                if len(author.affiliations) > 0:
                     entry.arxiv.affiliation(author.full_name, author.affiliations)
 
         results: str = fg.atom_str(pretty=True)
