@@ -34,11 +34,8 @@ class Atom_1_0(Serializer):  # pylint: disable=too-few-public-methods
         fg.link(href='http://arxiv.org/rss/version=atom_1.0', rel='self', type='application/atom+xml')
         fg.updated(datetime.utcnow().replace(tzinfo=utc))
 
-        # TODO - Try to remove generator element.  This doesn't work - code ignores "None"
-        # fg.generator(None)
         # TODO - We don't currently set "subtitle", but could do it like this
-        # fg.subtitle(
-        #     f"{archive['name']} ({archive.arxiv_id}) updates on the arXiv.org e-print archive")
+        # fg.subtitle(str.join(', ', eprints.categories) + " updates on the arXiv.org e-print archive")
 
         # Add each search result to the feed
         for eprint in eprints.eprints:
@@ -87,7 +84,8 @@ class Atom_1_0(Serializer):  # pylint: disable=too-few-public-methods
             for author in eprint.authors:
                 author_list = {"name": author.full_name}
                 entry.author(author_list)
-                # TODO - How can arxiv-specific affiliation elements be added to authors?
+                if len(author.affiliations) > 0:
+                    entry.arxiv.affiliation(author.full_name, author.affiliations)
 
         results: str = fg.atom_str(pretty=True)
         return results

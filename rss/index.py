@@ -198,7 +198,11 @@ def create_eprint(record: Hit) -> EPrint:
         last_name = hit_author['last_name']
         full_name = hit_author['full_name']
         initials = hit_author['initials']
-        author = Author(last_name, full_name, initials)
+        affiliations = []
+        if 'affiliation' in hit_author:
+            for affiliation in hit_author['affiliation']:
+                affiliations.append(affiliation)
+        author = Author(last_name, full_name, initials, affiliations)
         authors.append(author)
 
     # Copy the hit data for categories into the EPrint

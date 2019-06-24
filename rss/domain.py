@@ -9,6 +9,7 @@ class Author(NamedTuple):
     last_name: str
     full_name: str
     initials: str
+    affiliations: List[str]
 
 
 class Category(NamedTuple):
