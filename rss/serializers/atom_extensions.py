@@ -1,21 +1,21 @@
 """Classes derived from the Feedgen extension classes."""
 
 from typing import Dict, List
-from feedgen.ext.base import BaseEntryExtension, BaseExtension
+
 from lxml import etree
 from lxml.etree import Element
+from feedgen.ext.base import BaseEntryExtension, BaseExtension
 
 
 class ArxivExtension(BaseExtension):
-    """Extension of the Feedgen base class to allow us to modify and extend its behavior."""
+    """Extension of the Feedgen class to allow us to change its behavior."""
 
     def __init__(self: BaseExtension) -> None:
         """Noop initialization."""
         pass
 
     def extend_atom(self: BaseExtension, atom_feed: Element) -> Element:
-        """
-        Allow the extension to modify the initial feed element tree for Atom serialization.
+        """Allow the extension to modify the initial feed tree for Atom.
 
         Parameters
         ----------
@@ -28,16 +28,16 @@ class ArxivExtension(BaseExtension):
             The feed's root element.
 
         """
-        # Remove the unwanted "generator" element, which can't be erased though the API.
+        # Remove the unwanted "generator" element, which can't be erased though
+        # the API.
         for child in atom_feed:
-            if child.tag == 'generator':
+            if child.tag == "generator":
                 atom_feed.remove(child)
 
         return atom_feed
 
     def extend_rss(self: BaseExtension, rss_feed: Element) -> Element:
-        """
-        Allow the extension to modify the initial feed element tree for RSS serialization.
+        """Allow the extension to modify the initial feed tree for RSS.
 
         Parameters
         ----------
@@ -62,11 +62,11 @@ class ArxivExtension(BaseExtension):
             Definitions of the "arxiv" namespaces.
 
         """
-        return {'arxiv': 'http://arxiv.org/schemas/atom'}
+        return {"arxiv": "http://arxiv.org/schemas/atom"}
 
 
 class ArxivEntryExtension(BaseEntryExtension):
-    """Extension of the Feedgen Entry base class to allow us to modify and extend its behavior."""
+    """Extension of the Entry class to allow us to change its behavior."""
 
     def __init__(self: BaseEntryExtension):
         """Initialize the member values to all be empty."""
@@ -93,41 +93,52 @@ class ArxivEntryExtension(BaseEntryExtension):
 
         """
         if self.__arxiv_comment:
-            comment_element = etree.SubElement(entry, '{http://arxiv.org/schemas/atom}comment')
+            comment_element = etree.SubElement(
+                entry, "{http://arxiv.org/schemas/atom}comment"
+            )
             comment_element.text = self.__arxiv_comment
 
         if self.__arxiv_primary_category:
-            etree.SubElement(entry, '{http://arxiv.org/schemas/atom}primary_category',
-                             attrib=self.__arxiv_primary_category)
+            etree.SubElement(
+                entry,
+                "{http://arxiv.org/schemas/atom}primary_category",
+                attrib=self.__arxiv_primary_category,
+            )
 
         if self.__arxiv_journal_ref:
-            journal_ref_element =\
-                etree.SubElement(entry, '{http://arxiv.org/schemas/atom}journal_ref')
+            journal_ref_element = etree.SubElement(
+                entry, "{http://arxiv.org/schemas/atom}journal_ref"
+            )
             journal_ref_element.text = self.__arxiv_journal_ref
 
         if self.__arxiv_doi:
             for doi in self.__arxiv_doi:
-                doi_element = etree.SubElement(entry, '{http://arxiv.org/schemas/atom}doi')
+                doi_element = etree.SubElement(
+                    entry, "{http://arxiv.org/schemas/atom}doi"
+                )
                 doi_element.text = doi
 
         # Check each of the entry's author nodes
         for entry_child in entry:
-            if entry_child.tag == 'author':
+            if entry_child.tag == "author":
                 author = entry_child
                 for author_child in author:
-                    # If the author's name is in the affiliation dictionary, add Elements for all of its affiliations.
-                    if author_child.tag == 'name':
+                    # If the author's name is in the affiliation dictionary,
+                    # add Elements for all of its affiliations.
+                    if author_child.tag == "name":
                         name = author_child.text
                         affiliations = self.__arxiv_affiliations[name]
                         for affiliation in affiliations:
-                            element = etree.SubElement(author, '{http://arxiv.org/schemas/atom}affiliation')
+                            element = etree.SubElement(
+                                author,
+                                "{http://arxiv.org/schemas/atom}affiliation",
+                            )
                             element.text = affiliation
 
         return entry
 
     def extend_rss(self, entry: Element) -> Element:
-        """
-        Allow the extension to modify the entry element for RSS serialization.
+        """Allow the extension to modify the entry element for RSS.
 
         Parameters
         ----------

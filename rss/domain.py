@@ -1,9 +1,11 @@
 """Domain classes for the RSS feed."""
 
-from typing import List, NamedTuple
+from typing import List
+from dataclasses import dataclass
 
 
-class Author(NamedTuple):
+@dataclass
+class Author:
     """Represents an e-print's author."""
 
     last_name: str
@@ -12,14 +14,16 @@ class Author(NamedTuple):
     affiliations: List[str]
 
 
-class Category(NamedTuple):
+@dataclass
+class Category:
     """Represents an arXiv category."""
 
-    name: str
     id: str
+    name: str
 
 
-class EPrint(NamedTuple):
+@dataclass
+class Document:
     """Represents an arXiv e-print."""
 
     arxiv_id: str
@@ -37,14 +41,15 @@ class EPrint(NamedTuple):
 
     primary_category: Category
     secondary_categories: List[Category]
-    """The categories under which this eprint is filed."""
+    """The categories under which this document is filed."""
 
 
-class EPrintSet(NamedTuple):
-    """A set of :class:`.EPrint`s for responding to a specific RSS feed."""
+@dataclass
+class DocumentSet:
+    """A set of :class:`.Document`s for responding to a specific RSS feed."""
 
     categories: List[str]
     """The categories that were searched to produce these results."""
 
-    eprints: List[EPrint]
-    """Data for all the eprints that were found by the search."""
+    documents: List[Document]
+    """Data for all the documents that were found by the search."""

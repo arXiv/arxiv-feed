@@ -1,7 +1,8 @@
 """Base class for RSS serializers."""
 
 from abc import ABC, abstractmethod
-from rss.domain import EPrintSet
+
+from rss.domain import DocumentSet
 
 
 class Serializer(ABC):  # pylint: disable=too-few-public-methods
@@ -12,7 +13,7 @@ class Serializer(ABC):  # pylint: disable=too-few-public-methods
         pass
 
     @abstractmethod
-    def get_xml(self: ABC, response: EPrintSet) -> str:
+    def get_xml(self: ABC, response: DocumentSet) -> str:
         """
         Serialize the provided search results.
 
@@ -24,7 +25,8 @@ class Serializer(ABC):  # pylint: disable=too-few-public-methods
         Returns
         -------
         data : Tuple[str, int]
-            The serialized results of the search plus the operation's HTTP status code.
+            The serialized results of the search plus the operation's HTTP
+            status code.
 
         """
         pass
