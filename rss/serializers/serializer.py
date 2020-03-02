@@ -6,21 +6,21 @@ from rss.domain import DocumentSet
 
 
 class Serializer(ABC):  # pylint: disable=too-few-public-methods
-    """Abstract base class for RSS serializers that produce XML results."""
+    """Abstract base class for feed serializers."""
 
     def __init__(self: ABC):
         """Noop initialization."""
         pass
 
     @abstractmethod
-    def get_xml(self: ABC, response: DocumentSet) -> str:
+    def get_feed(self: ABC, response: DocumentSet) -> str:
         """
         Serialize the provided search results.
 
         Parameters
         ----------
-        response : EPrintSet
-            The Elasticsearch search results to serialize.
+        response : DocumentSet
+            The ElasticSearch search results to serialize.
 
         Returns
         -------

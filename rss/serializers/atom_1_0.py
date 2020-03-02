@@ -11,10 +11,10 @@ from rss.serializers.serializer import Serializer
 from rss.serializers.atom_extensions import ArxivEntryExtension, ArxivExtension
 
 
-class Atom_1_0(Serializer):  # pylint: disable=too-few-public-methods
+class Atom10(Serializer):  # pylint: disable=too-few-public-methods
     """RSS serializer that produces XML results in the Atom v1.0 format."""
 
-    def get_xml(self: Serializer, documents: DocumentSet) -> str:
+    def get_feed(self: Serializer, documents: DocumentSet) -> str:
         """
         Serialize the provided response data into Atom, version 1.0.
 

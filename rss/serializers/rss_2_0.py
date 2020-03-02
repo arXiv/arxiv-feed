@@ -94,11 +94,11 @@ class Admin(Extension):  # pylint: disable=too-few-public-methods
         return {"xmlns:admin": "http://webns.net/mvcb/"}
 
 
-class RSS_2_0(Serializer):  # pylint: disable=too-few-public-methods
+class RSS20(Serializer):  # pylint: disable=too-few-public-methods
     """RSS serializer that produces XML results in the RSS v2.0 format."""
 
     # TODO - Use the correct value for pubDate
-    def get_xml(self: Serializer, documents: DocumentSet) -> str:
+    def get_feed(self: Serializer, documents: DocumentSet) -> str:
         """Serialize the provided response data into RSS, version 2.0.
 
         Parameters

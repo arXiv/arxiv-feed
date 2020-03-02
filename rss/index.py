@@ -1,5 +1,6 @@
 """Interface to Index Service for RSS feeds."""
 
+import logging
 from typing import List
 from datetime import datetime, timedelta
 
@@ -9,38 +10,22 @@ from elasticsearch_dsl import Search, Q
 from elasticsearch_dsl.response import Hit
 
 from arxiv import taxonomy
+from rss.utils import utc_now
+from rss.consts import DELIMITER
+from rss.errors import FeedIndexerError
 from rss.domain import Author, Category, Document, DocumentSet
 
-DELIMITER = "+"
+
+logger = logging.getLogger(__name__)
 
 
-class RssIndexerError(Exception):
-    """An exception for returning errors from the RSS feed's indexer."""
-
-    def __init__(self, message: str):
-        """
-        Initialize an exception.
-
-        Parameters
-        ----------
-        message : str
-            The error message for the exception.
-
-        """
-        self.message = message
-
-
-def perform_search(
-    archives: str, date_time: datetime, days: int
-) -> DocumentSet:
+def search(archives: str, days: int) -> DocumentSet:
     """Search the index for records with the archive ID and dated within 24h.
 
     Parameters
     ----------
     archives : str
         The IDs of the archives to search
-    date_time : datetime
-        The date/time that defines the end of the 24 hour search window.
     days : int
         The number of days before the specified time for which to return
         records.
@@ -55,9 +40,9 @@ def perform_search(
 
     request_categories = validate_request(archives)
 
-    records = get_records_from_indexer(request_categories, date_time, days)
+    records = get_records_from_indexer(request_categories, utc_now(), days)
 
-    # Create an EPrint object for every hit that was found
+    # Create a Document object for every hit that was found
     for record in records:
         document = create_document(record)
         documents.append(document)
@@ -94,9 +79,9 @@ def validate_request(archives: str) -> List[str]:
 
     # Is the syntax of the archive/category specification correct?
     if len(request_categories) == 0 or any(
-        len(cat) == 0 for cat in request_categories
+        len(cat.strip()) == 0 for cat in request_categories
     ):
-        raise RssIndexerError(
+        raise FeedIndexerError(
             f"Invalid archive specification '{archives}'. Correct format is "
             f"one or more archive names delimited by '{DELIMITER}'. Each name "
             f"can be either of the form 'archive' or 'archive.category'. For "
@@ -108,7 +93,7 @@ def validate_request(archives: str) -> List[str]:
     for category in request_categories:
         parts = category.split(".")
         if not parts[0] in taxonomy.ARCHIVES:
-            raise RssIndexerError(
+            raise FeedIndexerError(
                 f"Bad archive '{parts[0]}'. Valid archive names are: "
                 f"{', '.join(taxonomy.ARCHIVES.keys())}."
             )
@@ -119,7 +104,7 @@ def validate_request(archives: str) -> List[str]:
                 for key in taxonomy.CATEGORIES.keys()
                 if key.startswith(parts[0] + ".")
             ]
-            raise RssIndexerError(
+            raise FeedIndexerError(
                 f"Bad subject class '{parts[1]}'. Valid subject classes for "
                 f"the archive '{parts[0]}' are: {', '.join(groups)}."
             )
@@ -193,8 +178,11 @@ def get_records_from_indexer(
         ).execute()
         return response
 
-    except ElasticsearchException:
-        raise RssIndexerError("Search engine error.")
+    except ElasticsearchException as ex:
+        logger.exception(
+            "Failed to fetch documents from ElasticSearch: %s", ex
+        )
+        raise FeedIndexerError("Search engine error.")
 
 
 def create_document(record: Hit) -> Document:

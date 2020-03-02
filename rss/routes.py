@@ -1,15 +1,24 @@
 """URL routes for RSS feeds."""
 
-from flask import Blueprint
-from flask import request
+from werkzeug import Response
+from werkzeug.exceptions import BadRequest
+from flask import Blueprint, request, make_response
 
 from rss import controller
+from rss.errors import FeedError
+from rss.consts import FeedVersion
 
 blueprint = Blueprint("rss", __name__, url_prefix="/rss")
 
 
-@blueprint.route("/<string:archive_id>", methods=["GET", "POST"])
-def rss(archive_id: str) -> tuple:
+# FIXME: I would change this in the following way:
+#        Root url / is predefined atom or rss 2.0 (I have no preference), and
+#        hen have separate urls (/rss.xml and /atom.xml) if the user wants to
+#        pick a different feed format.
+
+
+@blueprint.route("/<string:archive_id>", methods=["GET"])
+def rss(archive_id: str) -> Response:
     """Return RSS results for the past day.
 
     Format is specified by URL parameters.
@@ -29,7 +38,12 @@ def rss(archive_id: str) -> tuple:
         Headers associated with the response.
 
     """
-    version = request.args.get("version")
-    data, status, headers = controller.get_xml(archive_id, version)
-    # TODO: create a flask response object to hold the data?
-    return data, status, headers
+    version = request.args.get("version", FeedVersion.RSS_2_0)
+    try:
+        data, etag = controller.get_feed(archive_id, version)
+    except FeedError as ex:
+        raise BadRequest(ex.message)
+
+    response = make_response(data)
+    response.headers["ETag"] = etag
+    return response

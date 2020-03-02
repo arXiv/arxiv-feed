@@ -1,25 +1,22 @@
 """Controller for RSS Feeds."""
 
-from http import HTTPStatus
-from datetime import datetime
-from typing import Tuple, Optional, Any, cast
-
-from pytz import UTC
+import logging
+import hashlib
+from typing import Tuple
 from flask import current_app
-from werkzeug.exceptions import BadRequest
 
 from rss import index
-from rss.index import RssIndexerError
-from rss.serializers.rss_2_0 import RSS_2_0
-from rss.serializers.atom_1_0 import Atom_1_0
+from rss import consts
+from rss import serializers
+from rss.consts import FeedVersion
+from rss.errors import FeedVersionError
 from rss.serializers.serializer import Serializer
 
 
-VER_RSS_2_0 = "2.0"
-VER_ATOM_1_0 = "atom_1.0"
+logger = logging.getLogger(__name__)
 
 
-def get_xml(archive_id: str, version: Optional[Any]) -> Tuple[str, int, dict]:
+def get_feed(archive_id: str, version: FeedVersion) -> Tuple[str, str]:
     """
     Return the past day's RSS content from the specified XML serializer.
 
@@ -34,34 +31,38 @@ def get_xml(archive_id: str, version: Optional[Any]) -> Tuple[str, int, dict]:
     -------
     data : str
         The serialized XML results of the search.
-    status_code
-        The status code for the operation.
-    header
-        HTML headers for the response to the request.
+    etag: str
+        Feed etag.
 
+    Raises
+    ------
+    FeedError
+        Either FeedVersionError if the feed version is incorrect or
+        FeedIndexError if it fails to fetch the feed from ElasticSearch.
     """
-    # Get the current date and time
-    date_time = datetime.now(UTC)
-
     # Get the number of days for which results are to be returned
-    days = int(cast(str, current_app.config["RSS_NUM_DAYS"]))
+    feed_num_days = current_app.config.get(
+        "FEED_NUM_DAYS", consts.FEED_NUM_DAYS
+    )
+    try:
+        days = int(feed_num_days)
+    except ValueError:
+        logger.error(
+            "Invalid configuration - FEED_NUM_DAYS: '%s'. Setting to 1.",
+            feed_num_days,
+        )
+        days = 1
 
     # Create the correct serializer
-    if version in (VER_RSS_2_0, None):
-        serializer = RSS_2_0()  # type: Serializer
-    elif version == VER_ATOM_1_0:
-        serializer = Atom_1_0()
+    if version == FeedVersion.RSS_2_0:
+        serializer: Serializer = serializers.RSS20()
+    elif version == FeedVersion.ATOM_1_0:
+        serializer: Serializer = serializers.Atom10()
     else:
-        raise BadRequest(
-            f"Unsupported RSS version '{version}' requested."
-            f"Valid options are '{VER_RSS_2_0}' and '{VER_ATOM_1_0}'."
-        )
-    # Get the search results, pass them to the serializer, return the results
-    try:
-        documents = index.perform_search(archive_id, date_time, days)
-        data = serializer.get_xml(documents)
-    except RssIndexerError as ex:
-        raise BadRequest(ex.message)
+        raise FeedVersionError(version)
 
-    # TODO - We may eventually want to return an etag in the header
-    return data, HTTPStatus.OK, {}
+    # Get the search results, pass them to the serializer, return the results
+    documents = index.search(archive_id, days)
+    data = serializer.get_feed(documents)
+    etag = hashlib.sha256(data.encode("utf-8"))
+    return data, etag.hexdigest()
