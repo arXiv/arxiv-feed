@@ -6,8 +6,8 @@ from datetime import datetime
 from flask import url_for
 from rfeed import Extension, Feed, Guid, Image, Item
 
-from rss.domain import DocumentSet
-from rss.serializers.serializer import Serializer
+from feed.domain import DocumentSet
+from feed.serializers.serializer import Serializer
 
 
 # Rfeed Extensions are used to add namespaces to the rss element.

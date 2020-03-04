@@ -10,10 +10,10 @@ from elasticsearch_dsl import Search, Q
 from elasticsearch_dsl.response import Hit
 
 from arxiv import taxonomy
-from rss.utils import utc_now
-from rss.consts import DELIMITER
-from rss.errors import FeedIndexerError
-from rss.domain import Author, Category, Document, DocumentSet
+from feed.utils import utc_now
+from feed.consts import DELIMITER
+from feed.errors import FeedIndexerError
+from feed.domain import Author, Category, Document, DocumentSet
 
 
 logger = logging.getLogger(__name__)

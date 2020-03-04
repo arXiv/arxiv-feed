@@ -19,8 +19,7 @@
       language: python
       entry: flake8
       args:
-        - rss
-        - tests
+        - feed
 
 - repo: https://github.com/pycqa/pydocstyle
   rev: master
@@ -30,6 +29,4 @@
       language: python
       entry: pydocstyle
       args:
-        - rss
-        - tests
-        - --add-ignore=D401,D202
+        - feed

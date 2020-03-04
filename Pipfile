@@ -20,7 +20,7 @@ pylint = "*"
 pyhamcrest = "*"
 pytest = "*"
 pytest-cov = "*"
-pytest-easyread = "*"
+pytest-sugar = "==0.9.2"
 
 
 [requires]

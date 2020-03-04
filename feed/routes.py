@@ -4,9 +4,9 @@ from werkzeug import Response
 from werkzeug.exceptions import BadRequest
 from flask import Blueprint, request, make_response
 
-from rss import controller
-from rss.errors import FeedError
-from rss.consts import FeedVersion
+from feed import controller
+from feed.errors import FeedError
+from feed.consts import FeedVersion
 
 blueprint = Blueprint("rss", __name__, url_prefix="/rss")
 
@@ -42,7 +42,7 @@ def rss(archive_id: str) -> Response:
     try:
         data, etag = controller.get_feed(archive_id, version)
     except FeedError as ex:
-        raise BadRequest(ex.message)
+        raise BadRequest(ex.error)
 
     response = make_response(data)
     response.headers["ETag"] = etag

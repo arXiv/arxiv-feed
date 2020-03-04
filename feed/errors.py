@@ -1,4 +1,4 @@
-from rss.consts import FeedVersion
+from feed.consts import FeedVersion
 
 
 class FeedError(Exception):
@@ -6,15 +6,15 @@ class FeedError(Exception):
 
     Parameters
     ----------
-    message : str
+    error : str
         The error message.
     """
 
-    def __init__(self, message=""):
-        self.message = message
+    def __init__(self, error=""):
+        self.error = error
 
     def __str__(self):
-        return f"{self.__class__.__name__}(message={self.message})"
+        return f"{self.__class__.__name__}({self.error})"
 
     __repr__ = __str__
 
@@ -24,7 +24,7 @@ class FeedVersionError(FeedError):
 
     def __init__(self, version: str):
         super().__init__(
-            message=f"Unsupported RSS version '{version}' requested."
+            error=f"Unsupported RSS version '{version}' requested."
             f"Valid options are: {', '.join(FeedVersion)}."
         )
 

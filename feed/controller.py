@@ -5,12 +5,12 @@ import hashlib
 from typing import Tuple
 from flask import current_app
 
-from rss import index
-from rss import consts
-from rss import serializers
-from rss.consts import FeedVersion
-from rss.errors import FeedVersionError
-from rss.serializers.serializer import Serializer
+from feed import index
+from feed import consts
+from feed import serializers
+from feed.consts import FeedVersion
+from feed.errors import FeedVersionError
+from feed.serializers.serializer import Serializer
 
 
 logger = logging.getLogger(__name__)

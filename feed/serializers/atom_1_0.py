@@ -6,9 +6,12 @@ from pytz import utc
 from flask import url_for
 from feedgen.feed import FeedGenerator
 
-from rss.domain import DocumentSet
-from rss.serializers.serializer import Serializer
-from rss.serializers.atom_extensions import ArxivEntryExtension, ArxivExtension
+from feed.domain import DocumentSet
+from feed.serializers.serializer import Serializer
+from feed.serializers.atom_extensions import (
+    ArxivEntryExtension,
+    ArxivExtension,
+)
 
 
 class Atom10(Serializer):  # pylint: disable=too-few-public-methods
@@ -57,13 +60,18 @@ class Atom10(Serializer):  # pylint: disable=too-few-public-methods
 
             entry.link(
                 {
-                    "href": url_for("abs_by_id", paper_id=document.paper_id),
                     "type": "text/html",
+                    "href": url_for("abs_by_id", paper_id=document.paper_id),
                 }
             )
-            pdf_link = dict(title="pdf", rel="related", type="application/pdf")
-            pdf_link["href"] = url_for("pdf_by_id", paper_id=document.paper_id)
-            entry.link(pdf_link)
+            entry.link(
+                {
+                    "title": "pdf",
+                    "rel": "related",
+                    "type": "application/pdf",
+                    "href": url_for("pdf_by_id", paper_id=document.paper_id),
+                }
+            )
 
             # Add categories
             categories = [

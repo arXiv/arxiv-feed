@@ -1,4 +1,4 @@
-# arXiv RSS Feeds
+# arXiv Feeds
 
 ## Development environment
 

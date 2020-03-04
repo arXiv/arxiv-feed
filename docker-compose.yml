@@ -3,23 +3,23 @@
 ---
 version: '3'
 services:
-  arxiv-rss-elasticsearch:
+  arxiv-feed-elasticsearch:
     build:
       context: .
       dockerfile: Dockerfile-elasticsearch
-    container_name: arxiv-rss-elasticsearch
+    container_name: arxiv-feed-elasticsearch
     environment:    ['http.host=0.0.0.0', 'transport.host=0.0.0.0']
     ports:          ['9200:9200', '9300:9300']
-    networks:       ['arxiv_rss_network']
+    networks:       ['arxiv_feed_network']
 
-  arxiv-rss-kibana:
+  arxiv-feed-kibana:
     image: docker.elastic.co/kibana/kibana:6.1.1
     container_name: arxiv-rss-kibana
     # environment:
     #   - ELASTICSEARCH_USERNAME=elastic
     #   - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
     ports:          ['127.0.0.1:5601:5601']
-    networks:       ['arxiv_rss_network']
-    depends_on:     ['arxiv-rss-elasticsearch']
+    networks:       ['arxiv_feed_network']
+    depends_on:     ['arxiv-feed-elasticsearch']
 
 networks: {arxiv_rss_network: {}}

@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 
-from rss.domain import DocumentSet
+from feed.domain import DocumentSet
 
 
 class Serializer(ABC):  # pylint: disable=too-few-public-methods

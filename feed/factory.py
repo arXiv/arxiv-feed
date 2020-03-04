@@ -2,7 +2,7 @@
 
 from flask import Flask
 
-from rss import routes
+from feed import routes
 
 
 def create_web_app() -> Flask:
