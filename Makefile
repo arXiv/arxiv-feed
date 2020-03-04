@@ -9,9 +9,9 @@ PIPENV_VERBOSITY = -1
 
 # Arguments context,state,description
 define report_to_travis
-	curl -u $USERNAME:$GITHUB_TOKEN                                                                                                                                            \
-    	 -d '{"context": "code-quality/$(1)", "state": "$(2)", "description": "$(3)", "target_url": "https://travis-ci.org/'$TRAVIS_REPO_SLUG'/builds/'$TRAVIS_BUILD_ID'"}'    \
-         -XPOST https://api.github.com/repos/$TRAVIS_REPO_SLUG/statuses/$SHA                                                                                                   \
+	curl -u $$USERNAME:$$GITHUB_TOKEN                                                                                                                                            \
+    	 -d '{"context": "code-quality/$(1)", "state": "$(2)", "description": "$(3)", "target_url": "https://travis-ci.org/'$$TRAVIS_REPO_SLUG'/builds/'$$TRAVIS_BUILD_ID'"}'    \
+         -XPOST https://api.github.com/repos/$$TRAVIS_REPO_SLUG/statuses/$$SHA                                                                                                   \
     	 > /dev/null 2>&1
 endef
 
