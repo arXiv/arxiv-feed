@@ -28,12 +28,6 @@ class ArxivExtension(BaseExtension):
             The feed's root element.
 
         """
-        # Remove the unwanted "generator" element, which can't be erased though
-        # the API.
-        for child in atom_feed:
-            if child.tag == "generator":
-                atom_feed.remove(child)
-
         return atom_feed
 
     def extend_rss(self: BaseExtension, rss_feed: Element) -> Element:
