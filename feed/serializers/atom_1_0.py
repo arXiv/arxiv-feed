@@ -117,5 +117,5 @@ class Atom10(Serializer):  # pylint: disable=too-few-public-methods
                         author.full_name, author.affiliations
                     )
 
-        results: str = fg.atom_str(pretty=True)
+        results: str = fg.atom_str(pretty=True).decode("utf-8")
         return results

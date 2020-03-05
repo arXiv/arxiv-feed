@@ -2,48 +2,53 @@
 
 from werkzeug import Response
 from werkzeug.exceptions import BadRequest
-from flask import Blueprint, request, make_response
+from flask import Blueprint, make_response
 
 from feed import controller
 from feed.errors import FeedError
 from feed.consts import FeedVersion
 
-blueprint = Blueprint("rss", __name__, url_prefix="/rss")
+
+blueprint = Blueprint("rss", __name__, url_prefix="/")
 
 
-# FIXME: I would change this in the following way:
-#        Root url / is predefined atom or rss 2.0 (I have no preference), and
-#        hen have separate urls (/rss.xml and /atom.xml) if the user wants to
-#        pick a different feed format.
-
-
-@blueprint.route("/<string:archive_id>", methods=["GET"])
-def rss(archive_id: str) -> Response:
-    """Return RSS results for the past day.
-
-    Format is specified by URL parameters.
+def _feed(arxiv_id: str, version: FeedVersion) -> Response:
+    """Return the feed in appropriate format for the past day.
 
     Parameters
     ----------
-    archive_id : str
+    arxiv_id : str
         The ID code for the archive that is being searched.
 
     Returns
     -------
-    data : str
-        The RSS (XML) response for the request.
-    status
-        The outcome status for the request.
-    headers
-        Headers associated with the response.
-
+    response: Response
+        Flask response object populated with the RSS or ATOM (XML) response for
+        the request and ETag header added.
     """
-    version = request.args.get("version", FeedVersion.RSS_2_0)
     try:
-        data, etag = controller.get_feed(archive_id, version)
+        data, etag = controller.get_feed(arxiv_id, version)
     except FeedError as ex:
         raise BadRequest(ex.error)
 
     response: Response = make_response(data)
     response.headers["ETag"] = etag
     return response
+
+
+@blueprint.route("/rss/<string:arxiv_id>", methods=["GET"])
+def rss(arxiv_id: str) -> Response:
+    """Return the RSS 2.0 results for the past day."""
+    return _feed(arxiv_id=arxiv_id, version=FeedVersion.RSS_2_0)
+
+
+@blueprint.route("/atom/<string:arxiv_id>", methods=["GET"])
+def atom(arxiv_id: str) -> Response:
+    """Return the Atomx 1.0 results for the past day."""
+    return _feed(arxiv_id=arxiv_id, version=FeedVersion.ATOM_1_0)
+
+
+@blueprint.route("/<string:arxiv_id>", methods=["GET"])
+def feed(arxiv_id: str) -> Response:
+    """Return RSS 2.0 results for the past day."""
+    return _feed(arxiv_id=arxiv_id, version=FeedVersion.RSS_2_0)

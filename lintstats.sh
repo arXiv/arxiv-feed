@@ -29,7 +29,7 @@ fi
 #   description: Custom description.
 report_to_travis () {
   if [ ${REPORT_TO_TRAVIS} = 1 ]; then
-    local JSON=`printf '{"context": "code-quality/%s", "state": "%s", "description": "%s", "target_url": "https://travis-ci.org/%s/builds/%s"}' ${1} ${2} ${3} ${TRAVIS_REPO_SLUG} ${TRAVIS_BUILD_ID}`;
+    local JSON=$(printf '{"context": "code-quality/%s", "state": "%s", "description": "%s", "target_url": "https://travis-ci.org/%s/builds/%s"}' ${1} ${2} ${3} ${TRAVIS_REPO_SLUG} ${TRAVIS_BUILD_ID}`);
   	curl -u ${USERNAME}:${GITHUB_TOKEN}                                           \
   	     -d \'${JSON}\'                                                           \
          -XPOST https://api.github.com/repos/${TRAVIS_REPO_SLUG}/statuses/${SHA}  \
@@ -37,7 +37,8 @@ report_to_travis () {
   fi
 }
 
-# Run a simple status reported command
+
+# Run a simple status reported command.
 #
 # Args:
 #   command: Command to run.
