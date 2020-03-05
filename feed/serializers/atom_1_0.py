@@ -44,6 +44,7 @@ class Atom10(Serializer):  # pylint: disable=too-few-public-methods
             type="application/atom+xml",
         )
         fg.updated(datetime.utcnow().replace(tzinfo=utc))
+        fg.generator("")
 
         # TODO - We don't currently set "subtitle", but could do it like this
         # fg.subtitle(str.join(', ', document.categories) + " updates on the
