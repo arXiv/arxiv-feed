@@ -2,6 +2,7 @@ language: python
 sudo: required
 cache: pip
 env:
+  REPORT_TO_TRAVIS: 1
   MIN_PYLINT_SCORE: 8
 os:
   - linux
@@ -11,6 +12,6 @@ script:
   - pip install pipenv
   - pipenv sync --dev
   - make test
-  - make check-travis
+  - make check
 after_success:
   - coveralls

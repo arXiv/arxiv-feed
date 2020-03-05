@@ -170,4 +170,5 @@ class RSS20(Serializer):  # pylint: disable=too-few-public-methods
             )
             feed.items.append(item)
 
-        return feed.rss()
+        result: str = feed.rss()
+        return result

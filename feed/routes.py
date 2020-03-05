@@ -44,6 +44,6 @@ def rss(archive_id: str) -> Response:
     except FeedError as ex:
         raise BadRequest(ex.error)
 
-    response = make_response(data)
+    response: Response = make_response(data)
     response.headers["ETag"] = etag
     return response

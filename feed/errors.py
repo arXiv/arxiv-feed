@@ -10,10 +10,10 @@ class FeedError(Exception):
         The error message.
     """
 
-    def __init__(self, error=""):
+    def __init__(self, error: str = ""):
         self.error = error
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.__class__.__name__}({self.error})"
 
     __repr__ = __str__

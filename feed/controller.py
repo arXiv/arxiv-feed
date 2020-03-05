@@ -57,7 +57,7 @@ def get_feed(archive_id: str, version: FeedVersion) -> Tuple[str, str]:
     if version == FeedVersion.RSS_2_0:
         serializer: Serializer = serializers.RSS20()
     elif version == FeedVersion.ATOM_1_0:
-        serializer: Serializer = serializers.Atom10()
+        serializer = serializers.Atom10()
     else:
         raise FeedVersionError(version)
 
