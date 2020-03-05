@@ -22,4 +22,4 @@ services:
     networks:       ['arxiv_feed_network']
     depends_on:     ['arxiv-feed-elasticsearch']
 
-networks: {arxiv_rss_network: {}}
+networks: {arxiv_feed_network: {}}
