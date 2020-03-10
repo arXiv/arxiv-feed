@@ -2,7 +2,7 @@
 
 from werkzeug import Response
 from werkzeug.exceptions import BadRequest
-from flask import Blueprint, make_response
+from flask import request, Blueprint, make_response
 
 from feed import controller
 from feed.errors import FeedError
@@ -44,11 +44,14 @@ def rss(arxiv_id: str) -> Response:
 
 @blueprint.route("/atom/<string:arxiv_id>", methods=["GET"])
 def atom(arxiv_id: str) -> Response:
-    """Return the Atomx 1.0 results for the past day."""
+    """Return the Atom 1.0 results for the past day."""
     return _feed(arxiv_id=arxiv_id, version=FeedVersion.ATOM_1_0)
 
 
 @blueprint.route("/<string:arxiv_id>", methods=["GET"])
 def feed(arxiv_id: str) -> Response:
     """Return RSS 2.0 results for the past day."""
-    return _feed(arxiv_id=arxiv_id, version=FeedVersion.RSS_2_0)
+    version = FeedVersion.get(
+        request.headers.get("VERSION", FeedVersion.RSS_2_0)
+    )
+    return _feed(arxiv_id=arxiv_id, version=version)

@@ -59,7 +59,9 @@ def get_feed(archive_id: str, version: FeedVersion) -> Tuple[str, str]:
     elif version == FeedVersion.ATOM_1_0:
         serializer = serializers.Atom10()
     else:
-        raise FeedVersionError(version)
+        raise FeedVersionError(
+            version=version, supported=FeedVersion.supported()
+        )
 
     # Get the search results, pass them to the serializer, return the results
     documents = index.search(archive_id, days)

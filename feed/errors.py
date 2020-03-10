@@ -1,4 +1,4 @@
-from feed.consts import FeedVersion
+from typing import Set
 
 
 class FeedError(Exception):
@@ -22,11 +22,13 @@ class FeedError(Exception):
 class FeedVersionError(FeedError):
     """Invalid feed version."""
 
-    def __init__(self, version: str):
+    def __init__(self, version: str, supported: Set):
         super().__init__(
-            error=f"Unsupported RSS version '{version}' requested."
-            f"Valid options are: {', '.join(FeedVersion)}."
+            error=f"Unsupported feed version '{version}' requested."
+            f"Valid options are: {', '.join(supported)}."
         )
+        self.version = version
+        self.supported = supported
 
 
 class FeedIndexerError(FeedError):
