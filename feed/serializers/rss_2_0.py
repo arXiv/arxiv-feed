@@ -3,7 +3,7 @@
 from typing import Dict
 from datetime import datetime
 
-from flask import url_for
+from flask import current_app
 from rfeed import Extension, Feed, Guid, Image, Item
 
 from feed.domain import DocumentSet
@@ -112,15 +112,18 @@ class RSS20(Serializer):  # pylint: disable=too-few-public-methods
             The serialized XML results.
 
         """
+        base_server = current_app.config.get("BASE_SERVER")
+        urls = current_app.config.get("URLS")
+
         feed = Feed(
             title=f"{', '.join(documents.categories)} updates on arXiv.org",
-            link="http://arxiv.org/",
+            link=f"https://{base_server}",
             description=f"{', '.join(documents.categories)} updates on the "
-            f"arXiv.org e-print archive",
+            f"{base_server} e-print archive.",
             language="en-us",
             pubDate=datetime.now(),
             lastBuildDate=datetime.now(),
-            managingEditor="www-admin@arxiv.org",
+            managingEditor=f"www-admin@{base_server}",
         )
 
         # Remove two elements added by the Rfeed package
@@ -133,9 +136,9 @@ class RSS20(Serializer):  # pylint: disable=too-few-public-methods
         feed.extensions.append(Syndication())
         feed.extensions.append(Admin())
         feed.image = Image(
-            url="http://arxiv.org/icons/sfx.gif",
-            title="arXiv.org",
-            link="http://arxiv.org",
+            url=f"https://{base_server}/icons/sfx.gif",
+            title=f"{base_server}",
+            link=f"https://{base_server}",
         )
 
         # Add each search result to the feed
@@ -153,7 +156,7 @@ class RSS20(Serializer):  # pylint: disable=too-few-public-methods
                     f"{author.last_name},+{author.initials.replace(' ', '+')}"
                 )
                 description += (
-                    f'<a href="http://arxiv.org/search/?'
+                    f'<a href="http://{base_server}/search/?'
                     f'query={name}&searchtype=author">{author.full_name}</a>'
                 )
             description += f"</p><p>{document.abstract}</p>"
@@ -161,8 +164,7 @@ class RSS20(Serializer):  # pylint: disable=too-few-public-methods
             # Create the item element for the document
             item = Item(
                 title=document.title,
-                link=url_for("abs_by_id", paper_id=document.paper_id),
-                # link=f"http://arxiv.org/abs/{hit['paper_id']}",
+                link=urls["abs_by_id"].format(paper_id=document.paper_id),
                 description=description,
                 guid=Guid(
                     f"oai:arXiv.org:{document.paper_id}", isPermaLink=False

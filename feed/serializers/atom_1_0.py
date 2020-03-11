@@ -3,7 +3,7 @@
 from datetime import datetime
 
 from pytz import utc
-from flask import url_for
+from flask import current_app
 from feedgen.feed import FeedGenerator
 
 from feed.domain import DocumentSet
@@ -32,14 +32,17 @@ class Atom10(Serializer):  # pylint: disable=too-few-public-methods
             The serialized XML results.
 
         """
+        base_server = current_app.config.get("BASE_SERVER")
+        urls = current_app.config.get("URLS")
+
         fg = FeedGenerator()
         fg.register_extension(
             "arxiv", ArxivExtension, ArxivEntryExtension, rss=False
         )
-        fg.id("http://arxiv.org/rss/version=atom_1.0")
+        fg.id(f"https://{base_server}/atom")
         fg.title(f"{', '.join(documents.categories)} updates on arXiv.org")
         fg.link(
-            href="http://arxiv.org/rss/version=atom_1.0",
+            href=f"http://{base_server}/atom",
             rel="self",
             type="application/atom+xml",
         )
@@ -53,7 +56,7 @@ class Atom10(Serializer):  # pylint: disable=too-few-public-methods
         # Add each search result to the feed
         for document in documents.documents:
             entry = fg.add_entry()
-            entry.id("http://arxiv.org/abs/" + document.paper_id)
+            entry.id(urls["abs_by_id"].format(paper_id=document.paper_id))
             entry.title(document.title)
             entry.summary(document.abstract)
             entry.published(document.submitted_date)
@@ -62,7 +65,9 @@ class Atom10(Serializer):  # pylint: disable=too-few-public-methods
             entry.link(
                 {
                     "type": "text/html",
-                    "href": url_for("abs_by_id", paper_id=document.paper_id),
+                    "href": urls["abs_by_id"].format(
+                        paper_id=document.paper_id
+                    ),
                 }
             )
             entry.link(
@@ -70,7 +75,9 @@ class Atom10(Serializer):  # pylint: disable=too-few-public-methods
                     "title": "pdf",
                     "rel": "related",
                     "type": "application/pdf",
-                    "href": url_for("pdf_by_id", paper_id=document.paper_id),
+                    "href": urls["pdf_by_id"].format(
+                        paper_id=document.paper_id
+                    ),
                 }
             )
 
@@ -82,7 +89,7 @@ class Atom10(Serializer):  # pylint: disable=too-few-public-methods
                 label = cat.name + " (" + cat.id + ")"
                 category = {
                     "term": cat.id,
-                    "scheme": "http://arxiv.org/schemas/atom",
+                    "scheme": f"https://{base_server}/schemas/atom",
                     "label": label,
                 }
                 entry.category(category)
@@ -100,7 +107,7 @@ class Atom10(Serializer):  # pylint: disable=too-few-public-methods
             label = prim_cat.name + " (" + prim_cat.id + ")"
             category = {
                 "term": prim_cat.id,
-                "scheme": "http://arxiv.org/schemas/atom",
+                "scheme": f"https://{base_server}/schemas/atom",
                 "label": label,
             }
             entry.arxiv.primary_category(category)

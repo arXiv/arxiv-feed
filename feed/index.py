@@ -210,7 +210,11 @@ def create_document(record: Hit) -> Document:
                 last_name=hit_author["last_name"],
                 full_name=hit_author["full_name"],
                 initials=hit_author["initials"],
-                affiliations=hit_author.get("affiliation", []),
+                affiliations=(
+                    hit_author["affiliation"]
+                    if "affiliation" in hit_author
+                    else []
+                ),
             )
         )
 

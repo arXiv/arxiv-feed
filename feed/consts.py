@@ -3,6 +3,13 @@ from typing import Set
 
 from feed.errors import FeedVersionError
 
+BASE_SERVER = "arxiv.org"
+METADATA_ENDPOINT = f"https://{BASE_SERVER}"
+
+FEED_NUM_DAYS = 1
+
+DELIMITER = "+"
+
 
 class FeedVersion(str, Enum):
     RSS_0_91 = "RSS 0.91"
@@ -56,7 +63,3 @@ class FeedVersion(str, Enum):
             raise FeedVersionError(version=version, supported=cls.supported())
 
 
-FEED_NUM_DAYS = 1
-
-
-DELIMITER = "+"

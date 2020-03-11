@@ -31,8 +31,12 @@ def _feed(arxiv_id: str, version: FeedVersion) -> Response:
     except FeedError as ex:
         raise BadRequest(ex.error)
 
+    # Create response object from data
     response: Response = make_response(data)
+    # Set headers
     response.headers["ETag"] = etag
+    response.headers["Content-Type"] = "application/xml"
+
     return response
 
 

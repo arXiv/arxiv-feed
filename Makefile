@@ -5,7 +5,9 @@ PROJECT := feed
 
 .EXPORT_ALL_VARIABLES:
 PIPENV_VERBOSITY = -1
-METADATA_ENDPOINT = "https://beta.arxiv.org/"
+FEED_NUM_DAYS = 10000
+BASE_SERVER = beta.arxiv.org
+METADATA_ENDPOINT = https://beta.arxiv.org
 
 
 help:                   ## Show help.
@@ -15,12 +17,15 @@ help:                   ## Show help.
 # Index
 
 index:                  ## Create and populate elasticsearch index.
-	docker run                                                          \
+	@docker run                                                          \
+           --name=arxiv-search-index                                    \
     	   --network=arxiv_feed_network                                 \
     	   --volume `pwd`/example:/example                              \
     	   --env METADATA_ENDPOINT="$(METADATA_ENDPOINT)"               \
     	   --env ELASTICSEARCH_SERVICE_HOST=arxiv-feed-elasticsearch    \
-    	   arxiv/search-index:0.6 /example/paper_ids.txt
+    	   arxiv/search-index:0.6 /example/paper_ids.txt                \
+    	   && echo "Indexing successful." || echo "Indexing failed."
+	@docker rm --force arxiv-search-index
 
 
 index-test:           ## Test if the index is created.
