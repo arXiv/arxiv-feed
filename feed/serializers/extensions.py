@@ -147,7 +147,7 @@ class ArxivEntryExtension(BaseEntryExtension):
                     # add Elements for all of its affiliations.
                     if author_child.tag == "name":
                         name = author_child.text
-                        affiliations = self.__arxiv_affiliations[name]
+                        affiliations = self.__arxiv_affiliations.get(name, [])
                         for affiliation in affiliations:
                             element = etree.SubElement(
                                 author,

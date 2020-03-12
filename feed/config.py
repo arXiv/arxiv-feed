@@ -24,6 +24,12 @@ class Config(object):
         "pdf_only": f"https://{BASE_SERVER}/pdf/{{paper_id}}v{{version}}",
     }
 
+    ELASTICSEARCH_HOST = os.environ.get("ELASTICSEARCH_HOST", "127.0.0.1")
+    ELASTICSEARCH_PORT = int(os.environ.get("ELASTICSEARCH_PORT", "9200"))
+    ELASTICSEARCH_SSL = (
+        os.environ.get("ELASTICSEARCH_SSL", "false").lower() == "true"
+    )
+
 
 class Production(Config):
     BASE_SERVER = "arxiv.org"

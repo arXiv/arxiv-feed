@@ -4,6 +4,7 @@ import logging
 from typing import List
 from datetime import datetime, timedelta
 
+from flask import current_app
 from elasticsearch import Elasticsearch, ElasticsearchException
 from elasticsearch.connection import Urllib3HttpConnection
 from elasticsearch_dsl import Search, Q
@@ -155,9 +156,9 @@ def get_records_from_indexer(
         es = Elasticsearch(
             [
                 {
-                    "host": "localhost",
-                    "port": 9200,
-                    "use_ssl": False,
+                    "host": current_app.config.get("ELASTICSEARCH_HOST"),
+                    "port": current_app.config.get("ELASTICSEARCH_PORT"),
+                    "use_ssl": current_app.config.get("ELASTICSEARCH_SSL"),
                     "http_auth": None,
                     "verify_certs": True,
                 }
@@ -226,7 +227,7 @@ def create_document(record: Hit) -> Document:
         category = classification["category"].to_dict()
         secondary_categories.append(Category(category["name"], category["id"]))
 
-    # Create the EPrint and add it to the collection to be returned
+    # Create the Document and add it to the collection to be returned
     return Document(
         arxiv_id=archive["id"],
         archive_name=archive["name"],
@@ -236,7 +237,7 @@ def create_document(record: Hit) -> Document:
         submitted_date=record["submitted_date"],
         updated_date=record["updated_date"],
         comments=record["comments"],
-        journal_ref=record["journal_ref"] or "",
+        journal_ref=record["journal_ref"] if "journal_ref" in record else "",
         doi=record["doi"],
         authors=authors,
         primary_category=primary_category,
