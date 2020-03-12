@@ -236,7 +236,7 @@ def create_document(record: Hit) -> Document:
         submitted_date=record["submitted_date"],
         updated_date=record["updated_date"],
         comments=record["comments"],
-        journal_ref=record["journal_ref"],
+        journal_ref=record["journal_ref"] or "",
         doi=record["doi"],
         authors=authors,
         primary_category=primary_category,

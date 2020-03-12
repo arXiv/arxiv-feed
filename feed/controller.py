@@ -1,22 +1,17 @@
 """Controller for RSS Feeds."""
 
 import logging
-import hashlib
-from typing import Tuple
 from flask import current_app
 
 from feed import index
-from feed import consts
-from feed import serializers
 from feed.consts import FeedVersion
-from feed.errors import FeedVersionError
-from feed.serializers.serializer import Serializer
+from feed.serializers.serializer import Serializer, Feed
 
 
 logger = logging.getLogger(__name__)
 
 
-def get_feed(archive_id: str, version: FeedVersion) -> Tuple[str, str]:
+def get_feed(archive_id: str, version: FeedVersion) -> Feed:
     """
     Return the past day's RSS content from the specified XML serializer.
 
@@ -29,10 +24,8 @@ def get_feed(archive_id: str, version: FeedVersion) -> Tuple[str, str]:
 
     Returns
     -------
-    data : str
-        The serialized XML results of the search.
-    etag: str
-        Feed etag.
+    Feed
+        Feed object containing the serialized feed.
 
     Raises
     ------
@@ -51,18 +44,7 @@ def get_feed(archive_id: str, version: FeedVersion) -> Tuple[str, str]:
         )
         days = 1
 
-    # Create the correct serializer
-    if version == FeedVersion.RSS_2_0:
-        serializer: Serializer = serializers.RSS20()
-    elif version == FeedVersion.ATOM_1_0:
-        serializer = serializers.Atom10()
-    else:
-        raise FeedVersionError(
-            version=version, supported=FeedVersion.supported()
-        )
-
     # Get the search results, pass them to the serializer, return the results
     documents = index.search(archive_id, days)
-    data = serializer.get_feed(documents)
-    etag = hashlib.sha256(data.encode("utf-8"))
-    return data, etag.hexdigest()
+    serializer = Serializer(documents=documents, version=version)
+    return serializer.serialize()

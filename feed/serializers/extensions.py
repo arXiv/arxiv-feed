@@ -1,10 +1,13 @@
 """Classes derived from the Feedgen extension classes."""
 
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from lxml import etree
 from lxml.etree import Element
+from flask import current_app
 from feedgen.ext.base import BaseEntryExtension, BaseExtension
+
+from feed.domain import Author
 
 
 class ArxivExtension(BaseExtension):
@@ -56,7 +59,29 @@ class ArxivExtension(BaseExtension):
             Definitions of the "arxiv" namespaces.
 
         """
-        return {"arxiv": "http://arxiv.org/schemas/atom"}
+        return {
+            "arxiv": "http://arxiv.org/schemas/atom",
+            "content": "http://purl.org/rss/1.0/modules/content/",
+            "taxo": "http://purl.org/rss/1.0/modules/taxonomy/",
+            "syn": "http://purl.org/rss/1.0/modules/syndication/",
+            "admin": "http://webns.net/mvcb/",
+        }
+
+
+class ArxivAtomExtension(BaseEntryExtension):
+    def extend_ns(self: BaseExtension) -> Dict[str, str]:
+        """
+        Define the feed's namespaces.
+
+        Returns
+        -------
+        namespaces : Dict[str, str]
+            Definitions of the "arxiv" namespaces.
+
+        """
+        return {
+            "arxiv": "http://arxiv.org/schemas/atom",
+        }
 
 
 class ArxivEntryExtension(BaseEntryExtension):
@@ -64,11 +89,12 @@ class ArxivEntryExtension(BaseEntryExtension):
 
     def __init__(self: BaseEntryExtension):
         """Initialize the member values to all be empty."""
-        self.__arxiv_comment: str = None
-        self.__arxiv_primary_category: str = None
-        self.__arxiv_doi: Dict = None
-        self.__arxiv_affiliation: str = None
-        self.__arxiv_journal_ref: str = None
+        self.__arxiv_authors: List[Author] = []
+        self.__arxiv_comment: Optional[str] = None
+        self.__arxiv_primary_category: Optional[str] = None
+        self.__arxiv_doi: Optional[dict] = None
+        self.__arxiv_affiliation: Optional[str] = None
+        self.__arxiv_journal_ref: Optional[str] = None
         self.__arxiv_affiliations: Dict = {}
 
     def extend_atom(self, entry: Element) -> Element:
@@ -145,11 +171,43 @@ class ArxivEntryExtension(BaseEntryExtension):
             The modified entry.
 
         """
+        base_server = current_app.config.get("BASE_SERVER")
+
+        for entry_child in entry:
+            if entry_child.tag == "description":
+                description = "<p>Authors: "
+                first = True
+                for author in self.__arxiv_authors:
+                    if first:
+                        first = False
+                    else:
+                        description += ", "
+                    name = (
+                        f"{author.last_name},"
+                        f"+{author.initials.replace(' ', '+')}"
+                    )
+                    description += (
+                        f'<a href="http://{base_server}/search/?query={name}&'
+                        f'searchtype=author">{author.full_name}</a>'
+                    )
+                description += f"</p><p>{entry_child.text}</p>"
+
+                entry_child.text = description
+
         return entry
 
-    def comment(self, text: str) -> None:
+    def author(self, author: Author):
+        """Add an author value to this entry.
+
+        Parameters
+        ----------
+        author : Author
+            Paper author.
         """
-        Assign the comment value to this entry.
+        self.__arxiv_authors.append(author)
+
+    def comment(self, text: str) -> None:
+        """Assign the comment value to this entry.
 
         Parameters
         ----------
@@ -160,8 +218,7 @@ class ArxivEntryExtension(BaseEntryExtension):
         self.__arxiv_comment = text
 
     def primary_category(self, text: str) -> None:
-        """
-        Assign the primary_category value to this entry.
+        """Assign the primary_category value to this entry.
 
         Parameters
         ----------
@@ -172,8 +229,7 @@ class ArxivEntryExtension(BaseEntryExtension):
         self.__arxiv_primary_category = text
 
     def journal_ref(self, text: str) -> None:
-        """
-        Assign the journal_ref value to this entry.
+        """Assign the journal_ref value to this entry.
 
         Parameters
         ----------
@@ -184,8 +240,7 @@ class ArxivEntryExtension(BaseEntryExtension):
         self.__arxiv_journal_ref = text
 
     def doi(self, doi_list: Dict[str, str]) -> None:
-        """
-        Assign the set of DOI definitions for this entry.
+        """Assign the set of DOI definitions for this entry.
 
         Parameters
         ----------
@@ -196,8 +251,7 @@ class ArxivEntryExtension(BaseEntryExtension):
         self.__arxiv_doi = doi_list
 
     def affiliation(self, full_name: str, affiliations: List[str]) -> None:
-        """
-        Assign an affiliation for one author of this entry.
+        """Assign an affiliation for one author of this entry.
 
         Parameters
         ----------
