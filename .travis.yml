@@ -4,6 +4,7 @@ cache: pip
 env:
   REPORT_TO_TRAVIS: 1
   MIN_PYLINT_SCORE: 8
+  ARXIV_FEED_CONFIGURATION: Testing
 os:
   - linux
 python:

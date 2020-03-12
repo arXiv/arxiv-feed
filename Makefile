@@ -5,9 +5,7 @@ PROJECT := feed
 
 .EXPORT_ALL_VARIABLES:
 PIPENV_VERBOSITY = -1
-FEED_NUM_DAYS = 10000
-BASE_SERVER = beta.arxiv.org
-METADATA_ENDPOINT = https://beta.arxiv.org
+ARXIV_FEED_CONFIGURATION = development
 
 
 help:                   ## Show help.
