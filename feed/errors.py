@@ -24,7 +24,7 @@ class FeedVersionError(FeedError):
 
     def __init__(self, version: str, supported: Set):
         super().__init__(
-            error=f"Unsupported feed version '{version}' requested."
+            error=f"Unsupported feed version '{version}' requested. "
             f"Valid options are: {', '.join(supported)}."
         )
         self.version = version

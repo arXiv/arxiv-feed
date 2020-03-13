@@ -39,7 +39,7 @@ run:                    ## Run feed server in development mode.
 # Utilities
 
 test:                   ## Run tests and coverage checks.
-	@pipenv run py.test -v --cov "$(PROJECT)" "$(PROJECT)"
+	@ARXIV_FEED_CONFIGURATION=testing pipenv run py.test -v --cov "$(PROJECT)" "$(PROJECT)"
 
 
 check:                  ## Run code checks.
