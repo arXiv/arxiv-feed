@@ -111,3 +111,17 @@ def test_feed_version_get_invalid():
         ex: FeedVersionError = excinfo.value
         assert ex.version == version
         assert ex.supported == FeedVersion.supported()
+
+
+def test_is_property():
+    # RSS
+    assert FeedVersion.RSS_0_91.is_rss
+    assert FeedVersion.RSS_1_0.is_rss
+    assert FeedVersion.RSS_2_0.is_rss
+    assert not FeedVersion.RSS_0_91.is_atom
+    assert not FeedVersion.RSS_1_0.is_atom
+    assert not FeedVersion.RSS_2_0.is_atom
+
+    # Atom
+    assert FeedVersion.ATOM_1_0.is_atom
+    assert not FeedVersion.ATOM_1_0.is_rss

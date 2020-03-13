@@ -1,5 +1,7 @@
 import re
 import random
+import hashlib
+from typing import Union
 from datetime import datetime, timezone
 
 
@@ -39,3 +41,21 @@ def randomize_case(s: str) -> str:
         return randomize_case(s)
     else:
         return result
+
+
+def etag(content: Union[str, bytes]) -> str:
+    """Calculate a unique ETag for the provided content.
+
+    Parameters
+    ----------
+    content : Union[str, bytes]
+        Content for which the etag should be calculated.
+
+    Returns
+    -------
+    str
+        Calculated etag.
+    """
+    if isinstance(content, str):
+        content = content.encode("utf-8")
+    return hashlib.sha256(content).hexdigest()

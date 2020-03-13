@@ -1,7 +1,7 @@
 import string
 from datetime import timezone
 
-from feed.utils import utc_now, randomize_case
+from feed.utils import utc_now, randomize_case, etag
 
 # utc_now
 
@@ -32,3 +32,11 @@ def test_randomize_case_non_letters():
 
 def test_randomize_case_edge_cases():
     assert "" == randomize_case("")
+
+
+# etag
+
+def test_etag():
+    assert etag("content") == etag(b"content")
+    assert etag("Садржај") == etag("Садржај".encode("utf-8"))
+    assert etag("foo") != etag("bar")

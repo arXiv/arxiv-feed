@@ -6,6 +6,7 @@ PROJECT := feed
 .EXPORT_ALL_VARIABLES:
 PIPENV_VERBOSITY = -1
 ARXIV_FEED_CONFIGURATION = development
+METADATA_ENDPOINT = https://beta.arxiv.org
 
 
 help:                   ## Show help.

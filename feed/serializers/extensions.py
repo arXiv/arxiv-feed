@@ -13,10 +13,6 @@ from feed.domain import Author
 class ArxivExtension(BaseExtension):
     """Extension of the Feedgen class to allow us to change its behavior."""
 
-    def __init__(self: BaseExtension) -> None:
-        """Noop initialization."""
-        pass
-
     def extend_atom(self: BaseExtension, atom_feed: Element) -> Element:
         """Allow the extension to modify the initial feed tree for Atom.
 
@@ -196,7 +192,7 @@ class ArxivEntryExtension(BaseEntryExtension):
 
         return entry
 
-    def author(self, author: Author):
+    def author(self, author: Author) -> None:
         """Add an author value to this entry.
 
         Parameters

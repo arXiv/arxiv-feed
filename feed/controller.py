@@ -34,7 +34,7 @@ def get_feed(archive_id: str, version: FeedVersion) -> Feed:
         FeedIndexError if it fails to fetch the feed from ElasticSearch.
     """
     # Get the number of days for which results are to be returned
-    feed_num_days = current_app.config.get("FEED_NUM_DAYS")
+    feed_num_days: str = current_app.config["FEED_NUM_DAYS"]
     try:
         days = int(feed_num_days)
     except ValueError:

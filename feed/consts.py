@@ -15,6 +15,16 @@ class FeedVersion(str, Enum):
     RSS_2_0 = "RSS 2.0"
     ATOM_1_0 = "Atom 1.0"
 
+    @property
+    def is_rss(self) -> bool:
+        """Return True if this is an RSS specification."""
+        return self in (self.RSS_0_91, self.RSS_1_0, self.RSS_2_0)
+
+    @property
+    def is_atom(self) -> bool:
+        """Return True if this is an Atom specification."""
+        return self in (self.ATOM_1_0,)
+
     @classmethod
     def supported(cls) -> Set["FeedVersion"]:
         """Return a set of supported feed versions."""
@@ -59,5 +69,3 @@ class FeedVersion(str, Enum):
                 return fv
         else:
             raise FeedVersionError(version=version, supported=cls.supported())
-
-

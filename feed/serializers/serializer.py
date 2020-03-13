@@ -1,5 +1,4 @@
-import hashlib
-from dataclasses import dataclass
+from typing import Dict, Any
 
 from flask import current_app
 from feedgen.feed import FeedGenerator
@@ -8,6 +7,7 @@ from feed.utils import utc_now
 from feed.consts import FeedVersion
 from feed.errors import FeedVersionError
 from feed.domain import Document, DocumentSet
+from feed.serializers import Feed
 from feed.serializers.extensions import (
     ArxivExtension,
     ArxivAtomExtension,
@@ -15,17 +15,14 @@ from feed.serializers.extensions import (
 )
 
 
-@dataclass
-class Feed:
-    content: str
-    etag: str
-    content_type: str = "application/xml"
-
-
 class Serializer:
     """Atom 1.0 and RSS 2.0 serializer."""
 
-    def __init__(self, documents: DocumentSet, version=FeedVersion.RSS_2_0):
+    def __init__(
+        self,
+        documents: DocumentSet,
+        version: FeedVersion = FeedVersion.RSS_2_0,
+    ):
         """Initialize serializer.
 
         Parameters
@@ -47,8 +44,8 @@ class Serializer:
             )
 
         # Config data
-        self.base_server = current_app.config.get("BASE_SERVER")
-        self.urls = current_app.config.get("URLS")
+        self.base_server = current_app.config["BASE_SERVER"]
+        self.urls: Dict[str, Any] = current_app.config["URLS"]
 
         self.version = version
         self.link = (
@@ -100,7 +97,7 @@ class Serializer:
         for document in documents.documents:
             self.add_document(document)
 
-    def add_document(self, document: Document):
+    def add_document(self, document: Document) -> None:
         """Add document to the feed.
 
         Parameters
@@ -177,24 +174,6 @@ class Serializer:
             if len(author.affiliations) > 0:
                 entry.arxiv.affiliation(author.full_name, author.affiliations)
 
-    @staticmethod
-    def __etag(content: bytes) -> str:
-        """Returns a unique ETag for the provided content.
-
-        Parameters
-        ----------
-        content: bytes
-            Content for which the etag should be calculated.
-
-
-        Returns
-        -------
-        str
-            Calculated etag.
-        """
-        etag = hashlib.sha256(content)
-        return etag.hexdigest()
-
     def serialize(self) -> Feed:
         """
         Serialize feed as RSS 2.0.
@@ -212,18 +191,10 @@ class Serializer:
         if self.version == FeedVersion.RSS_2_0:
             content: bytes = self.fg.rss_str(pretty=True)
         elif self.version == FeedVersion.ATOM_1_0:
-            content: bytes = self.fg.atom_str(pretty=True)
+            content = self.fg.atom_str(pretty=True)
         else:
             raise FeedVersionError(
                 version=self.version, supported=FeedVersion.supported()
             )
 
-        return Feed(
-            content=content.decode("utf-8"),
-            etag=self.__etag(content),
-            content_type=(
-                "application/atom+xml"
-                if self.version == FeedVersion.ATOM_1_0
-                else "application/rss+xml"
-            ),
-        )
+        return Feed(content=content.decode("utf-8"),)
