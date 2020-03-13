@@ -4,7 +4,9 @@ import os
 from feed import consts
 
 
-class Config(object):
+class Config:
+    """Base configuration object."""
+
     DEBUG = False
     TESTING = False
     VERSION = "0.3"
@@ -32,16 +34,22 @@ class Config(object):
 
 
 class Production(Config):
+    """Production configuration."""
+
     BASE_SERVER = "arxiv.org"
     METADATA_ENDPOINT = f"https://{BASE_SERVER}"
 
 
 class Beta(Config):
+    """Beta environment configuration."""
+
     BASE_SERVER = "beta.arxiv.org"
     METADATA_ENDPOINT = f"https://{BASE_SERVER}"
 
 
 class Development(Config):
+    """Development configuration."""
+
     DEBUG = True
 
     BASE_SERVER = "127.0.0.1"
@@ -51,4 +59,6 @@ class Development(Config):
 
 
 class Testing(Config):
+    """Configuration for running tests."""
+
     TESTING = True

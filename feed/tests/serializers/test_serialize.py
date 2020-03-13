@@ -59,7 +59,7 @@ def test_serialize_error(app):
         check_feed(feed, version=version, status_code=400, error=error)
 
 
-def test_serialize_invalid_format(app, documents):
+def test_serialize_invalid_version(app, documents):
     for version in [
         v for v in FeedVersion if v not in FeedVersion.supported()
     ]:

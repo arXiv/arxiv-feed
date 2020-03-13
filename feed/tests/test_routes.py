@@ -90,7 +90,9 @@ def test_routes_version_override(
 
 @patch("feed.routes.controller.get_documents")
 @patch("feed.routes.serialize")
-def test_version_ok(serialize, get_documents, client, documents: DocumentSet, feed_rss: Feed):
+def test_version_ok(
+    serialize, get_documents, client, documents: DocumentSet, feed_rss: Feed
+):
     get_documents.return_value = documents
 
     for version in FeedVersion.supported():

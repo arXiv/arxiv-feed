@@ -63,13 +63,9 @@ class Feed:
         str
             Content type.
         """
-        if self.version in (
-            FeedVersion.RSS_0_91,
-            FeedVersion.RSS_1_0,
-            FeedVersion.RSS_2_0,
-        ):
+        if self.version.is_rss:
             return "application/rss+xml"
-        elif self.version in (FeedVersion.ATOM_1_0,):
+        elif self.version.is_atom:
             return "application/atom+xml"
         else:
             return "application/xml"

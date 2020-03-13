@@ -18,7 +18,7 @@ from feed.serializers.extensions import (
 class Serializer:
     """Atom 1.0 and RSS 2.0 serializer."""
 
-    def __init__(self, version: FeedVersion):
+    def __init__(self, version: Union[str, FeedVersion]):
         """Initialize serializer.
 
         Parameters
@@ -35,13 +35,7 @@ class Serializer:
         self.base_server = current_app.config["BASE_SERVER"]
         self.urls: Dict[str, Any] = current_app.config["URLS"]
 
-        # Check if the serialization format is supported
-        if version not in FeedVersion.supported():
-            raise FeedVersionError(
-                version=version, supported=FeedVersion.supported()
-            )
-        self.version = version
-
+        self.version = FeedVersion.get(version)
         self.link = (
             f"https://{self.base_server}/atom"
             if version == FeedVersion.ATOM_1_0
@@ -259,7 +253,7 @@ class Serializer:
 
 def serialize(
     documents_or_error: Union[DocumentSet, FeedError],
-    version: FeedVersion = FeedVersion.RSS_2_0,
+    version: Union[str, FeedVersion] = FeedVersion.RSS_2_0,
 ) -> Feed:
     """Serialize a document set or an error.
 
