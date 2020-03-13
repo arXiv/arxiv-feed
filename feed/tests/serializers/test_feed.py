@@ -7,11 +7,11 @@ from feed.errors import FeedVersionError
 
 
 @pytest.fixture
-def content() -> str:
-    return "content"
+def content() -> bytes:
+    return b"content"
 
 
-def test_feed_creation(content: str):
+def test_feed_creation(content: bytes):
     feed = Feed(content)
     assert feed.content == content
     assert feed.version == FeedVersion.RSS_2_0
@@ -29,7 +29,7 @@ def test_feed_creation(content: str):
             assert feed.content_type == "application/atom+xml"
 
 
-def test_invalid_version_feed_cration(content: str):
+def test_invalid_version_feed_cration(content: bytes):
     # Test invalid version
     for version in FeedVersion:
         if version not in FeedVersion.supported():

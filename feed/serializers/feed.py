@@ -10,7 +10,7 @@ class Feed:
 
     Parameters
     ----------
-    content : str
+    content : bytes
         Feed xml content.
     version : FeedVersion
         Version of the feed specification.
@@ -22,9 +22,13 @@ class Feed:
     """
 
     def __init__(
-        self, content: str, version: FeedVersion = FeedVersion.RSS_2_0
+        self,
+        content: bytes,
+        status_code: int = 200,
+        version: FeedVersion = FeedVersion.RSS_2_0,
     ):
         self.content = content
+        self.status_code = status_code
 
         # Check the version
         if (

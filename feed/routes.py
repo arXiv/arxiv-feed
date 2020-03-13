@@ -2,12 +2,12 @@
 from typing import Union
 
 from werkzeug import Response
-from werkzeug.exceptions import BadRequest
 from flask import request, Blueprint, make_response
 
 from feed import controller
-from feed.errors import FeedError
 from feed.consts import FeedVersion
+from feed.serializers import serialize
+from feed.errors import FeedError, FeedVersionError
 
 
 blueprint = Blueprint("rss", __name__, url_prefix="/")
@@ -29,16 +29,18 @@ def _feed(arxiv_id: str, version: Union[str, FeedVersion]) -> Response:
     """
     try:
         version = FeedVersion.get(version)
-        feed = controller.get_feed(arxiv_id, version)
+        documents = controller.get_documents(arxiv_id)
+        feed = serialize(documents, version=version)
+    except FeedVersionError as ex:
+        feed = serialize(ex)
     except FeedError as ex:
-        raise BadRequest(ex.error)
+        feed = serialize(ex, version=version)
 
     # Create response object from data
-    response: Response = make_response(feed.content)
+    response: Response = make_response(feed.content, feed.status_code)
     # Set headers
     response.headers["ETag"] = feed.etag
     response.headers["Content-Type"] = feed.content_type
-
     return response
 
 

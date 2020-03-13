@@ -4,14 +4,13 @@ import logging
 from flask import current_app
 
 from feed import index
-from feed.consts import FeedVersion
-from feed.serializers.serializer import Serializer, Feed
+from feed.domain import DocumentSet
 
 
 logger = logging.getLogger(__name__)
 
 
-def get_feed(archive_id: str, version: FeedVersion) -> Feed:
+def get_documents(archive_id: str) -> DocumentSet:
     """
     Return the past day's RSS content from the specified XML serializer.
 
@@ -19,13 +18,11 @@ def get_feed(archive_id: str, version: FeedVersion) -> Feed:
     ----------
     archive_id : str
         An ID identifying the archive to search.
-    version : str
-        The RSS format/version to use when serializing the results.
 
     Returns
     -------
-    Feed
-        Feed object containing the serialized feed.
+    DocumentSet
+        DocumentSet object populated with search results.
 
     Raises
     ------
@@ -45,6 +42,4 @@ def get_feed(archive_id: str, version: FeedVersion) -> Feed:
         days = 1
 
     # Get the search results, pass them to the serializer, return the results
-    documents = index.search(archive_id, days)
-    serializer = Serializer(documents=documents, version=version)
-    return serializer.serialize()
+    return index.search(archive_id, days)

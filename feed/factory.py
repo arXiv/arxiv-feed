@@ -9,7 +9,7 @@ from feed import routes
 
 def create_web_app() -> Flask:
     """Initialize and configure the rss application."""
-    app = Flask("rss")
+    app = Flask("feed")
     configuration = os.environ.get("ARXIV_FEED_CONFIGURATION", "production")
     app.config.from_object(
         import_string(f"feed.config.{configuration.title()}")()
