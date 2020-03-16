@@ -1,11 +1,11 @@
-# arXiv RSS Feeds
+# arXiv Feed
 
 ## Development environment
 
 ### Running Elasticsearch + Kibana with Docker Compose
 
 A ``docker-compose.yml`` file is included in the root of this repo that will
-start Elasticsearch and Kibana on your local machine. This is for local
+start ElasticsSarch and Kibana on your local machine. This is for local
 development and testing purposes only. You'll need to install
 [Docker Compose](https://docs.docker.com/compose/).
 
@@ -18,7 +18,7 @@ docker-compose build
 You can start ES + Kibana like this:
 
 ```bash
-docker-compose up
+docker-compose up -d
 ```
 
 You should be able to access Kibana at http://127.0.0.1:5601, and Elasticsearch
@@ -33,60 +33,70 @@ used to add documents to the search index.
 
 **Note:** To do this, you will need to be connected to Cornell VPN.
 
-First, put the arXiv paper ID's that you'd like to index into a text file, one
-ID per line. An example is included at ``example/paper_ids.txt``.
-
 With Elasticsearch running using the ``docker-compose`` method, above, you
 should be able to add documents to the index using (note that you'll need to
 update paths):
 
 ```bash
-docker run -e ELASTICSEARCH_SERVICE_HOST=arxiv-rss-elasticsearch \
-    --network=arxiv-rss_es_stack \
-    -v /Full/Path/To/arxiv-rss/example:/to_index \
-    arxiv/search-index:0.4 /to_index/paper_ids.txt
+make index
 ```
 
-This runs the arxiv/search-index image in a container on the network created
-using ``docker-compose``, above. The `-v` parameter mounts the directory that
-contains your file with paper IDs onto the container at ``/to_index``.
-The image accepts a single argument, the path (within the container) of the
-text file containing paper IDs. In this example case, it would be
-``/to_index/paper_ids.txt``.
+This runs the `arxiv/search-index` image in a container on the network created
+using ``docker-compose``, above. The image accepts a single argument, the path
+(within the container) of the text file containing paper IDs. To get the file
+inside the container we use the `example` folder which is mounted inside the
+container as `/example`. To specify paper ids just populate the `paper_ids.txt`
+inside the example folder.
 
-You should see something like this:
+
+You can verify that the papers were indexed by running:
+
+```
+make index-test
+```
+
+Note: You'll need [jq](https://stedolan.github.io/jq/) installed to run this
+command.
+
+
+### Running the developkment server
+
+
+To run the development enter:
+
+```
+make run
+```
+
+This will start the flask development server on port 5000.
+
+
+For other commands run:
+
+```
+make help
+```
+
+
+### Pre-commit hooks
+
+To run pre commit hooks install the dev dependencies:
 
 ```bash
-Indexing 3 papers...
-Papers indexed
-2018-07-12 01:03:36,626 - search.agent.consumer - DEBUG: 1601.00121: get metadata
-2018-07-12 01:03:36,627 - search.agent.consumer - DEBUG: 1601.00121: could not retrieve from cache: No cached document
-2018-07-12 01:03:36,628 - search.agent.consumer - DEBUG: 1601.00121: requesting metadata
-2018-07-12 01:03:36,916 - search.agent.consumer - DEBUG: current version is 1
-2018-07-12 01:03:36,916 - search.agent.consumer - DEBUG: 1601.00122: get metadata
-2018-07-12 01:03:36,918 - search.agent.consumer - DEBUG: 1601.00122: could not retrieve from cache: No cached document
-2018-07-12 01:03:36,919 - search.agent.consumer - DEBUG: 1601.00122: requesting metadata
-2018-07-12 01:03:37,167 - search.agent.consumer - DEBUG: current version is 1
-2018-07-12 01:03:37,168 - search.agent.consumer - DEBUG: 1601.00123: get metadata
-2018-07-12 01:03:37,169 - search.agent.consumer - DEBUG: 1601.00123: could not retrieve from cache: No cached document
-2018-07-12 01:03:37,169 - search.agent.consumer - DEBUG: 1601.00123: requesting metadata
-2018-07-12 01:03:37,428 - search.agent.consumer - DEBUG: current version is 2
-2018-07-12 01:03:37,428 - search.agent.consumer - DEBUG: 1601.00123v1: get metadata
-2018-07-12 01:03:37,428 - search.agent.consumer - DEBUG: 1601.00123v1: could not retrieve from cache: No cached document
-2018-07-12 01:03:37,428 - search.agent.consumer - DEBUG: 1601.00123v1: requesting metadata
-2018-07-12 01:03:37,677 - search.services.index - DEBUG: init ES session for index "arxiv" at arxiv-rss-elasticsearch:9200
-
-Done indexing 3 papers.
+pipenv install --dev
 ```
 
-You can verify that the papers were indexed by running the following query in
-Kibana's dev tools interface (or making the request directly to the ES API):
+After that you'll need to install the pre commit hooks:
 
+```bash
+pipenv run pre-commit install
 ```
-GET arxiv/_search
-{
-  "query": {
-    "match_all": {}
-  }
-}
+
+Git will run all the pre-commit hooks on all changed files before you are
+allowed to commit. You will be allowed to commit only if all checks pass.
+
+You can also run the pre commit hooks manually with:
+
+```bash
+pipenv run pre-commit run
 ```

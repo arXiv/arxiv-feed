@@ -1,25 +1,34 @@
 # Provides the Elasticsearch + Kibana stack for local development. See
 # README.md for instructions on use.
 ---
-version: '3'
+version: "3.5"
 services:
-  elasticsearch:
+  arxiv-feed-elasticsearch:
     build:
       context: .
-      dockerfile: Dockerfile-elasticsearch
-    container_name: arxiv-rss-elasticsearch
-    environment:    ['http.host=0.0.0.0', 'transport.host=0.0.0.0']
-    ports:          ['9200:9200', '9300:9300']
-    networks:       ['es_stack']
+      dockerfile: "Dockerfile-elasticsearch"
+    container_name: "arxiv-feed-elasticsearch"
+    environment:
+      - "http.host=0.0.0.0"
+      - "transport.host=0.0.0.0"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - "arxiv_feed_network"
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:6.1.1
-    container_name: arxiv-rss-kibana
-    # environment:
-    #   - ELASTICSEARCH_USERNAME=elastic
-    #   - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
-    ports:          ['127.0.0.1:5601:5601']
-    networks:       ['es_stack']
-    depends_on:     ['elasticsearch']
+  arxiv-feed-kibana:
+    image: "docker.elastic.co/kibana/kibana:6.2.4"
+    container_name: "arxiv-feed-kibana"
+    environment:
+      ELASTICSEARCH_URL: "http://arxiv-feed-elasticsearch:9200"
+    ports:
+      - "5601:5601"
+    networks:
+      - "arxiv_feed_network"
+    depends_on:
+      - "arxiv-feed-elasticsearch"
 
-networks: {es_stack: {}}
+networks:
+  arxiv_feed_network:
+    name: "arxiv_feed_network"
