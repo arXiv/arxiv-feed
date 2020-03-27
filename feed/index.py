@@ -20,13 +20,14 @@ from feed.domain import Author, Category, Document, DocumentSet
 logger = logging.getLogger(__name__)
 
 
-def search(archives: str, days: int) -> DocumentSet:
+def search(query: str, days: int) -> DocumentSet:
     """Search the index for records with the archive ID and dated within 24h.
 
     Parameters
     ----------
-    archives : str
-        The IDs of the archives to search
+    query : str
+        A concatenation of archive/category specifiers separated by delimiter
+        characters.
     days : int
         The number of days before the specified time for which to return
         records.
@@ -39,7 +40,7 @@ def search(archives: str, days: int) -> DocumentSet:
     """
     documents: List[Document] = []
 
-    request_categories = validate_request(archives)
+    request_categories = validate_request(query)
 
     records = get_records_from_indexer(request_categories, utc_now(), days)
 
@@ -51,14 +52,14 @@ def search(archives: str, days: int) -> DocumentSet:
     return DocumentSet(request_categories, documents)
 
 
-def validate_request(archives: str) -> List[str]:
+def validate_request(query: str) -> List[str]:
     """Validate the provided archive/category specification.
 
     Return a list of its named archives and categories.
 
     Parameters
     ----------
-    archives : str
+    query : str
         A concatenation of archive/category specifiers separated by delimiter
         characters.
 
@@ -76,16 +77,16 @@ def validate_request(archives: str) -> List[str]:
 
     """
     # Separate the request string into individual archives/categories
-    request_categories = archives.split(DELIMITER)
+    request_categories = query.split(DELIMITER)
 
     # Is the syntax of the archive/category specification correct?
     if len(request_categories) == 0 or any(
         len(cat.strip()) == 0 for cat in request_categories
     ):
         raise FeedIndexerError(
-            f"Invalid archive specification '{archives}'. Correct format is "
-            f"one or more archive names delimited by '{DELIMITER}'. Each name "
-            f"can be either of the form 'archive' or 'archive.category'. For "
+            f"Invalid archive specification '{query}'. Correct format is one "
+            f"or more archive names delimited by '{DELIMITER}'. Each name can "
+            f"be either of the form 'archive' or 'archive.category'. For "
             f"example: 'math+cs.CG' (all from math and only computational "
             f"geometry from computer science)."
         )

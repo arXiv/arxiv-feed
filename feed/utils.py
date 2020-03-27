@@ -4,6 +4,8 @@ import hashlib
 from typing import Union
 from datetime import datetime, timezone
 
+from feed.consts import DELIMITER
+
 
 # Get a random seed
 random.seed()
@@ -41,6 +43,13 @@ def randomize_case(s: str) -> str:
         return randomize_case(s)
     else:
         return result
+
+
+def hash_query(query: str) -> str:
+    """Return a hash of query that is not dependent on the query order."""
+    parts = [part.strip() for part in query.split(DELIMITER)]
+    parts.sort()
+    return hashlib.sha256(DELIMITER.join(parts).encode("utf-8")).hexdigest()
 
 
 def etag(content: Union[str, bytes]) -> str:

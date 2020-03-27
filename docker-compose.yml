@@ -29,6 +29,14 @@ services:
     depends_on:
       - "arxiv-feed-elasticsearch"
 
+  arxiv-feed-redis:
+      image: "redis:5.0.8"
+      container_name: "arxiv-feed-redis"
+      ports:
+        - "6379:6379"
+      networks:
+        - "arxiv_feed_network"
+
 networks:
   arxiv_feed_network:
     name: "arxiv_feed_network"

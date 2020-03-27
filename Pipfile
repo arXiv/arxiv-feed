@@ -4,23 +4,23 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+arxiv-base = "==0.16.6"
 elasticsearch = "==6.3.1"
 elasticsearch-dsl = "==6.3.1"
-arxiv-base = "==0.16.6"
 feedgen = "==0.9.0"
+flask-caching = "==1.8.0"
+redis = "==3.4.1"
 
 [dev-packages]
 mypy = "==0.761"
 flake8 = "==3.7.9"
-Flask-Testing = "==0.7.1"
-pre-commit = "==2.1.1"
+flask-testing = "==0.8.0"
+pre-commit = "==2.2.0"
 pydocstyle = "==5.0.2"
 pylint = "==2.4.4"
-pytest = "==5.3.5"
+pytest = "==5.4.1"
 pytest-cov = "==2.8.1"
 pytest-flask = "==1.0.0"
-pytest-sugar = "==0.9.2"
-
 
 [requires]
 python_version = "3.7"

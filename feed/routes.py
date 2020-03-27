@@ -5,21 +5,24 @@ from werkzeug import Response
 from flask import request, Blueprint, make_response
 
 from feed import controller
+from feed.cache import cache
+from feed.utils import hash_query
 from feed.consts import FeedVersion
-from feed.serializers import serialize
+from feed.serializers import serialize, Feed
 from feed.errors import FeedError, FeedVersionError
 
 
 blueprint = Blueprint("rss", __name__, url_prefix="/")
 
 
-def _feed(arxiv_id: str, version: Union[str, FeedVersion]) -> Response:
+def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
     """Return the feed in appropriate format for the past day.
 
     Parameters
     ----------
-    arxiv_id : str
-        The ID code for the archive that is being searched.
+    query : str
+        A concatenation of archive/category specifiers separated by delimiter
+        characters.
 
     Returns
     -------
@@ -27,14 +30,26 @@ def _feed(arxiv_id: str, version: Union[str, FeedVersion]) -> Response:
         Flask response object populated with the RSS or ATOM (XML) response for
         the request and ETag header added.
     """
-    try:
-        version = FeedVersion.get(version)
-        documents = controller.get_documents(arxiv_id)
-        feed = serialize(documents, version=version)
-    except FeedVersionError as ex:
-        feed = serialize(ex)
-    except FeedError as ex:
-        feed = serialize(ex, version=version)
+    # Calculate unique key
+    key = f"{hash_query(query)}-{version}"
+
+    # Try to get from cache
+    value = cache.get(key)
+
+    if value is not None:
+        feed = Feed.from_string(value)
+    else:
+        # Cache failed generate feed
+        try:
+            version = FeedVersion.get(version)
+            documents = controller.get_documents(query)
+            feed = serialize(documents, version=version)
+        except FeedVersionError as ex:
+            feed = serialize(ex)
+        except FeedError as ex:
+            feed = serialize(ex, version=version)
+        # Save feed to cache
+        cache.set(key, feed.to_string())
 
     # Create response object from data
     response: Response = make_response(feed.content, feed.status_code)
@@ -44,22 +59,22 @@ def _feed(arxiv_id: str, version: Union[str, FeedVersion]) -> Response:
     return response
 
 
-@blueprint.route("/rss/<string:arxiv_id>", methods=["GET"])
-def rss(arxiv_id: str) -> Response:
+@blueprint.route("/rss/<string:query>", methods=["GET"])
+def rss(query: str) -> Response:
     """Return the RSS 2.0 results for the past day."""
-    return _feed(arxiv_id=arxiv_id, version=FeedVersion.RSS_2_0)
+    return _feed(query=query, version=FeedVersion.RSS_2_0)
 
 
-@blueprint.route("/atom/<string:arxiv_id>", methods=["GET"])
-def atom(arxiv_id: str) -> Response:
+@blueprint.route("/atom/<string:query>", methods=["GET"])
+def atom(query: str) -> Response:
     """Return the Atom 1.0 results for the past day."""
-    return _feed(arxiv_id=arxiv_id, version=FeedVersion.ATOM_1_0)
+    return _feed(query=query, version=FeedVersion.ATOM_1_0)
 
 
-@blueprint.route("/<string:arxiv_id>", methods=["GET"])
-def default(arxiv_id: str) -> Response:
+@blueprint.route("/<string:query>", methods=["GET"])
+def default(query: str) -> Response:
     """Return RSS 2.0 results for the past day."""
     return _feed(
-        arxiv_id=arxiv_id,
+        query=query,
         version=request.headers.get("VERSION", FeedVersion.RSS_2_0),
     )
