@@ -23,6 +23,7 @@ class Config:
         "abs": f"https://{BASE_SERVER}/abs/{{paper_id}}v{{version}}",
         "abs_by_id": f"https://{BASE_SERVER}/abs/{{paper_id}}",
         "pdf_by_id": f"https://{BASE_SERVER}/pdf/{{paper_id}}",
+        "ps_by_id": f"https://{BASE_SERVER}/ps/{{paper_id}}",
         "pdf_only": f"https://{BASE_SERVER}/pdf/{{paper_id}}v{{version}}",
     }
 

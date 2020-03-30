@@ -2,7 +2,9 @@
 
 import logging
 from typing import List
+from collections import Iterable
 from datetime import datetime, timedelta
+
 
 from flask import current_app
 from elasticsearch import Elasticsearch, ElasticsearchException
@@ -12,8 +14,8 @@ from elasticsearch_dsl.response import Hit
 
 from arxiv import taxonomy
 from feed.utils import utc_now
-from feed.consts import DELIMITER
 from feed.errors import FeedIndexerError
+from feed.consts import DELIMITER, Format
 from feed.domain import Author, Category, Document, DocumentSet
 
 
@@ -227,6 +229,15 @@ def create_document(record: Hit) -> Document:
         category = classification["category"].to_dict()
         secondary_categories.append(Category(category["name"], category["id"]))
 
+    formats = set()
+    known_formats = set(Format)
+    if "formats" in record and isinstance(record["formats"], Iterable):
+        formats = {
+            Format(fmt.lower())
+            for fmt in record["formats"]
+            if fmt.lower() in known_formats
+        }
+
     # Create the Document and add it to the collection to be returned
     return Document(
         arxiv_id=archive["id"],
@@ -239,6 +250,7 @@ def create_document(record: Hit) -> Document:
         comments=record["comments"],
         journal_ref=record["journal_ref"] if "journal_ref" in record else "",
         doi=record["doi"],
+        formats=formats,
         authors=authors,
         primary_category=primary_category,
         secondary_categories=secondary_categories,

@@ -9,6 +9,11 @@ FEED_NUM_DAYS = 1
 DELIMITER = "+"
 
 
+class Format(str, Enum):
+    PDF = "pdf"
+    PS = "ps"
+
+
 class FeedVersion(str, Enum):
     RSS_0_91 = "RSS 0.91"
     RSS_1_0 = "RSS 1.0"
