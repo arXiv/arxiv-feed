@@ -1,4 +1,4 @@
-from typing import Dict, Any, Union
+from typing import Dict, Union
 
 from flask import current_app
 from feedgen.feed import FeedGenerator
@@ -10,7 +10,6 @@ from feed.domain import Media, Document, DocumentSet
 from feed.serializers import Feed
 from feed.serializers.extensions import (
     ArxivExtension,
-    ArxivRSSExtension,
     ArxivAtomExtension,
     ArxivEntryExtension,
 )
@@ -53,7 +52,6 @@ class Serializer:
         fg = FeedGenerator()
 
         # Register extensions
-        fg.register_extension("arxiv_rss", ArxivRSSExtension, atom=False)
         fg.register_extension("arxiv_atom", ArxivAtomExtension, rss=False)
         fg.register_extension("arxiv", ArxivExtension, ArxivEntryExtension)
 

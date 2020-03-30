@@ -24,7 +24,6 @@ class ArxivExtension(BaseExtension):
         -------
         atom_feed : Element
             The feed's root element.
-
         """
         return atom_feed
 
@@ -40,7 +39,6 @@ class ArxivExtension(BaseExtension):
         -------
         rss_feed : Element
             The feed's root element.
-
         """
         return rss_feed
 
@@ -52,7 +50,6 @@ class ArxivExtension(BaseExtension):
         -------
         namespaces : Dict[str, str]
             Definitions of the "arxiv" namespaces.
-
         """
         return {
             "arxiv": "http://arxiv.org/schemas/atom",
@@ -60,23 +57,6 @@ class ArxivExtension(BaseExtension):
             "taxo": "http://purl.org/rss/1.0/modules/taxonomy/",
             "syn": "http://purl.org/rss/1.0/modules/syndication/",
             "admin": "http://webns.net/mvcb/",
-        }
-
-
-class ArxivRSSExtension(BaseEntryExtension):
-    """RSS only extension."""
-
-    def extend_ns(self: BaseExtension) -> Dict[str, str]:
-        """
-        Define the feed's namespaces.
-
-        Returns
-        -------
-        namespaces : Dict[str, str]
-            Definitions of the "arxiv" namespaces.
-
-        """
-        return {
             "media": "http://search.yahoo.com/mrss",
         }
 
@@ -92,7 +72,6 @@ class ArxivAtomExtension(BaseEntryExtension):
         -------
         namespaces : Dict[str, str]
             Definitions of the "arxiv" namespaces.
-
         """
         return {
             "arxiv": "http://arxiv.org/schemas/atom",
@@ -112,6 +91,21 @@ class ArxivEntryExtension(BaseEntryExtension):
         self.__arxiv_affiliation: Optional[str] = None
         self.__arxiv_journal_ref: Optional[str] = None
         self.__arxiv_affiliations: Dict = {}
+
+    def __add_media(self, entry: Element) -> None:
+        for media in self.__arxiv_media:
+            group = etree.SubElement(
+                entry, "{http://search.yahoo.com/mrss}group"
+            )
+            title = etree.SubElement(
+                group, "{http://search.yahoo.com/mrss}title"
+            )
+            title.text = media.title
+            etree.SubElement(
+                group,
+                "{http://search.yahoo.com/mrss}content",
+                attrib={"url": media.url, "type": media.type},
+            )
 
     def extend_atom(self, entry: Element) -> Element:
         """
@@ -171,6 +165,8 @@ class ArxivEntryExtension(BaseEntryExtension):
                             )
                             element.text = affiliation
 
+        self.__add_media(entry=entry)
+
         return entry
 
     def extend_rss(self, entry: Element) -> Element:
@@ -187,7 +183,7 @@ class ArxivEntryExtension(BaseEntryExtension):
             The modified entry.
 
         """
-        base_server: str = current_app.config.get("BASE_SERVER")
+        base_server: str = current_app.config["BASE_SERVER"]
 
         for entry_child in entry:
             if entry_child.tag == "description":
@@ -210,19 +206,7 @@ class ArxivEntryExtension(BaseEntryExtension):
 
                 entry_child.text = description
 
-        for media in self.__arxiv_media:
-            group = etree.SubElement(
-                entry, "{http://search.yahoo.com/mrss}group"
-            )
-            title = etree.SubElement(
-                group, "{http://search.yahoo.com/mrss}title"
-            )
-            title.text = media.title
-            etree.SubElement(
-                group,
-                "{http://search.yahoo.com/mrss}content",
-                attrib={"url": media.url, "type": media.type},
-            )
+        self.__add_media(entry=entry)
 
         return entry
 
@@ -240,6 +224,7 @@ class ArxivEntryExtension(BaseEntryExtension):
         """Add a media item.
 
         Parameters
+        ----------
         media: Dict[str, str]
             Dictionary with url and type attributes.
         """
@@ -263,7 +248,6 @@ class ArxivEntryExtension(BaseEntryExtension):
         ----------
         text : str
             The new primary_category name.
-
         """
         self.__arxiv_primary_category = text
 
@@ -274,7 +258,6 @@ class ArxivEntryExtension(BaseEntryExtension):
         ----------
         text : str
             The new journal_ref value.
-
         """
         self.__arxiv_journal_ref = text
 
@@ -298,6 +281,5 @@ class ArxivEntryExtension(BaseEntryExtension):
             An author's full name.
         affiliations : List[str]
             The code for the author's affiliated institution.
-
         """
         self.__arxiv_affiliations[full_name] = affiliations

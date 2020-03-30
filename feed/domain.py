@@ -1,6 +1,6 @@
 """Domain classes for the RSS feed."""
 
-from typing import List, Set
+from typing import List
 from dataclasses import dataclass
 
 from feed.consts import Format
@@ -53,7 +53,7 @@ class Document:
     comments: str
     journal_ref: str
     doi: str
-    formats: Set[Format]
+    formats: List[Format]
     authors: List[Author]
     primary_category: Category
     secondary_categories: List[Category]

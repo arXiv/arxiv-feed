@@ -229,14 +229,15 @@ def create_document(record: Hit) -> Document:
         category = classification["category"].to_dict()
         secondary_categories.append(Category(category["name"], category["id"]))
 
-    formats = set()
-    known_formats = set(Format)
+    formats = []
     if "formats" in record and isinstance(record["formats"], Iterable):
-        formats = {
-            Format(fmt.lower())
-            for fmt in record["formats"]
-            if fmt.lower() in known_formats
-        }
+        # Formats should be added in the order provided by the supported method
+        # because they are ordered by importance since RSS generates only the
+        # last one.
+        available_formats = {fmt.lower() for fmt in record["formats"]}
+        for fmt in Format.supported():
+            if fmt in available_formats:
+                formats.append(fmt)
 
     # Create the Document and add it to the collection to be returned
     return Document(

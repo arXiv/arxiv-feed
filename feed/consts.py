@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Set
+from typing import List, Set
 
 from feed.errors import FeedVersionError
 
@@ -12,6 +12,11 @@ DELIMITER = "+"
 class Format(str, Enum):
     PDF = "pdf"
     PS = "ps"
+
+    @classmethod
+    def supported(cls) -> List["Format"]:
+        """Return a set of supported formats."""
+        return [cls.PS, cls.PDF]
 
 
 class FeedVersion(str, Enum):
