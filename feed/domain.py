@@ -3,6 +3,8 @@
 from typing import List
 from dataclasses import dataclass
 
+from feed.consts import Format
+
 
 @dataclass
 class Author:
@@ -23,6 +25,21 @@ class Category:
 
 
 @dataclass
+class Media:
+    """Represents a media item."""
+
+    title: str
+    url: str
+    format: Format
+
+    @property
+    def type(self) -> str:
+        if self.format in {Format.PDF, Format.PS}:
+            return f"application/{self.format}"
+        return "text/html"
+
+
+@dataclass
 class Document:
     """Represents an arXiv e-print."""
 
@@ -36,9 +53,8 @@ class Document:
     comments: str
     journal_ref: str
     doi: str
-
+    formats: List[Format]
     authors: List[Author]
-
     primary_category: Category
     secondary_categories: List[Category]
     """The categories under which this document is filed."""

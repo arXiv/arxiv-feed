@@ -1,4 +1,4 @@
-from typing import Dict, Any, Union
+from typing import Dict, Union
 
 from flask import current_app
 from feedgen.feed import FeedGenerator
@@ -6,7 +6,7 @@ from feedgen.feed import FeedGenerator
 from feed.utils import utc_now
 from feed.consts import FeedVersion
 from feed.errors import FeedError, FeedVersionError
-from feed.domain import Document, DocumentSet
+from feed.domain import Media, Document, DocumentSet
 from feed.serializers import Feed
 from feed.serializers.extensions import (
     ArxivExtension,
@@ -33,7 +33,7 @@ class Serializer:
         """
         # Config data
         self.base_server = current_app.config["BASE_SERVER"]
-        self.urls: Dict[str, Any] = current_app.config["URLS"]
+        self.urls: Dict[str, str] = current_app.config["URLS"]
 
         self.version = FeedVersion.get(version)
         self.link = (
@@ -52,8 +52,8 @@ class Serializer:
         fg = FeedGenerator()
 
         # Register extensions
-        fg.register_extension("arxiv", ArxivExtension, ArxivEntryExtension)
         fg.register_extension("arxiv_atom", ArxivAtomExtension, rss=False)
+        fg.register_extension("arxiv", ArxivExtension, ArxivEntryExtension)
 
         # Populate the feed
         fg.id(self.link)
@@ -111,13 +111,13 @@ class Serializer:
             Document that should be added to the feed.
         """
         entry = fg.add_entry()
+
         entry.id(self.urls["abs_by_id"].format(paper_id=document.paper_id))
         entry.guid(f"oai:arXiv.org:{document.paper_id}", permalink=False)
         entry.title(document.title)
         entry.summary(document.abstract)
         entry.published(document.submitted_date)
         entry.updated(document.updated_date)
-
         entry.link(
             {
                 "type": "text/html",
@@ -126,18 +126,26 @@ class Serializer:
                 ),
             }
         )
-        entry.link(
-            {
-                "title": "pdf",
-                "rel": "related",
-                "type": "application/pdf",
-                "href": self.urls["pdf_by_id"].format(
+        for fmt in document.formats:
+            media = Media(
+                title=document.title,
+                url=self.urls[f"{fmt}_by_id"].format(
                     paper_id=document.paper_id
                 ),
-            }
-        )
+                format=fmt,
+            )
+            entry.link(
+                {
+                    "title": str(media.format),
+                    "rel": "related",
+                    "type": media.type,
+                    "href": media.url,
+                }
+            )
+            entry.enclosure(url=media.url, type=media.type)
+            entry.arxiv.media(media)
 
-        # Add categories
+        # Categories
         categories = [
             document.primary_category
         ] + document.secondary_categories

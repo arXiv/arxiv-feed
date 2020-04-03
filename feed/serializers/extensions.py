@@ -1,5 +1,4 @@
 """Classes derived from the Feedgen extension classes."""
-
 from typing import Dict, List, Optional
 
 from lxml import etree
@@ -7,7 +6,7 @@ from lxml.etree import Element
 from flask import current_app
 from feedgen.ext.base import BaseEntryExtension, BaseExtension
 
-from feed.domain import Author
+from feed.domain import Author, Media
 
 
 class ArxivExtension(BaseExtension):
@@ -25,7 +24,6 @@ class ArxivExtension(BaseExtension):
         -------
         atom_feed : Element
             The feed's root element.
-
         """
         return atom_feed
 
@@ -41,7 +39,6 @@ class ArxivExtension(BaseExtension):
         -------
         rss_feed : Element
             The feed's root element.
-
         """
         return rss_feed
 
@@ -53,7 +50,6 @@ class ArxivExtension(BaseExtension):
         -------
         namespaces : Dict[str, str]
             Definitions of the "arxiv" namespaces.
-
         """
         return {
             "arxiv": "http://arxiv.org/schemas/atom",
@@ -61,10 +57,13 @@ class ArxivExtension(BaseExtension):
             "taxo": "http://purl.org/rss/1.0/modules/taxonomy/",
             "syn": "http://purl.org/rss/1.0/modules/syndication/",
             "admin": "http://webns.net/mvcb/",
+            "media": "http://search.yahoo.com/mrss",
         }
 
 
 class ArxivAtomExtension(BaseEntryExtension):
+    """Atom only extension."""
+
     def extend_ns(self: BaseExtension) -> Dict[str, str]:
         """
         Define the feed's namespaces.
@@ -73,7 +72,6 @@ class ArxivAtomExtension(BaseEntryExtension):
         -------
         namespaces : Dict[str, str]
             Definitions of the "arxiv" namespaces.
-
         """
         return {
             "arxiv": "http://arxiv.org/schemas/atom",
@@ -86,12 +84,28 @@ class ArxivEntryExtension(BaseEntryExtension):
     def __init__(self: BaseEntryExtension):
         """Initialize the member values to all be empty."""
         self.__arxiv_authors: List[Author] = []
+        self.__arxiv_media: List[Media] = []
         self.__arxiv_comment: Optional[str] = None
         self.__arxiv_primary_category: Optional[str] = None
         self.__arxiv_doi: Optional[dict] = None
         self.__arxiv_affiliation: Optional[str] = None
         self.__arxiv_journal_ref: Optional[str] = None
         self.__arxiv_affiliations: Dict = {}
+
+    def __add_media(self, entry: Element) -> None:
+        for media in self.__arxiv_media:
+            group = etree.SubElement(
+                entry, "{http://search.yahoo.com/mrss}group"
+            )
+            title = etree.SubElement(
+                group, "{http://search.yahoo.com/mrss}title"
+            )
+            title.text = media.title
+            etree.SubElement(
+                group,
+                "{http://search.yahoo.com/mrss}content",
+                attrib={"url": media.url, "type": media.type},
+            )
 
     def extend_atom(self, entry: Element) -> Element:
         """
@@ -151,6 +165,8 @@ class ArxivEntryExtension(BaseEntryExtension):
                             )
                             element.text = affiliation
 
+        self.__add_media(entry=entry)
+
         return entry
 
     def extend_rss(self, entry: Element) -> Element:
@@ -167,7 +183,7 @@ class ArxivEntryExtension(BaseEntryExtension):
             The modified entry.
 
         """
-        base_server = current_app.config.get("BASE_SERVER")
+        base_server: str = current_app.config["BASE_SERVER"]
 
         for entry_child in entry:
             if entry_child.tag == "description":
@@ -190,6 +206,8 @@ class ArxivEntryExtension(BaseEntryExtension):
 
                 entry_child.text = description
 
+        self.__add_media(entry=entry)
+
         return entry
 
     def author(self, author: Author) -> None:
@@ -201,6 +219,16 @@ class ArxivEntryExtension(BaseEntryExtension):
             Paper author.
         """
         self.__arxiv_authors.append(author)
+
+    def media(self, media: Media) -> None:
+        """Add a media item.
+
+        Parameters
+        ----------
+        media: Dict[str, str]
+            Dictionary with url and type attributes.
+        """
+        self.__arxiv_media.append(media)
 
     def comment(self, text: str) -> None:
         """Assign the comment value to this entry.
@@ -220,7 +248,6 @@ class ArxivEntryExtension(BaseEntryExtension):
         ----------
         text : str
             The new primary_category name.
-
         """
         self.__arxiv_primary_category = text
 
@@ -231,7 +258,6 @@ class ArxivEntryExtension(BaseEntryExtension):
         ----------
         text : str
             The new journal_ref value.
-
         """
         self.__arxiv_journal_ref = text
 
@@ -255,6 +281,5 @@ class ArxivEntryExtension(BaseEntryExtension):
             An author's full name.
         affiliations : List[str]
             The code for the author's affiliated institution.
-
         """
         self.__arxiv_affiliations[full_name] = affiliations
