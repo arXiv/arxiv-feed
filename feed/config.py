@@ -33,7 +33,7 @@ class Config:
     )  # 1 day
     CACHE_REDIS_HOST = os.environ.get("CACHE_REDIS_HOST", "127.0.0.1")
     CACHE_REDIS_PORT = int(os.environ.get("CACHE_REDIS_PORT", "6379"))
-    CACHE_REDIS_DB = 0
+    CACHE_REDIS_DB = int(os.environ.get("CACHE_REDIS_DB", "0"))
 
     # ElasticSearch
     ELASTICSEARCH_HOST = os.environ.get("ELASTICSEARCH_HOST", "127.0.0.1")
