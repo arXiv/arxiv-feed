@@ -31,7 +31,7 @@ class Config:
     CACHE_DEFAULT_TIMEOUT = int(
         os.environ.get("CACHE_DEFAULT_TIMEOUT", "86400")
     )  # 1 day
-    CACHE_REDIS_HOST = "127.0.0.1"
+    CACHE_REDIS_HOST = os.environ.get("CACHE_REDIS_HOST", "127.0.0.1")
     CACHE_REDIS_PORT = 6379
     CACHE_REDIS_DB = 0
 
