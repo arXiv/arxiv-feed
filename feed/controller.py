@@ -10,14 +10,15 @@ from feed.domain import DocumentSet
 logger = logging.getLogger(__name__)
 
 
-def get_documents(archive_id: str) -> DocumentSet:
+def get_documents(query: str) -> DocumentSet:
     """
     Return the past day's RSS content from the specified XML serializer.
 
     Parameters
     ----------
-    archive_id : str
-        An ID identifying the archive to search.
+    query : str
+        A concatenation of archive/category specifiers separated by delimiter
+        characters.
 
     Returns
     -------
@@ -42,4 +43,4 @@ def get_documents(archive_id: str) -> DocumentSet:
         days = 1
 
     # Get the search results, pass them to the serializer, return the results
-    return index.search(archive_id, days)
+    return index.search(query, days)
