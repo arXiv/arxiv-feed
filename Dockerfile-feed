@@ -1,0 +1,38 @@
+# arxiv/feed
+#
+# Defines the runtime for the arXiv feed service, which provides RSS and ATOM
+# article feeds
+
+FROM python:3.7.12
+ARG git_commit
+
+WORKDIR /opt/arxiv
+
+RUN pip install uwsgi
+
+# add python application and configuration
+ENV PIPENV_VENV_IN_PROJECT 1
+ADD app.py /opt/arxiv/
+ADD Pipfile /opt/arxiv/
+ADD Pipfile.lock /opt/arxiv/
+RUN pip install -U pip pipenv
+RUN pipenv sync
+
+ENV PATH "/opt/arxiv:${PATH}"
+
+ADD feed /opt/arxiv/feed
+ADD wsgi.py uwsgi.ini /opt/arxiv/
+ADD bin/start_feed.sh /opt/arxiv/
+
+RUN chmod +x /opt/arxiv/start_feed.sh
+RUN echo $git_commit > /git-commit.txt
+
+ENV LC_ALL en_US.utf8
+ENV LANG en_US.utf8
+ENV LOGLEVEL 40
+ENV FLASK_DEBUG 1
+ENV FLASK_APP /opt/arxiv/app.py
+
+EXPOSE 8000
+ENTRYPOINT ["pipenv", "run"]
+CMD ["uwsgi", "--ini", "/opt/arxiv/uwsgi.ini"]
