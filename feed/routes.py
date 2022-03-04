@@ -79,5 +79,5 @@ def default(query: str) -> Response:
     """Return RSS 2.0 results for the past day."""
     return _feed(
         query=query,
-        version=FeedVersion.RSS_2_0,
+        version=request.headers.get("VERSION", FeedVersion.RSS_2_0),
     )

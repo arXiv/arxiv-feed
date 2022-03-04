@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-arxiv-base = "==0.16.6"
+arxiv-base = "==0.17.4post2"
 elasticsearch = "==6.3.1"
 elasticsearch-dsl = "==6.3.1"
 feedgen = "==0.9.0"
