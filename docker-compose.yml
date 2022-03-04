@@ -1,8 +1,22 @@
-# Provides the Elasticsearch + Kibana stack for local development. See
+# Provides the Feed + ElasticSearch + Kibana stack for local development. See
 # README.md for instructions on use.
 ---
 version: "3.5"
 services:
+  arxiv-feed-app:
+      build:
+        context: .
+        dockerfile: "Dockerfile-feed"
+      container_name: "arxiv-feed-app"
+      environment:
+        DEBUG: "true"
+        TESTING: "true"
+        CACHE_REDIS_HOST: "arxiv-feed-redis"
+        ELASTICSEARCH_HOST: "arxiv-feed-elasticsearch"
+      ports:
+        - "8000:8000"
+      networks:
+        - "arxiv_feed_network"
   arxiv-feed-elasticsearch:
     build:
       context: .
