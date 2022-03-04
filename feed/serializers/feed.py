@@ -36,9 +36,7 @@ class Feed:
             not isinstance(version, FeedVersion)
             or version not in FeedVersion.supported()
         ):
-            raise FeedVersionError(
-                version=version, supported=FeedVersion.supported()
-            )
+            raise FeedVersionError(version=version, supported=FeedVersion.supported())
         self.version = version
         self.__etag: Optional[str] = None
 
@@ -80,7 +78,7 @@ class Feed:
             {
                 "content": self.content.decode("utf-8"),
                 "status_code": self.status_code,
-                "version": str(self.version),
+                "version": self.version.value,
             },
             indent=0,
         )

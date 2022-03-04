@@ -5,7 +5,7 @@
 ### Running Elasticsearch + Kibana with Docker Compose
 
 A ``docker-compose.yml`` file is included in the root of this repo that will
-start ElasticsSarch and Kibana on your local machine. This is for local
+start ElasticSearch and Kibana on your local machine. This is for local
 development and testing purposes only. You'll need to install
 [Docker Compose](https://docs.docker.com/compose/).
 
@@ -21,7 +21,7 @@ You can start ES + Kibana like this:
 docker-compose up -d
 ```
 
-You should be able to access Kibana at http://127.0.0.1:5601, and Elasticsearch
+You should be able to access Kibana at http://127.0.0.1:5601, and ElasticSearch
 at http://127.0.0.1:9200.
 
 ### Adding documents to the index
@@ -42,7 +42,7 @@ make index
 ```
 
 This runs the `arxiv/search-index` image in a container on the network created
-using ``docker-compose``, above. The image accepts a single argument, the path
+using ``docker-compose``, above. The image accepts a single argument: the path
 (within the container) of the text file containing paper IDs. To get the file
 inside the container we use the `example` folder which is mounted inside the
 container as `/example`. To specify paper ids just populate the `paper_ids.txt`
@@ -59,8 +59,7 @@ Note: You'll need [jq](https://stedolan.github.io/jq/) installed to run this
 command.
 
 
-### Running the developkment server
-
+### Running the development server
 
 To run the development enter:
 

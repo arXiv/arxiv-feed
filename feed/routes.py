@@ -30,16 +30,19 @@ def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
         Flask response object populated with the RSS or ATOM (XML) response for
         the request and ETag header added.
     """
-    # Calculate unique key
+    # Calculate unique key for the query
     key = f"{hash_query(query)}-{version}"
 
-    # Try to get from cache
+    # Try to get feed from cache
     value = cache.get(key)
 
     if value is not None:
-        feed = Feed.from_string(value)
+        try:
+            feed = Feed.from_string(value)
+        except ValueError as ex:
+            feed = serialize(ex)
     else:
-        # Cache failed generate feed
+        # Cache failed to generate feed
         try:
             version = FeedVersion.get(version)
             documents = controller.get_documents(query)
@@ -76,5 +79,5 @@ def default(query: str) -> Response:
     """Return RSS 2.0 results for the past day."""
     return _feed(
         query=query,
-        version=request.headers.get("VERSION", FeedVersion.RSS_2_0),
+        version=FeedVersion.RSS_2_0,
     )
