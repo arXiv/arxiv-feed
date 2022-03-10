@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 arxiv-base = "==0.17.4post2"
 elasticsearch = "==6.3.1"
-elasticsearch-dsl = "==6.3.1"
+elasticsearch-dsl = "==6.4.0"
 feedgen = "==0.9.0"
 flask-caching = "==1.8.0"
 redis = "==3.4.1"

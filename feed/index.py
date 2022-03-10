@@ -147,11 +147,8 @@ def get_records_from_indexer(
                 # Subcategories, like "cs.AI"
                 q = Q("match", primary_classification__category__id=category)
             else:
-                # Top-level categories, like "cs"
-                q = Q(
-                    "wildcard",
-                    primary_classification__category__id=category + ".*",
-                )
+                # Top-level archives, like "cs"
+                q = Q("wildcard", primary_classification__category__id=category + ".*",)
             sub_queries.append(q)
         q = Q("bool", should=sub_queries)
 
@@ -163,29 +160,31 @@ def get_records_from_indexer(
                     "port": current_app.config.get("ELASTICSEARCH_PORT"),
                     "use_ssl": current_app.config.get("ELASTICSEARCH_SSL"),
                     "http_auth": None,
-                    "verify_certs": True,
+                    "verify_certs": False,
                 }
             ],
             connection_class=Urllib3HttpConnection,
+            send_get_body_as="POST",
         )
 
-        # Perform the search, filtering to only return the last day's papers
+        # Perform the search, filtering to only return the `days` papers
         start_date = (date_time - timedelta(days=days)).strftime("%Y-%m-%d")
         end_date = date_time.strftime("%Y-%m-%d")
-        response: List[Hit] = Search(index="arxiv").using(es).query(q).filter(
-            "range",
-            submitted_date={
-                "gte": start_date,
-                "lte": end_date,
-                "format": "date",
-            },
-        ).execute()
+        search_obj = (
+            Search(index=current_app.config.get("ELASTICSEARCH_INDEX"))
+            .using(es)
+            .query(q)
+            .filter(
+                "range",
+                submitted_date={"gte": start_date, "lte": end_date, "format": "date"},
+            )
+        )
+        response: List[Hit] = search_obj.execute()
+
         return response
 
     except ElasticsearchException as ex:
-        logger.exception(
-            "Failed to fetch documents from ElasticSearch: %s", ex
-        )
+        logger.exception("Failed to fetch documents from ElasticSearch: %s", ex)
         raise FeedIndexerError("Search engine error.")
 
 
@@ -215,9 +214,7 @@ def create_document(record: Hit) -> Document:
                 full_name=hit_author["full_name"],
                 initials=hit_author["initials"],
                 affiliations=(
-                    hit_author["affiliation"]
-                    if "affiliation" in hit_author
-                    else []
+                    hit_author["affiliation"] if "affiliation" in hit_author else []
                 ),
             )
         )
@@ -249,7 +246,7 @@ def create_document(record: Hit) -> Document:
         abstract=record["abstract"],
         submitted_date=record["submitted_date"],
         updated_date=record["updated_date"],
-        comments=record["comments"],
+        comments=record["comments"] if "comments" in record else "",
         journal_ref=record["journal_ref"] if "journal_ref" in record else "",
         doi=record["doi"],
         formats=formats,

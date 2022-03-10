@@ -35,15 +35,18 @@ def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
 
     # Try to get feed from cache
     value = cache.get(key)
+    # value = None
 
     if value is not None:
         try:
             feed = Feed.from_string(value)
         except ValueError as ex:
+            print("got here")
             feed = serialize(ex)
     else:
         # Cache failed to generate feed
         try:
+            print("failed to gen feed")
             version = FeedVersion.get(version)
             documents = controller.get_documents(query)
             feed = serialize(documents, version=version)
@@ -78,6 +81,5 @@ def atom(query: str) -> Response:
 def default(query: str) -> Response:
     """Return RSS 2.0 results for the past day."""
     return _feed(
-        query=query,
-        version=request.headers.get("VERSION", FeedVersion.RSS_2_0),
+        query=query, version=request.headers.get("VERSION", FeedVersion.RSS_2_0),
     )
