@@ -168,6 +168,7 @@ def get_records_from_indexer(
         )
 
         # Perform the search, filtering to only return the `days` papers
+        # This search may return up to 10,000 items, per the `extra` params.
         start_date = (date_time - timedelta(days=days)).strftime("%Y-%m-%d")
         end_date = date_time.strftime("%Y-%m-%d")
         search_obj = (
@@ -178,6 +179,7 @@ def get_records_from_indexer(
                 "range",
                 submitted_date={"gte": start_date, "lte": end_date, "format": "date"},
             )
+            .extra(from_=0, size=10_000)
         )
         response: List[Hit] = search_obj.execute()
 
