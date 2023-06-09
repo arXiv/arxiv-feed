@@ -42,7 +42,7 @@ class Config:
     ELASTICSEARCH_SSL = (
         os.environ.get("ELASTICSEARCH_SSL", "false").lower() == "true"
     )
-
+    ELASTICSEARCH_INDEX = os.environ.get("ELASTICSEARCH_INDEX", "arxiv")
 
 class Production(Config):
     """Production configuration."""

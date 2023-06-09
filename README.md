@@ -1,5 +1,8 @@
 # arXiv Feed
 
+This is a RSS and Atom feed service that reads from the arxiv-search
+ElasticSearch and produces feeds.
+
 ## Development environment
 
 ### Running Elasticsearch + Kibana with Docker Compose
@@ -99,3 +102,10 @@ You can also run the pre commit hooks manually with:
 ```bash
 pipenv run pre-commit run
 ```
+
+### CURL to ES
+Here is an example of using CURL to test a query against ES:
+
+    curl -X GET --header 'Content-Type: application/json' \
+    "https://search-something.arxiv.org/arxiv0.0/_search" \
+    -d '{"query": {"bool": {"must": [{"wildcard": {"primary_classification.category.id": "physics.*"}}], "filter": [{"range": {"submitted_date": {"gte": "2023-06-08", "lte": "2023-06-09", "format": "date"}}}]}}}'
