@@ -6,7 +6,7 @@ services:
   arxiv-feed-app:
       build:
         context: .
-        dockerfile: "Dockerfile-feed"
+        dockerfile: "Dockerfile"
       container_name: "arxiv-feed-app"
       environment:
         DEBUG: "true"
