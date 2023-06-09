@@ -21,6 +21,22 @@ from feed.domain import Author, Category, Document, DocumentSet
 
 logger = logging.getLogger(__name__)
 
+# Start monkeypatch of elasticsearch-py's search(), use POST not GET
+
+import elasticsearch.client
+
+def search2(self, index=None, doc_type=None, body=None, params=None):
+  if params and 'from_' in params:
+    params['from'] = params.pop('from_')
+  if doc_type and not index:
+    index = '_all'
+  tmppath =  elasticsearch.client.utils._make_path(index, doc_type, '_search')
+  return self.transport.perform_request('POST', tmppath, params=params, body=body)
+
+elasticsearch.client.Elasticsearch.search = search2
+
+# End monkeypatch
+
 
 def search(query: str, days: int) -> DocumentSet:
     """Search the index for records with the archive ID and dated within 24h.
@@ -139,6 +155,7 @@ def get_records_from_indexer(
         The list is empty when status is 500.
 
     """
+    query_txt="Not yet set"
     try:
         # Compose a query that includes all specified archives
         sub_queries = []
@@ -156,36 +173,36 @@ def get_records_from_indexer(
         q = Q("bool", should=sub_queries)
 
         # Connect to the indexer
+        conn_params = {
+            "host": current_app.config.get("ELASTICSEARCH_HOST"),
+            "port": current_app.config.get("ELASTICSEARCH_PORT"),
+            "use_ssl": current_app.config.get("ELASTICSEARCH_SSL"),
+            "http_auth": None,
+            "verify_certs": True,
+        }
         es = Elasticsearch(
-            [
-                {
-                    "host": current_app.config.get("ELASTICSEARCH_HOST"),
-                    "port": current_app.config.get("ELASTICSEARCH_PORT"),
-                    "use_ssl": current_app.config.get("ELASTICSEARCH_SSL"),
-                    "http_auth": None,
-                    "verify_certs": True,
-                }
-            ],
+            [conn_params],
             connection_class=Urllib3HttpConnection,
         )
-
         # Perform the search, filtering to only return the last day's papers
         start_date = (date_time - timedelta(days=days)).strftime("%Y-%m-%d")
         end_date = date_time.strftime("%Y-%m-%d")
-        response: List[Hit] = Search(index="arxiv").using(es).query(q).filter(
+        search = Search(index=current_app.config.get("ELASTICSEARCH_INDEX")).using(es).query(q).filter(
             "range",
             submitted_date={
                 "gte": start_date,
                 "lte": end_date,
                 "format": "date",
             },
-        ).execute()
+        )
+        query_txt = str(search.to_dict())
+        response: List[Hit] = search.execute()
         return response
 
     except ElasticsearchException as ex:
         logger.exception(
-            "Failed to fetch documents from ElasticSearch: %s", ex
-        )
+            "Failed to fetch documents from ElasticSearch: %s\n"
+            "Query: %s", ex, query_txt)
         raise FeedIndexerError("Search engine error.")
 
 
@@ -249,11 +266,11 @@ def create_document(record: Hit) -> Document:
         abstract=record["abstract"],
         submitted_date=record["submitted_date"],
         updated_date=record["updated_date"],
-        comments=record["comments"],
+        comments=record["comments"] if "comments" in record else "",
         journal_ref=record["journal_ref"] if "journal_ref" in record else "",
-        doi=record["doi"],
+        doi=record["doi"] if "doi" in record else "",
         formats=formats,
         authors=authors,
         primary_category=primary_category,
-        secondary_categories=secondary_categories,
+        secondary_categories=secondary_categories if "secondary_categories" in record else [],
     )
