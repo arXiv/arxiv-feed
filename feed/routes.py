@@ -83,3 +83,7 @@ def default(query: str) -> Response:
     return _feed(
         query=query, version=request.headers.get("VERSION", FeedVersion.RSS_2_0),
     )
+
+@blueprint.route("/status")
+def status() -> Response:
+    return make_response("good", 200)
