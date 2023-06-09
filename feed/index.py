@@ -4,7 +4,7 @@ import logging
 from typing import List
 from collections import Iterable
 from datetime import datetime, timedelta
-
+import certifi
 
 from flask import current_app
 from elasticsearch import Elasticsearch, ElasticsearchException
@@ -174,6 +174,7 @@ def get_records_from_indexer(
             "host": current_app.config.get("ELASTICSEARCH_HOST"),
             "port": current_app.config.get("ELASTICSEARCH_PORT"),
             "use_ssl": current_app.config.get("ELASTICSEARCH_SSL"),
+            "ca_certs": certifi.where(), # for cert error on cloud run
             "http_auth": None,
             "verify_certs": True,
         }
