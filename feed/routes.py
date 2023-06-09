@@ -14,6 +14,10 @@ from feed.errors import FeedError, FeedVersionError
 
 blueprint = Blueprint("rss", __name__, url_prefix="/")
 
+@blueprint.route("/status")
+def status() -> Response:
+    return make_response("good", 200)
+
 
 def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
     """Return the feed in appropriate format for the past day.
@@ -83,7 +87,3 @@ def default(query: str) -> Response:
     return _feed(
         query=query, version=request.headers.get("VERSION", FeedVersion.RSS_2_0),
     )
-
-@blueprint.route("/status")
-def status() -> Response:
-    return make_response("good", 200)
