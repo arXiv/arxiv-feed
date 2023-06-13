@@ -14,7 +14,7 @@ from feed.errors import FeedError, FeedVersionError
 
 blueprint = Blueprint("rss", __name__, url_prefix="/")
 
-@blueprint.route("/status")
+@blueprint.route("/feed/status")
 def status() -> Response:
     return make_response("good", 200)
 
