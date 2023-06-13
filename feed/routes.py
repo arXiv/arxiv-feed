@@ -68,8 +68,11 @@ def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
 
 @blueprint.route("/rss/<string:query>", methods=["GET"])
 def rss(query: str) -> Response:
-    """Return the RSS 2.0 results for the past day."""
-    return _feed(query=query, version=FeedVersion.RSS_2_0)
+    """Return the RSS results for the past day.
+
+    Defaults to RSS 2.0 and only supports 2.0. 0.91 and 1.0 will raise errors."""
+    return _feed(query=query,
+                 version=request.args.get("version", default="2.0", type=str))
 
 
 @blueprint.route("/atom/<string:query>", methods=["GET"])

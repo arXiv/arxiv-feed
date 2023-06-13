@@ -38,12 +38,13 @@ def test_routes_ok(
     client,
     documents: DocumentSet,
     feed_rss: Feed,
-    feed_atom: Feed,
+    feed_atom: Feed
 ):
     get_documents.return_value = documents
 
     for route, feed in [
         ("/rss/cs.LO", feed_rss),
+        ("/rss/cs.LO?version=2.0", feed_rss),
         ("/atom/cs.LO", feed_atom),
     ]:
         serialize.return_value = feed
@@ -81,30 +82,19 @@ def test_routes_version_override(
         serialize.assert_called_with(documents, version=override)
 
 
-# @patch("feed.routes.controller.get_documents")
-# @patch("feed.routes.serialize")
-# def test_version_ok(
-#     serialize, get_documents, client, documents: DocumentSet, feed_rss: Feed
-# ):
-#     get_documents.return_value = documents
-
-#     for version in FeedVersion.supported():
-#         # Return value doesn't matter we just check if the get_feed is called
-#         # with override FeedVersion
-#         serialize.return_value = feed_rss
-
-#         client.get("/cs.LO", headers={"VERSION": version})
-#         get_documents.assert_called_with("cs.LO")
-#         serialize.assert_called_with(documents, version=version)
+def test_routes_unsupported_rss(client):
+    for route in [
+            "/rss/cs.LO?version=1.0",
+            "/rss/cs.LO?version=0.91",
+            ]:
+        resp = client.get(route)
+        resp.status_code == 400
 
 
-# def test_version_fail(client):
-#     for version in [
-#         v for v in FeedVersion if v not in FeedVersion.supported()
-#     ]:
-#         feed_version_error = FeedVersionError(
-#             version=version, supported=FeedVersion.supported()
-#         )
-#         response = client.get("/cs.LO", headers={"VERSION": version})
-#         assert response.status_code == 400
-#         assert feed_version_error.error in response.data.decode("utf-8")
+def test_routes_bad_rss(client):
+    for route in [
+            "/rss/cs.LO?version=9999",
+            "/rss/cs.LO?version=bogus",
+            ]:
+        resp = client.get(route)
+        resp.status_code == 400
