@@ -39,18 +39,15 @@ def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
 
     # Try to get feed from cache
     value = cache.get(key)
-    # value = None
 
     if value is not None:
         try:
             feed = Feed.from_string(value)
         except ValueError as ex:
-            print("got here")
             feed = serialize(ex)
     else:
         # Cache failed to generate feed
         try:
-            print("failed to gen feed")
             version = FeedVersion.get(version)
             documents = controller.get_documents(query)
             feed = serialize(documents, version=version)
