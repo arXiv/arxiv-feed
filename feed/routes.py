@@ -76,11 +76,3 @@ def rss(query: str) -> Response:
 def atom(query: str) -> Response:
     """Return the Atom 1.0 results for the past day."""
     return _feed(query=query, version=FeedVersion.ATOM_1_0)
-
-
-@blueprint.route("/<string:query>", methods=["GET"])
-def default(query: str) -> Response:
-    """Return RSS 2.0 results for the past day."""
-    return _feed(
-        query=query, version=request.headers.get("VERSION", FeedVersion.RSS_2_0),
-    )
