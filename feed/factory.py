@@ -11,7 +11,10 @@ from feed.cache import cache
 def create_web_app() -> Flask:
     """Initialize and configure the rss application."""
     app = Flask("feed")
-    configuration = os.environ.get("ARXIV_FEED_CONFIGURATION", "production")
+    if "PYTEST_CURRENT_TEST" in os.environ:
+        configuration = "testing"
+    else:
+        configuration = os.environ.get("ARXIV_FEED_CONFIGURATION", "production")
     app.config.from_object(
         import_string(f"feed.config.{configuration.title()}")()
     )
