@@ -66,6 +66,13 @@ def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
     return response
 
 
+@blueprint.route("/rss")
+@blueprint.route("/atom")
+def feed_help()-> Response:
+    """Returns a empty error page"""
+    return make_response("No archive specified.", 200)
+
+
 @blueprint.route("/rss/<string:query>", methods=["GET"])
 def rss(query: str) -> Response:
     """Return the RSS results for the past day.
