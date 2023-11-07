@@ -2,7 +2,7 @@
 
 import logging
 from typing import List
-from collections import Iterable
+from typing import Iterable
 from datetime import datetime, timedelta
 import certifi
 
