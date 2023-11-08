@@ -18,6 +18,8 @@ class Format(str, Enum):
         """Return a set of supported formats."""
         return [cls.PS, cls.PDF]
 
+    def __str__(self):
+        return f"{self.value}"
 
 class FeedVersion(str, Enum):
     RSS_0_91 = "RSS 0.91"
@@ -29,6 +31,9 @@ class FeedVersion(str, Enum):
     def is_rss(self) -> bool:
         """Return True if this is an RSS specification."""
         return self in (self.RSS_0_91, self.RSS_1_0, self.RSS_2_0)
+    
+    def __str__(self):
+        return f"{self.value}"
 
     @property
     def is_atom(self) -> bool:
@@ -71,7 +76,7 @@ class FeedVersion(str, Enum):
             # It's a full version string, do nothing
             pass
 
-        if version.lower() not in {v.lower() for v in cls.supported()}:
+        if version.lower() not in {v.value.lower() for v in cls.supported()}:
             raise FeedVersionError(version=version, supported=cls.supported())
 
         for fv in cls.supported():

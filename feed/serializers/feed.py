@@ -32,11 +32,10 @@ class Feed:
         self.status_code = status_code
 
         # Check the version
-        if (
-            not isinstance(version, FeedVersion)
-            or version not in FeedVersion.supported()
-        ):
+        if not isinstance(version, FeedVersion):
             raise FeedVersionError(version=version, supported=FeedVersion.supported())
+        elif version not in FeedVersion.supported():
+            raise FeedVersionError(version=version.value, supported=FeedVersion.supported())
         self.version = version
         self.__etag: Optional[str] = None
 
