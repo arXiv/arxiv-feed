@@ -3,7 +3,7 @@
 # Defines the runtime for the arXiv feed service, which provides RSS and ATOM
 # article feeds
 
-FROM python:3.7 as base
+FROM python:3.11 as base
 
 ENV LC_ALL=en_US.utf8 \
     LANG=en_US.utf8
@@ -14,7 +14,7 @@ RUN pip install pipenv
 RUN apt-get update
 # Install python dependencies in /.venv
 COPY Pipfile .
-COPY Pipfile.lock .
+#COPY Pipfile.lock .
 RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
 ENV PATH="/.venv/bin:$PATH"
 RUN pip install "gunicorn==20.1.0"
