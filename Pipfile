@@ -17,6 +17,7 @@ certifi = "*"
 Flask-SQLAlchemy = "~=2.4"  
 SQLAlchemy = "~=1.4"
 arxiv-db = "~=0.11.0"
+mysqlclient = "~=2.2.0"
 
 [dev-packages]
 mypy = "==1.6"

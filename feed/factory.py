@@ -9,7 +9,6 @@ from feed.cache import cache
 
 from flask_sqlalchemy import SQLAlchemy
 from feed.tables import metadata
-#import arxiv_db
 
 db=SQLAlchemy(metadata=metadata)
 
@@ -26,7 +25,5 @@ def create_web_app() -> Flask:
     app.register_blueprint(routes.blueprint)
     cache.init_app(app)
 
-    #attempting to connect to db
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tests/data/test_data.db'
     db.init_app(app)
     return app
