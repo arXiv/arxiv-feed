@@ -2,6 +2,7 @@
 
 import os
 from feed import consts
+from zoneinfo import ZoneInfo
 
 
 class Config:
@@ -17,6 +18,8 @@ class Config:
     )
 
     FEED_NUM_DAYS = os.environ.get("FEED_NUM_DAYS", consts.FEED_NUM_DAYS)
+
+    ARXIV_BUSINESS_TZ = ZoneInfo(os.environ.get('ARXIV_BUSINESS_TZ', 'America/New_York'))
 
     URLS = {
         "pdf": f"https://{BASE_SERVER}/pdf/{{paper_id}}v{{version}}",
@@ -43,6 +46,12 @@ class Config:
         os.environ.get("ELASTICSEARCH_SSL", "false").lower() == "true"
     )
     ELASTICSEARCH_INDEX = os.environ.get("ELASTICSEARCH_INDEX", "arxiv")
+
+    ### atempting to connect to database
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
+    CLASSIC_DATABASE_URI = SQLALCHEMY_DATABASE_URI
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
 
 class Production(Config):
     """Production configuration."""

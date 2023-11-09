@@ -14,6 +14,9 @@ werkzeug = "==1.0.1"
 flask = "==1.1.4"
 markupsafe = "==2.0.1"
 certifi = "*"
+Flask-SQLAlchemy = "~=2.4"  
+SQLAlchemy = "~=1.4"
+arxiv-db = "~=0.11.0"
 
 [dev-packages]
 mypy = "==1.6"
