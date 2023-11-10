@@ -27,4 +27,4 @@ class ArXivUpdate(db.Model):
     }
     # You can define indexes and additional attributes here
     def __repr__(self):
-        return f"ArXivUpdate(document_id={self.document_id}, version={self.version}, action={self.action}, date={self.date}, category={self.category})"
+        return f"ArXivUpdate(document_id={self.document_id}, version={self.version}, action={self.action}, date={self.date}, category={self.category}, archive={self.archive})"

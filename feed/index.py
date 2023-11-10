@@ -1,8 +1,7 @@
 """Interface to Index Service for RSS feeds."""
 
 import logging
-from typing import List
-from typing import Iterable
+from typing import Iterable, List, Tuple
 from datetime import datetime, timedelta
 import certifi
 
@@ -17,6 +16,7 @@ from feed.utils import utc_now
 from feed.errors import FeedIndexerError
 from feed.consts import DELIMITER, Format
 from feed.domain import Author, Category, Document, DocumentSet
+from feed.database import get_announce_papers
 
 
 logger = logging.getLogger(__name__)
@@ -58,19 +58,24 @@ def search(query: str, days: int) -> DocumentSet:
     """
     documents: List[Document] = []
 
-    request_categories = validate_request(query)
+    archives,categories = validate_request(query)
 
-    records = get_records_from_indexer(request_categories, utc_now(), days)
+    #records = get_records_from_indexer(request_categories, utc_now(), days)
+    date=datetime(2021, 2, 15)
+    days2=5
+    records=get_records_from_db(archives,categories,date,days2) #TODO improve date selection
+    print("records:")
+    print(records)
 
     # Create a Document object for every hit that was found
     for record in records:
         document = create_document(record)
         documents.append(document)
 
-    return DocumentSet(request_categories, documents)
+    return DocumentSet(categories, documents) #TODO return both categories and archives
 
 
-def validate_request(query: str) -> List[str]:
+def validate_request(query: str) -> Tuple[List[str],List[str]]:
     """Validate the provided archive/category specification.
 
     Return a list of its named archives and categories.
@@ -89,13 +94,14 @@ def validate_request(query: str) -> List[str]:
 
     Returns
     -------
-    request_categories : List[str]
-        If validation was as successful, a list of archive/category names.
+    request_categories : List[str] and request_archives : List[str]
+        If validation was as successful, a tuple of a list of archive and category names.
         Otherwise, and empty list.
 
     """
     # Separate the request string into individual archives/categories
     request_categories = query.split(DELIMITER)
+
 
     # Is the syntax of the archive/category specification correct?
     if len(request_categories) == 0 or any(
@@ -109,9 +115,16 @@ def validate_request(query: str) -> List[str]:
             f"geometry from computer science)."
         )
 
+    archives=[]
+    categories=[]
+
     # Are each of the archives and subjects valid?
     for category in request_categories:
         parts = category.split(".")
+        if len(parts)>2:
+            raise FeedIndexerError(
+                f"Bad archive/subject class structure '{category}'. Valid names include an archive, possibly followed by a single period and subject class."
+            )
         if not parts[0] in taxonomy.ARCHIVES:
             raise FeedIndexerError(
                 f"Bad archive '{parts[0]}'. Valid archive names are: "
@@ -128,9 +141,21 @@ def validate_request(query: str) -> List[str]:
                 f"Bad subject class '{parts[1]}'. Valid subject classes for "
                 f"the archive '{parts[0]}' are: {', '.join(groups)}."
             )
+        #add verified category to list
+        if len(parts)==2:
+            categories.append(category)
+        else:
+            archives.append(category)
 
-    return request_categories
+    return archives,categories
 
+def get_records_from_db(archives: List[str], categories: List[str], current_date_time: datetime, days: int
+) -> List[Hit]:
+
+    #start at the start of today
+    last_date=current_date_time.replace(hour=0, minute=0, second=0, microsecond=0) #TODO timezone nonsense
+    first_date=last_date - timedelta(days=days)
+    return get_announce_papers(first_date,last_date, archives, categories)
 
 def get_records_from_indexer(
     request_categories: List[str], date_time: datetime, days: int
