@@ -17,6 +17,7 @@ from feed.errors import FeedIndexerError
 from feed.consts import DELIMITER, Format
 from feed.domain import Author, Category, Document, DocumentSet
 from feed.database import get_announce_papers
+from feed.tables import ArXivUpdate, ArXivMetadata
 
 
 logger = logging.getLogger(__name__)
@@ -150,8 +151,27 @@ def validate_request(query: str) -> Tuple[List[str],List[str]]:
     return archives,categories
 
 def get_records_from_db(archives: List[str], categories: List[str], current_date_time: datetime, days: int
-) -> List[Hit]:
+) -> List[Tuple[ArXivUpdate, ArXivMetadata]]:
+    """Retrieve all records that match the list of categories and date range.
 
+    Parameters
+    ----------
+    archives : List[str]
+        The archives that will be included in the search.
+    categories : List[str]
+        The categories that will be included in the search.
+    current_date_time : datetime
+        The date and time of the request.
+    days : int
+        The number of days before the end date that identifies the
+        beginning of the filter window.
+
+    Returns
+    -------
+    records : List[ArxivUpdate]
+        A list of entries from the arxiv_updates table that match the parameters
+
+    """
     #start at the start of today
     last_date=current_date_time.replace(hour=0, minute=0, second=0, microsecond=0) #TODO timezone nonsense
     first_date=last_date - timedelta(days=days)
