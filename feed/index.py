@@ -15,7 +15,7 @@ from arxiv import taxonomy
 from feed.utils import utc_now
 from feed.errors import FeedIndexerError
 from feed.consts import DELIMITER, Format
-from feed.domain import Author, Category, Document, DocumentSet
+from feed.domain import Author, Category, Document, DocumentSet, Document2
 from feed.database import get_announce_papers
 from feed.tables import ArXivUpdate, ArXivMetadata
 
@@ -57,7 +57,7 @@ def search(query: str, days: int) -> DocumentSet:
         The results of the ElasticSearch search as a collection of Documents.
 
     """
-    documents: List[Document] = []
+    documents: List[Document2] = []
 
     archives,categories = validate_request(query)
 
@@ -65,12 +65,10 @@ def search(query: str, days: int) -> DocumentSet:
     date=datetime(2021, 2, 15)
     days2=5
     records=get_records_from_db(archives,categories,date,days2) #TODO improve date selection
-    print("records:")
-    print(records)
 
     # Create a Document object for every hit that was found
     for record in records:
-        document = create_document(record)
+        document = create_document2(record)
         documents.append(document)
 
     return DocumentSet(categories, documents) #TODO return both categories and archives
@@ -252,6 +250,24 @@ def get_records_from_indexer(
             "Query: %s", ex, query_txt)
         raise FeedIndexerError("Search engine error.")
 
+def create_document2(record:Tuple[ArXivUpdate, ArXivMetadata])->Document2:
+    update, metadata=record
+    full_arxiv_id=f"{metadata.paper_id}v{metadata.version}"
+
+    print(metadata.authors)
+    print(metadata.abs_categories)
+    print(full_arxiv_id)
+    
+    return Document2(    
+        arxiv_id=full_arxiv_id,
+        title=metadata.title,
+        abstract=metadata.abstract,
+        authors=None,
+        primary_category=None,
+        secondary_categories=None,
+        journal_ref=metadata.journal_ref,
+        update_type=update.action
+        )
 
 def create_document(record: Hit) -> Document:
     """Copy data from the provided Hit into a new Document and return it.
@@ -319,3 +335,4 @@ def create_document(record: Hit) -> Document:
         primary_category=primary_category,
         secondary_categories=secondary_categories if "secondary_categories" in record else [],
     )
+

@@ -1,11 +1,11 @@
 from enum import Enum
-from typing import List, Set
+from typing import List, Set, Literal
 
 from feed.errors import FeedVersionError
 
 
 FEED_NUM_DAYS = 1
-
+UpdateActions = Literal['new', 'replace', 'absonly', 'cross', 'repcro']
 DELIMITER = "+"
 
 

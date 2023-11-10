@@ -3,7 +3,7 @@
 from typing import List
 from dataclasses import dataclass
 
-from feed.consts import Format
+from feed.consts import Format, UpdateActions
 
 
 @dataclass
@@ -59,6 +59,18 @@ class Document:
     secondary_categories: List[Category]
     """The categories under which this document is filed."""
 
+@dataclass
+class Document2:
+    """Represents an feed item."""
+
+    arxiv_id: str #hopefully includes version
+    title: str
+    abstract: str
+    authors: List[Author]
+    primary_category: Category
+    secondary_categories: List[Category]
+    journal_ref: str
+    update_type: UpdateActions
 
 @dataclass
 class DocumentSet:
