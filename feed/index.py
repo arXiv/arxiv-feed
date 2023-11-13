@@ -123,27 +123,33 @@ def validate_request(query: str) -> Tuple[List[str],List[str]]:
             raise FeedIndexerError(
                 f"Bad archive/subject class structure '{category}'. Valid names include an archive, possibly followed by a single period and subject class."
             )
-        if not parts[0] in taxonomy.ARCHIVES:
+        if not parts[0].lower() in taxonomy.ARCHIVES:
             raise FeedIndexerError(
                 f"Bad archive '{parts[0]}'. Valid archive names are: "
                 f"{', '.join(taxonomy.ARCHIVES.keys())}."
             )
-        if len(parts) == 2 and category not in taxonomy.CATEGORIES:
-            skip = len(parts[0]) + 1
-            groups = [
-                key[skip:]
-                for key in taxonomy.CATEGORIES.keys()
-                if key.startswith(parts[0] + ".")
-            ]
-            raise FeedIndexerError(
-                f"Bad subject class '{parts[1]}'. Valid subject classes for "
-                f"the archive '{parts[0]}' are: {', '.join(groups)}."
-            )
-        #add verified category to list
-        if len(parts)==2:
-            categories.append(category)
-        else:
-            archives.append(category)
+        if len(parts)==1:
+            archives.append(category.lower())
+        if len(parts) == 2:
+            category_upper=parts[0].lower()+"."+parts[1].upper()
+            category_lower=parts[0].lower()+"."+parts[1].lower()
+            if category_upper in taxonomy.CATEGORIES:
+                categories.append(category_upper)
+            elif category_lower in taxonomy.CATEGORIES:
+                categories.append(category_lower)
+            else:
+                print(category_upper)
+                print(category_lower)
+                skip = len(parts[0]) + 1
+                groups = [
+                    key[skip:]
+                    for key in taxonomy.CATEGORIES.keys()
+                    if key.startswith(parts[0].lower() + ".")
+                ]
+                raise FeedIndexerError(
+                    f"Bad subject class '{parts[1]}'. Valid subject classes for "
+                    f"the archive '{parts[0]}' are: {', '.join(groups)}."
+                )
 
     return archives,categories
 

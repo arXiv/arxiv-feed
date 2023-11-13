@@ -35,7 +35,7 @@ def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
         the request and ETag header added.
     """
     # Calculate unique key for the query
-    key = f"{hash_query(query)}-{version}"
+    key = f"{hash_query(query.lower())}-{version}"
 
     # Try to get feed from cache
     value = cache.get(key)
