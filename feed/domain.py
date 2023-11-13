@@ -63,12 +63,13 @@ class Document:
 class Document2:
     """Represents an feed item."""
 
-    arxiv_id: str #hopefully includes version
+    arxiv_id: str #includes version
+    document_id:str
     title: str
     abstract: str
     authors: List[Author]
-    primary_category: Category
-    secondary_categories: List[Category]
+    categories: List[str]
+    license: str
     journal_ref: str
     update_type: UpdateActions
 
