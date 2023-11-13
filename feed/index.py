@@ -61,8 +61,6 @@ def search(query: str, days: int) -> DocumentSet:
     documents: List[Document2] = []
 
     archives,categories = validate_request(query)
-
-    #records = get_records_from_indexer(request_categories, utc_now(), days)
     date=datetime(2021, 2, 15)
     days2=5
     records=get_records_from_db(archives,categories,date,days2) #TODO improve date selection
@@ -72,7 +70,7 @@ def search(query: str, days: int) -> DocumentSet:
         document = create_document2(record)
         documents.append(document)
 
-    return DocumentSet(categories, documents) #TODO return both categories and archives
+    return DocumentSet(categories+archives, documents) #TODO return both categories and archives
 
 
 def validate_request(query: str) -> Tuple[List[str],List[str]]:
@@ -252,6 +250,19 @@ def get_records_from_indexer(
         raise FeedIndexerError("Search engine error.")
 
 def create_document2(record:Tuple[ArXivUpdate, ArXivMetadata])->Document2:
+    """Copy data from the provided database entires into a new Document and return it.
+
+    Parameters
+    ----------
+    record : Tuple[ArXivUpdate, ArXivMetadata]
+        Models of data from two tables containing data on the update.
+
+    Returns
+    -------
+    document : Document
+        The new object that is created to hold the documents's data
+
+    """
     update, metadata=record
     full_arxiv_id=f"{metadata.paper_id}v{metadata.version}"
   

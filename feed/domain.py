@@ -80,5 +80,5 @@ class DocumentSet:
     categories: List[str]
     """The categories that were searched to produce these results."""
 
-    documents: List[Document]
+    documents: List[Document2]
     """Data for all the documents that were found by the search."""

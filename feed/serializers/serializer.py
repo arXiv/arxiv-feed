@@ -6,7 +6,7 @@ from feedgen.feed import FeedGenerator
 from feed.utils import utc_now
 from feed.consts import FeedVersion
 from feed.errors import FeedError, FeedVersionError
-from feed.domain import Media, Document, DocumentSet
+from feed.domain import Media, Document2, DocumentSet
 from feed.serializers import Feed
 from feed.serializers.extensions import (
     ArxivExtension,
@@ -100,7 +100,7 @@ class Serializer:
             content=content, status_code=status_code, version=self.version
         )
 
-    def add_document(self, fg: FeedGenerator, document: Document) -> None:
+    def add_document(self, fg: FeedGenerator, document: Document2) -> None:
         """Add document to the feed.
 
         Parameters
@@ -112,80 +112,61 @@ class Serializer:
         """
         entry = fg.add_entry()
 
-        entry.id(self.urls["abs_by_id"].format(paper_id=document.paper_id))
-        entry.guid(f"oai:arXiv.org:{document.paper_id}", permalink=False)
+        entry.id(self.urls["abs_by_id"].format(paper_id=document.arxiv_id))
+        entry.guid(f"oai:arXiv.org:{document.arxiv_id}", permalink=False)
         entry.title(document.title)
         entry.summary(document.abstract)
-        entry.published(document.submitted_date)
-        entry.updated(document.updated_date)
+        #entry.published(document.submitted_date)
+        #entry.updated(document.updated_date)
         entry.link(
             {
                 "type": "text/html",
                 "href": self.urls["abs_by_id"].format(
-                    paper_id=document.paper_id
+                    paper_id=document.arxiv_id
                 ),
             }
         )
-        for fmt in document.formats:
-            media = Media(
-                title=document.title,
-                url=self.urls[f"{fmt}_by_id"].format(
-                    paper_id=document.paper_id
-                ),
-                format=fmt,
-            )
-            entry.link(
-                {
-                    "title": str(media.format),
-                    "rel": "related",
-                    "type": media.type,
-                    "href": media.url,
-                }
-            )
-            entry.enclosure(url=media.url, type=media.type)
-            entry.arxiv.media(media)
 
         # Categories
-        categories = [
-            document.primary_category
-        ] + document.secondary_categories
+        categories = document.categories
         for cat in categories:
-            label = cat.name + " (" + cat.id + ")"
+            # label = cat.name + " (" + cat.id + ")"
             category = {
-                "term": cat.id,
-                "scheme": f"https://{self.base_server}/schemas/atom",
-                "label": label,
-            }
+                 "term": cat
+            #     "scheme": f"https://{self.base_server}/schemas/atom",
+            #     "label": label,
+             }
             entry.category(category)
 
-        # Add arXiv-specific element "comment"
-        if document.comments.strip():
-            entry.arxiv.comment(document.comments)
+        # # Add arXiv-specific element "comment"
+        # if document.comments.strip():
+        #     entry.arxiv.comment(document.comments)
 
         # Add arXiv-specific element "journal_ref"
-        if document.journal_ref.strip():
-            entry.arxiv.journal_ref(document.journal_ref)
+        if document.journal_ref:
+            entry.arxiv.journal_ref(document.journal_ref.strip())
 
-        # Add arXiv-specific element "primary_category"
-        prim_cat = document.primary_category
-        label = prim_cat.name + " (" + prim_cat.id + ")"
-        category = {
-            "term": prim_cat.id,
-            "scheme": f"https://{self.base_server}/schemas/atom",
-            "label": label,
-        }
-        entry.arxiv.primary_category(category)
+        # # Add arXiv-specific element "primary_category"
+        # prim_cat = document.primary_category
+        # label = prim_cat.name + " (" + prim_cat.id + ")"
+        # category = {
+        #     "term": prim_cat.id,
+        #     "scheme": f"https://{self.base_server}/schemas/atom",
+        #     "label": label,
+        # }
+        # entry.arxiv.primary_category(category)
 
         # Add arXiv-specific element "doi"
-        if document.doi:
-            entry.arxiv.doi(document.doi)
+        if document.document_id:
+            entry.arxiv.doi(document.document_id)
 
         # Add authors
         for author in document.authors:
-            entry.author({"name": author.full_name})
+            full_name=author.full_name+author.last_name+author.initials
+            entry.author({"name": full_name})
             entry.arxiv.author(author)
             if len(author.affiliations) > 0:
-                entry.arxiv.affiliation(author.full_name, author.affiliations)
+                entry.arxiv.affiliation(full_name, author.affiliations)
 
     def serialize_documents(self, documents: DocumentSet) -> Feed:
         """Serialize feed from documents.
