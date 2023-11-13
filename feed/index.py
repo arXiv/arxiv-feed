@@ -138,8 +138,6 @@ def validate_request(query: str) -> Tuple[List[str],List[str]]:
             elif category_lower in taxonomy.CATEGORIES:
                 categories.append(category_lower)
             else:
-                print(category_upper)
-                print(category_lower)
                 skip = len(parts[0]) + 1
                 groups = [
                     key[skip:]
