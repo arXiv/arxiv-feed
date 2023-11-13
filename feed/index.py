@@ -264,7 +264,6 @@ def create_document2(record:Tuple[ArXivUpdate, ArXivMetadata])->Document2:
 
     """
     update, metadata=record
-    full_arxiv_id=f"{metadata.paper_id}v{metadata.version}"
   
     authors=[]
     for author in parse_author_affil(metadata.authors):
@@ -273,7 +272,8 @@ def create_document2(record:Tuple[ArXivUpdate, ArXivMetadata])->Document2:
     categories=metadata.abs_categories.split(" ")
 
     return Document2(    
-        arxiv_id=full_arxiv_id,
+        arxiv_id=metadata.paper_id,
+        version=metadata.version,
         document_id=metadata.document_id,
         title=metadata.title,
         abstract=metadata.abstract,

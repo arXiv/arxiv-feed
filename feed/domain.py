@@ -63,7 +63,8 @@ class Document:
 class Document2:
     """Represents an feed item."""
 
-    arxiv_id: str #includes version
+    arxiv_id: str
+    version: int
     document_id:str
     title: str
     abstract: str

@@ -128,15 +128,19 @@ class Serializer:
         )
 
         # Categories
-        categories = document.categories
-        for cat in categories:
-            # label = cat.name + " (" + cat.id + ")"
-            category = {
-                 "term": cat
-            #     "scheme": f"https://{self.base_server}/schemas/atom",
-            #     "label": label,
-             }
-            entry.category(category)
+        entry.rights(document.license)
+        categories=[]
+        for cat in document.categories:
+            categories.append({"term": cat})
+        entry.category ( categories)
+        # for cat in categories:
+        #     # label = cat.name + " (" + cat.id + ")"
+        #     category = {
+        #          "term": cat
+        #     #     "scheme": f"https://{self.base_server}/schemas/atom",
+        #     #     "label": label,
+        #      }
+        #     entry.category(category)
 
         # # Add arXiv-specific element "comment"
         # if document.comments.strip():
