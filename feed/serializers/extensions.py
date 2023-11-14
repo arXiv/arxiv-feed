@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 
 from lxml import etree
 from lxml.etree import Element
-from flask import current_app
+from flask import current_app, url_for
 from feedgen.ext.base import BaseEntryExtension, BaseExtension
 
 from feed.domain import Author, Media
@@ -108,6 +108,22 @@ class ArxivEntryExtension(BaseEntryExtension):
                 "{http://search.yahoo.com/mrss}content",
                 attrib={"url": media.url, "type": media.type},
             )
+    def __add_authors(self, entry: Element) -> None:
+        base_server: str = current_app.config["BASE_SERVER"]
+        creator_element = etree.SubElement(
+            entry, "{http://purl.org/dc/elements/1.1/}creator"
+        )
+        for author in self.__arxiv_authors:
+            full_name = f'{author.full_name} {author.last_name}'
+            if author.initials:
+                full_name+=f" {author.initials}"
+            if author.affiliations:
+                full_name+=', '.join(author.affiliations)
+            # url = url_for('search_box', searchtype='author', query=full_name)
+            url = f"http://{base_server}/search/?searchtype=author%26query={author.last_name}%2C+{author.full_name[0]}"
+            author_element = etree.Element("a", href=url)
+            author_element.text = full_name
+            creator_element.append(author_element)
 
     def extend_atom(self, entry: Element) -> Element:
         """
@@ -168,6 +184,7 @@ class ArxivEntryExtension(BaseEntryExtension):
                             element.text = affiliation
 
         self.__add_media(entry=entry)
+        self.__add_authors(entry=entry)
 
         return entry
 
@@ -187,27 +204,6 @@ class ArxivEntryExtension(BaseEntryExtension):
         """
         base_server: str = current_app.config["BASE_SERVER"]
 
-        for entry_child in entry:
-            if entry_child.tag == "description":
-                description = "<p>Authors: "
-                first = True
-                for author in self.__arxiv_authors:
-                    if first:
-                        first = False
-                    else:
-                        description += ", "
-                    name = (
-                        f"{author.last_name},"
-                        f"+{author.initials.replace(' ', '+')}"
-                    )
-                    description += (
-                        f'<a href="http://{base_server}/search/?query={name}&'
-                        f'searchtype=author">{author.full_name}</a>'
-                    )
-                description += f"</p><p>{entry_child.text}</p>"
-
-                entry_child.text = description
-
         self.__add_media(entry=entry)
         if self.__arxiv_license:
             license=etree.SubElement(
@@ -215,10 +211,10 @@ class ArxivEntryExtension(BaseEntryExtension):
                 )
             license.text=self.__arxiv_license
 
-
+        self.__add_authors(entry=entry)
         return entry
 
-    def author(self, author: Author) -> None:
+    def authors(self, authors: List[Author]) -> None:
         """Add an author value to this entry.
 
         Parameters
@@ -226,7 +222,7 @@ class ArxivEntryExtension(BaseEntryExtension):
         author : Author
             Paper author.
         """
-        self.__arxiv_authors.append(author)
+        self.__arxiv_authors=authors
 
     def media(self, media: Media) -> None:
         """Add a media item.

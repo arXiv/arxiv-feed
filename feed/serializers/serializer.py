@@ -111,11 +111,11 @@ class Serializer:
             Document that should be added to the feed.
         """
         entry = fg.add_entry()
-
-        entry.id(self.urls["abs_by_id"].format(paper_id=document.arxiv_id))
-        entry.guid(f"oai:arXiv.org:{document.arxiv_id}", permalink=False)
+        full_id=f'{document.arxiv_id}v{document.version}'
+        entry.id(self.urls["abs_by_id"].format(paper_id=full_id))
+        entry.guid(f"oai:arXiv.org:{full_id}", permalink=True)
         entry.title(document.title)
-        entry.summary(document.abstract)
+        entry.description(document.abstract,True)
         #entry.published(document.submitted_date)
         #entry.updated(document.updated_date)
         entry.link(
@@ -165,12 +165,13 @@ class Serializer:
             entry.arxiv.doi(document.document_id)
 
         # Add authors
-        for author in document.authors:
-            full_name=author.full_name+author.last_name+author.initials
-            entry.author({"name": full_name})
-            entry.arxiv.author(author)
-            if len(author.affiliations) > 0:
-                entry.arxiv.affiliation(full_name, author.affiliations)
+        entry.arxiv.authors(document.authors)
+        # for author in document.authors:
+        #     full_name=author.full_name+author.last_name+author.initials
+        #     entry.author({"name": full_name})
+        #     entry.arxiv.author(author)
+        #     if len(author.affiliations) > 0:
+        #         entry.arxiv.affiliation(full_name, author.affiliations)
 
     def serialize_documents(self, documents: DocumentSet) -> Feed:
         """Serialize feed from documents.

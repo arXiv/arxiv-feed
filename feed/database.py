@@ -36,22 +36,3 @@ def get_announce_papers(first_day: datetime, last_day: datetime, archives: List[
 
     #TODO any error handling?
     return query_result
-
-
-def db_testing():
-    db=current_app.extensions['sqlalchemy'].db
-
-    categories_to_filter = ["CS.CV"]  # Add your desired categories to this list
-    archives_to_filter = ['hep-lat']  # Add your desired archives to this list
-    start_date=datetime(2021, 1, 15)
-    end_date=datetime(2023, 1, 31)
-    
-    query_result=get_announce_papers(start_date,end_date,archives_to_filter,categories_to_filter)
-
-
-    print("done")
-
-    for update, metadata in query_result:
-        print(update.document_id, update.date, metadata.version, metadata.title, metadata.is_current)
- 
-    return
