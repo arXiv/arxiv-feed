@@ -58,6 +58,7 @@ class ArxivExtension(BaseExtension):
             "syn": "http://purl.org/rss/1.0/modules/syndication/",
             "admin": "http://webns.net/mvcb/",
             "media": "http://search.yahoo.com/mrss",
+            "dc": "http://purl.org/dc/elements/1.1/"
         }
 
 
@@ -85,6 +86,7 @@ class ArxivEntryExtension(BaseEntryExtension):
         """Initialize the member values to all be empty."""
         self.__arxiv_authors: List[Author] = []
         self.__arxiv_media: List[Media] = []
+        self.__arxiv_license: Optional[str] = None
         self.__arxiv_comment: Optional[str] = None
         self.__arxiv_primary_category: Optional[str] = None
         self.__arxiv_doi: Optional[dict] = None
@@ -207,6 +209,12 @@ class ArxivEntryExtension(BaseEntryExtension):
                 entry_child.text = description
 
         self.__add_media(entry=entry)
+        if self.__arxiv_license:
+            license=etree.SubElement(
+                    entry, "{http://purl.org/dc/elements/1.1/}rights"
+                )
+            license.text=self.__arxiv_license
+
 
         return entry
 
@@ -229,6 +237,18 @@ class ArxivEntryExtension(BaseEntryExtension):
             Dictionary with url and type attributes.
         """
         self.__arxiv_media.append(media)
+
+    def rights(self, text: str) -> None:
+        """Assign the comment value to this entry.
+
+        Parameters
+        ----------
+        text : str
+            The liscence text.
+
+        """
+        
+        self.__arxiv_license = text
 
     def comment(self, text: str) -> None:
         """Assign the comment value to this entry.

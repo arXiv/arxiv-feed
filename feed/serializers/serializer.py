@@ -128,7 +128,7 @@ class Serializer:
         )
 
         # Categories
-        entry.rights(document.license)
+        entry.arxiv.rights(document.license)
         categories=[]
         for cat in document.categories:
             categories.append({"term": cat})
