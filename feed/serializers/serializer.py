@@ -59,11 +59,11 @@ class Serializer:
         fg.link(
             href=self.link, rel="self", type=self.content_type,
         )
-        fg.image(
-            url=f"https://{self.base_server}/icons/sfx.gif",
-            title=self.base_server,
-            link=self.link,
-        )
+        # fg.image(
+        #     url=f"https://{self.base_server}/icons/sfx.gif",
+        #     title=self.base_server,
+        #     link=self.link,
+        # )
         return fg
 
     def _serialize(self, fg: FeedGenerator, status_code: int = 200) -> Feed:
@@ -167,16 +167,15 @@ class Serializer:
         fg = self._create_feed_generator()
         fg.title(f"{', '.join(documents.categories)} updates on arXiv.org")
         fg.description(
-            f"{', '.join(documents.categories)} updates on the "
-            f"{self.base_server} e-print archive.",
+            f"{', '.join(documents.categories)} updates on the arXiv.org e-print archive.",
         )
         # Timestamps
-        now = utc_now()
+        now = utc_now() #TODO convert to arxiv midnight
         fg.pubDate(now)
-        fg.updated(now)
+        #fg.updated(now)
 
         fg.language("en-us")
-        fg.managingEditor(f"www-admin@{self.base_server}")
+        fg.managingEditor("rss-help@arxiv.org")
         fg.generator("")
 
         # Add each search result to the feed
@@ -212,7 +211,7 @@ class Serializer:
         fg.updated(now)
 
         fg.language("en-us")
-        fg.managingEditor(f"www-admin@{self.base_server}")
+        fg.managingEditor("rss-help.arxiv.org")
         fg.generator("")
 
         return self._serialize(fg, status_code=status_code)
