@@ -6,7 +6,7 @@ from feedgen.feed import FeedGenerator
 from feed.utils import utc_now
 from feed.consts import FeedVersion
 from feed.errors import FeedError, FeedVersionError
-from feed.domain import Media, Document2, DocumentSet
+from feed.domain import Media, Document, DocumentSet
 from feed.serializers import Feed
 from feed.serializers.extensions import (
     ArxivExtension,
@@ -99,7 +99,7 @@ class Serializer:
             content=content, status_code=status_code, version=self.version
         )
 
-    def add_document(self, fg: FeedGenerator, document: Document2) -> None:
+    def add_document(self, fg: FeedGenerator, document: Document) -> None:
         """Add document to the feed.
 
         Parameters

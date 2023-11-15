@@ -38,29 +38,8 @@ class Media:
             return f"application/{self.format}"
         return "text/html"
 
-
 @dataclass
 class Document:
-    """Represents an arXiv e-print."""
-
-    arxiv_id: str
-    archive_name: str
-    paper_id: str
-    title: str
-    abstract: str
-    submitted_date: str
-    updated_date: str
-    comments: str
-    journal_ref: str
-    doi: str
-    formats: List[Format]
-    authors: List[Author]
-    primary_category: Category
-    secondary_categories: List[Category]
-    """The categories under which this document is filed."""
-
-@dataclass
-class Document2:
     """Represents an feed item."""
 
     arxiv_id: str
@@ -81,5 +60,5 @@ class DocumentSet:
     categories: List[str]
     """The categories that were searched to produce these results."""
 
-    documents: List[Document2]
+    documents: List[Document]
     """Data for all the documents that were found by the search."""
