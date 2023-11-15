@@ -119,8 +119,7 @@ class ArxivEntryExtension(BaseEntryExtension):
                 full_name+=f" {author.initials}"
             if author.affiliations:
                 full_name+=', '.join(author.affiliations)
-            # url = url_for('search_box', searchtype='author', query=full_name)
-            url = f"http://{base_server}/search/?searchtype=author%26query={author.last_name}%2C+{author.full_name[0]}"
+            url = url_for('search_box', searchtype='author', query=full_name) #correct
             author_element = etree.Element("a", href=url)
             author_element.text = full_name
             creator_element.append(author_element)

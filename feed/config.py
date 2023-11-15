@@ -21,14 +21,12 @@ class Config:
 
     ARXIV_BUSINESS_TZ = ZoneInfo(os.environ.get('ARXIV_BUSINESS_TZ', 'America/New_York'))
 
-    URLS = {
-        "pdf": f"https://{BASE_SERVER}/pdf/{{paper_id}}v{{version}}",
-        "abs": f"https://{BASE_SERVER}/abs/{{paper_id}}v{{version}}",
-        "abs_by_id": f"https://{BASE_SERVER}/abs/{{paper_id}}",
-        "pdf_by_id": f"https://{BASE_SERVER}/pdf/{{paper_id}}",
-        "ps_by_id": f"https://{BASE_SERVER}/ps/{{paper_id}}",
-        "pdf_only": f"https://{BASE_SERVER}/pdf/{{paper_id}}v{{version}}",
-    }
+    URLS =[
+        ("pdf", "/pdf/<arxiv:paper_id>v<string:version>", BASE_SERVER),
+        ("pdf_by_id", "/pdf/<arxiv:paper_id>", BASE_SERVER),
+        ("rss", "/rss/", BASE_SERVER),
+        ("atom", "/atom/", BASE_SERVER)
+    ]
 
     # Cache
     CACHE_TYPE = "redis"

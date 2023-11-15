@@ -1,6 +1,6 @@
 from typing import Dict, Union
 
-from flask import current_app
+from flask import current_app, url_for
 from feedgen.feed import FeedGenerator
 
 from feed.utils import utc_now
@@ -33,13 +33,12 @@ class Serializer:
         """
         # Config data
         self.base_server = current_app.config["BASE_SERVER"]
-        self.urls: Dict[str, str] = current_app.config["URLS"]
 
         self.version = FeedVersion.get(version)
         self.link = (
-            f"https://{self.base_server}/atom"
+            url_for("atom")
             if version == FeedVersion.ATOM_1_0
-            else f"https://{self.base_server}/rss"
+            else url_for("rss")
         )
         self.content_type = (
             "application/atom+xml"
@@ -112,7 +111,7 @@ class Serializer:
         """
         entry = fg.add_entry()
         full_id=f'{document.arxiv_id}v{document.version}'
-        entry.id(self.urls["abs_by_id"].format(paper_id=full_id))
+        entry.id(url_for("abs", paper_id=document.arxiv_id, version=document.version))
         entry.guid(f"oai:arXiv.org:{full_id}", permalink=True)
         entry.title(document.title)
         entry.description(document.abstract,True)
@@ -121,9 +120,7 @@ class Serializer:
         entry.link(
             {
                 "type": "text/html",
-                "href": self.urls["abs_by_id"].format(
-                    paper_id=document.arxiv_id
-                ),
+                "href": url_for("abs", paper_id=document.arxiv_id, version=document.version),
             }
         )
 
@@ -133,14 +130,6 @@ class Serializer:
         for cat in document.categories:
             categories.append({"term": cat})
         entry.category ( categories)
-        # for cat in categories:
-        #     # label = cat.name + " (" + cat.id + ")"
-        #     category = {
-        #          "term": cat
-        #     #     "scheme": f"https://{self.base_server}/schemas/atom",
-        #     #     "label": label,
-        #      }
-        #     entry.category(category)
 
         # # Add arXiv-specific element "comment"
         # if document.comments.strip():
@@ -150,28 +139,12 @@ class Serializer:
         if document.journal_ref:
             entry.arxiv.journal_ref(document.journal_ref.strip())
 
-        # # Add arXiv-specific element "primary_category"
-        # prim_cat = document.primary_category
-        # label = prim_cat.name + " (" + prim_cat.id + ")"
-        # category = {
-        #     "term": prim_cat.id,
-        #     "scheme": f"https://{self.base_server}/schemas/atom",
-        #     "label": label,
-        # }
-        # entry.arxiv.primary_category(category)
-
         # Add arXiv-specific element "doi"
         if document.document_id:
             entry.arxiv.doi(document.document_id)
 
         # Add authors
         entry.arxiv.authors(document.authors)
-        # for author in document.authors:
-        #     full_name=author.full_name+author.last_name+author.initials
-        #     entry.author({"name": full_name})
-        #     entry.arxiv.author(author)
-        #     if len(author.affiliations) > 0:
-        #         entry.arxiv.affiliation(full_name, author.affiliations)
 
     def serialize_documents(self, documents: DocumentSet) -> Feed:
         """Serialize feed from documents.

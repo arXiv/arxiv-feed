@@ -4,6 +4,8 @@ import os
 from flask import Flask
 from werkzeug.utils import import_string
 
+from arxiv.base import Base
+
 from feed import routes
 from feed.cache import cache
 
@@ -22,6 +24,7 @@ def create_web_app() -> Flask:
     app.config.from_object(
         import_string(f"feed.config.{configuration.title()}")()
     )
+    Base(app)
     app.register_blueprint(routes.blueprint)
     cache.init_app(app)
 
