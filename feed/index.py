@@ -178,12 +178,12 @@ def create_document(record:Tuple[ArXivUpdate, ArXivMetadata])->Document:
     return Document(    
         arxiv_id=metadata.paper_id,
         version=metadata.version,
-        document_id=metadata.document_id,
         title=metadata.title,
         abstract=metadata.abstract,
         authors=authors,
         categories=categories,
         license=metadata.license,
+        doi=metadata.doi,
         journal_ref=metadata.journal_ref,
         update_type=update.action
         )

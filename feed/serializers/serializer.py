@@ -112,7 +112,7 @@ class Serializer:
         entry = fg.add_entry()
         full_id=f'{document.arxiv_id}v{document.version}'
         entry.id(url_for("abs", paper_id=document.arxiv_id, version=document.version))
-        entry.guid(f"oai:arXiv.org:{full_id}", permalink=True)
+        entry.guid(f"oai:arXiv.org:{full_id}", permalink=False)
         entry.title(document.title)
         entry.description(document.abstract,True)
         #entry.published(document.submitted_date)
@@ -120,7 +120,7 @@ class Serializer:
         entry.link(
             {
                 "type": "text/html",
-                "href": url_for("abs", paper_id=document.arxiv_id, version=document.version),
+                "href": url_for("abs_by_id", paper_id=document.arxiv_id),
             }
         )
 
@@ -136,12 +136,14 @@ class Serializer:
         #     entry.arxiv.comment(document.comments)
 
         # Add arXiv-specific element "journal_ref"
+       
+        entry.arxiv.announce_type(document.update_type)
         if document.journal_ref:
             entry.arxiv.journal_ref(document.journal_ref.strip())
 
         # Add arXiv-specific element "doi"
-        if document.document_id:
-            entry.arxiv.doi(document.document_id)
+        if document.doi:
+            entry.arxiv.doi(document.doi)
 
         # Add authors
         entry.arxiv.authors(document.authors)

@@ -44,7 +44,7 @@ class Document:
 
     arxiv_id: str
     version: int
-    document_id:str
+    doi:str
     title: str
     abstract: str
     authors: List[Author]

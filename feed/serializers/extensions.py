@@ -93,6 +93,7 @@ class ArxivEntryExtension(BaseEntryExtension):
         self.__arxiv_affiliation: Optional[str] = None
         self.__arxiv_journal_ref: Optional[str] = None
         self.__arxiv_affiliations: Dict = {}
+        self.__arxiv_announce_type: Optional[str] = None
 
     def __add_media(self, entry: Element) -> None:
         for media in self.__arxiv_media:
@@ -204,12 +205,28 @@ class ArxivEntryExtension(BaseEntryExtension):
         base_server: str = current_app.config["BASE_SERVER"]
 
         self.__add_media(entry=entry)
+        #add custom elements to entry structure
+        if self.__arxiv_announce_type:
+            action=etree.SubElement(
+                    entry, "{http://arxiv.org/schemas/atom}announce_type"
+                )
+            action.text=self.__arxiv_announce_type
+        
         if self.__arxiv_license:
             license=etree.SubElement(
                     entry, "{http://purl.org/dc/elements/1.1/}rights"
                 )
             license.text=self.__arxiv_license
-
+        if self.__arxiv_doi:
+            doi=etree.SubElement(
+                    entry, "{http://arxiv.org/schemas/atom}DOI"
+                )
+            doi.text=self.__arxiv_doi
+        if self.__arxiv_journal_ref:
+            j_ref=etree.SubElement(
+                    entry, "{http://arxiv.org/schemas/atom}journal_reference"
+                )
+            j_ref.text=self.__arxiv_journal_ref
         self.__add_authors(entry=entry)
         return entry
 
@@ -244,6 +261,12 @@ class ArxivEntryExtension(BaseEntryExtension):
         """
         
         self.__arxiv_license = text
+
+    def announce_type(self, text: str) -> None:
+        """type of anouncement, options are: 'new', 'replace', 'absonly', 'cross', 'repcro'
+        """
+        
+        self.__arxiv_announce_type = text
 
     def comment(self, text: str) -> None:
         """Assign the comment value to this entry.
@@ -286,15 +309,3 @@ class ArxivEntryExtension(BaseEntryExtension):
 
         """
         self.__arxiv_doi = doi_list
-
-    def affiliation(self, full_name: str, affiliations: List[str]) -> None:
-        """Assign an affiliation for one author of this entry.
-
-        Parameters
-        ----------
-        full_name : str
-            An author's full name.
-        affiliations : List[str]
-            The code for the author's affiliated institution.
-        """
-        self.__arxiv_affiliations[full_name] = affiliations
