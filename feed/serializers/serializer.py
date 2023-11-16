@@ -3,7 +3,7 @@ from typing import Dict, Union
 from flask import current_app, url_for
 from feedgen.feed import FeedGenerator
 
-from feed.utils import utc_now
+from feed.utils import get_arxiv_midnight
 from feed.consts import FeedVersion
 from feed.errors import FeedError, FeedVersionError
 from feed.domain import Media, Document, DocumentSet
@@ -170,10 +170,9 @@ class Serializer:
         fg.description(
             f"{', '.join(documents.categories)} updates on the arXiv.org e-print archive.",
         )
-        # Timestamps
-        now = utc_now() #TODO convert to arxiv midnight
-        fg.pubDate(now)
-        #fg.updated(now)
+
+        midnight=get_arxiv_midnight()
+        fg.pubDate(midnight)
 
         fg.language("en-us")
         fg.managingEditor("rss-help@arxiv.org")
@@ -208,9 +207,8 @@ class Serializer:
         fg.title(f"Feed error for query: {self.link}")
         fg.description(error.error)
         # Timestamps
-        now = utc_now()
-        fg.pubDate(now)
-        fg.updated(now)
+        midnight=get_arxiv_midnight()
+        fg.pubDate(midnight)
 
         fg.language("en-us")
         fg.managingEditor("rss-help.arxiv.org")

@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 from arxiv import taxonomy
 from arxiv.util.authors import parse_author_affil
-from feed.utils import utc_now
+from feed.utils import get_arxiv_midnight
 from feed.errors import FeedIndexerError
 from feed.consts import DELIMITER
 from feed.domain import Author, Document, DocumentSet
@@ -37,9 +37,9 @@ def search(query: str, days: int) -> DocumentSet:
     documents: List[Document] = []
 
     archives,categories = validate_request(query)
-    date=datetime(2021, 2, 15)
+    
     days2=5
-    records=get_records_from_db(archives,categories,date,days2) #TODO improve date selection
+    records=get_records_from_db(archives,categories, days2) #TODO improve date selection
 
     # Create a Document object for every hit that was found
     for record in records:
@@ -126,7 +126,7 @@ def validate_request(query: str) -> Tuple[List[str],List[str]]:
 
     return archives,categories
 
-def get_records_from_db(archives: List[str], categories: List[str], current_date_time: datetime, days: int
+def get_records_from_db(archives: List[str], categories: List[str], days: int
 ) -> List[Tuple[ArXivUpdate, ArXivMetadata]]:
     """Retrieve all records that match the list of categories and date range.
 
@@ -149,7 +149,8 @@ def get_records_from_db(archives: List[str], categories: List[str], current_date
 
     """
     #start at the start of today
-    last_date=current_date_time.replace(hour=0, minute=0, second=0, microsecond=0) #TODO timezone nonsense
+    last_date=datetime(2021, 2, 15).replace(hour=0, minute=0, second=0, microsecond=0) #TODO change when done testing
+    #last_date=get_arxiv_midnight()
     first_date=last_date - timedelta(days=days)
     return get_announce_papers(first_date,last_date, archives, categories)
 
