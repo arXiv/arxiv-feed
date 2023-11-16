@@ -136,7 +136,6 @@ class Serializer:
         #     entry.arxiv.comment(document.comments)
 
         # Add arXiv-specific element "journal_ref"
-       
         entry.arxiv.announce_type(document.update_type)
         if document.journal_ref:
             entry.arxiv.journal_ref(document.journal_ref.strip())
@@ -178,6 +177,7 @@ class Serializer:
 
         fg.language("en-us")
         fg.managingEditor("rss-help@arxiv.org")
+        fg.skipDays(["Saturday","Sunday"])
         fg.generator("")
 
         # Add each search result to the feed

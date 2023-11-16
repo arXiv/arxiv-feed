@@ -90,27 +90,10 @@ class ArxivEntryExtension(BaseEntryExtension):
         self.__arxiv_comment: Optional[str] = None
         self.__arxiv_primary_category: Optional[str] = None
         self.__arxiv_doi: Optional[dict] = None
-        self.__arxiv_affiliation: Optional[str] = None
         self.__arxiv_journal_ref: Optional[str] = None
-        self.__arxiv_affiliations: Dict = {}
         self.__arxiv_announce_type: Optional[str] = None
 
-    def __add_media(self, entry: Element) -> None:
-        for media in self.__arxiv_media:
-            group = etree.SubElement(
-                entry, "{http://search.yahoo.com/mrss}group"
-            )
-            title = etree.SubElement(
-                group, "{http://search.yahoo.com/mrss}title"
-            )
-            title.text = media.title
-            etree.SubElement(
-                group,
-                "{http://search.yahoo.com/mrss}content",
-                attrib={"url": media.url, "type": media.type},
-            )
     def __add_authors(self, entry: Element) -> None:
-        base_server: str = current_app.config["BASE_SERVER"]
         creator_element = etree.SubElement(
             entry, "{http://purl.org/dc/elements/1.1/}creator"
         )
@@ -202,9 +185,6 @@ class ArxivEntryExtension(BaseEntryExtension):
             The modified entry.
 
         """
-        base_server: str = current_app.config["BASE_SERVER"]
-
-        self.__add_media(entry=entry)
         #add custom elements to entry structure
         if self.__arxiv_announce_type:
             action=etree.SubElement(
@@ -239,16 +219,6 @@ class ArxivEntryExtension(BaseEntryExtension):
             Paper author.
         """
         self.__arxiv_authors=authors
-
-    def media(self, media: Media) -> None:
-        """Add a media item.
-
-        Parameters
-        ----------
-        media: Dict[str, str]
-            Dictionary with url and type attributes.
-        """
-        self.__arxiv_media.append(media)
 
     def rights(self, text: str) -> None:
         """Assign the comment value to this entry.
