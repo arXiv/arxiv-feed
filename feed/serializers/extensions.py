@@ -89,7 +89,7 @@ class ArxivEntryExtension(BaseEntryExtension):
         self.__arxiv_license: Optional[str] = None
         self.__arxiv_comment: Optional[str] = None
         self.__arxiv_primary_category: Optional[str] = None
-        self.__arxiv_doi: Optional[dict] = None
+        self.__arxiv_doi: Optional[str] = None
         self.__arxiv_journal_ref: Optional[str] = None
         self.__arxiv_announce_type: Optional[str] = None
 
@@ -142,11 +142,10 @@ class ArxivEntryExtension(BaseEntryExtension):
             journal_ref_element.text = self.__arxiv_journal_ref
 
         if self.__arxiv_doi:
-            for doi in self.__arxiv_doi:
-                doi_element = etree.SubElement(
-                    entry, "{http://arxiv.org/schemas/atom}doi"
+            doi=etree.SubElement(
+                    entry, "{http://arxiv.org/schemas/atom}DOI"
                 )
-                doi_element.text = doi
+            doi.text=self.__arxiv_doi
 
         # # Check each of the entry's author nodes
         # for entry_child in entry:
@@ -267,13 +266,12 @@ class ArxivEntryExtension(BaseEntryExtension):
         """
         self.__arxiv_journal_ref = text
 
-    def doi(self, doi_list: Dict[str, str]) -> None:
+    def doi(self, doi: str) -> None:
         """Assign the set of DOI definitions for this entry.
 
         Parameters
         ----------
-        doi_list : Dict[str, str]
-            A dictionary of DOI assignments.
+        doi: str of DOI's for the document
 
         """
-        self.__arxiv_doi = doi_list
+        self.__arxiv_doi = doi
