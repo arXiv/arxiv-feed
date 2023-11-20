@@ -53,11 +53,11 @@ class ArxivExtension(BaseExtension):
         """
         return {
             "arxiv": "http://arxiv.org/schemas/atom",
-            "content": "http://purl.org/rss/1.0/modules/content/",
-            "taxo": "http://purl.org/rss/1.0/modules/taxonomy/",
-            "syn": "http://purl.org/rss/1.0/modules/syndication/",
-            "admin": "http://webns.net/mvcb/",
-            "media": "http://search.yahoo.com/mrss",
+            #"content": "http://purl.org/rss/1.0/modules/content/",
+            #"taxo": "http://purl.org/rss/1.0/modules/taxonomy/",
+            #"syn": "http://purl.org/rss/1.0/modules/syndication/",
+            #"admin": "http://webns.net/mvcb/",
+            #"media": "http://search.yahoo.com/mrss/",
             "dc": "http://purl.org/dc/elements/1.1/"
         }
 
@@ -123,22 +123,21 @@ class ArxivEntryExtension(BaseEntryExtension):
             The modified entry.
 
         """
-        if self.__arxiv_comment:
-            comment_element = etree.SubElement(
-                entry, "{http://arxiv.org/schemas/atom}comment"
-            )
-            comment_element.text = self.__arxiv_comment
 
-        if self.__arxiv_primary_category:
-            etree.SubElement(
-                entry,
-                "{http://arxiv.org/schemas/atom}primary_category",
-                attrib=self.__arxiv_primary_category,
-            )
-
+        if self.__arxiv_announce_type:
+            action=etree.SubElement(
+                    entry, "{http://arxiv.org/schemas/atom}announce_type"
+                )
+            action.text=self.__arxiv_announce_type
+        
+        if self.__arxiv_license:
+            license=etree.SubElement(
+                    entry, "{http://purl.org/dc/elements/1.1/}rights"
+                )
+            license.text=self.__arxiv_license
         if self.__arxiv_journal_ref:
             journal_ref_element = etree.SubElement(
-                entry, "{http://arxiv.org/schemas/atom}journal_ref"
+                entry, "{http://arxiv.org/schemas/atom}journal_reference"
             )
             journal_ref_element.text = self.__arxiv_journal_ref
 
@@ -149,24 +148,23 @@ class ArxivEntryExtension(BaseEntryExtension):
                 )
                 doi_element.text = doi
 
-        # Check each of the entry's author nodes
-        for entry_child in entry:
-            if entry_child.tag == "author":
-                author = entry_child
-                for author_child in author:
-                    # If the author's name is in the affiliation dictionary,
-                    # add Elements for all of its affiliations.
-                    if author_child.tag == "name":
-                        name = author_child.text
-                        affiliations = self.__arxiv_affiliations.get(name, [])
-                        for affiliation in affiliations:
-                            element = etree.SubElement(
-                                author,
-                                "{http://arxiv.org/schemas/atom}affiliation",
-                            )
-                            element.text = affiliation
+        # # Check each of the entry's author nodes
+        # for entry_child in entry:
+        #     if entry_child.tag == "author":
+        #         author = entry_child
+        #         for author_child in author:
+        #             # If the author's name is in the affiliation dictionary,
+        #             # add Elements for all of its affiliations.
+        #             if author_child.tag == "name":
+        #                 name = author_child.text
+        #                 affiliations = self.__arxiv_affiliations.get(name, [])
+        #                 for affiliation in affiliations:
+        #                     element = etree.SubElement(
+        #                         author,
+        #                         "{http://arxiv.org/schemas/atom}affiliation",
+        #                     )
+        #                     element.text = affiliation
 
-        self.__add_media(entry=entry)
         self.__add_authors(entry=entry)
 
         return entry

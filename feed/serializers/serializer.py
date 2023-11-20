@@ -114,7 +114,8 @@ class Serializer:
         entry.id(url_for("abs", paper_id=document.arxiv_id, version=document.version))
         entry.guid(f"oai:arXiv.org:{full_id}", permalink=False)
         entry.title(document.title)
-        entry.description(document.abstract,True)
+        entry.description(document.abstract)
+        entry.summary(document.abstract)
         #entry.published(document.submitted_date)
         #entry.updated(document.updated_date)
         entry.link(
@@ -170,7 +171,7 @@ class Serializer:
         fg.description(
             f"{', '.join(documents.categories)} updates on the arXiv.org e-print archive.",
         )
-
+        fg.id(f"{self.link}{'+'.join(documents.categories)}")
         midnight=get_arxiv_midnight()
         fg.pubDate(midnight)
 
@@ -182,7 +183,6 @@ class Serializer:
         # Add each search result to the feed
         for document in documents.documents:
             self.add_document(fg, document)
-
         return self._serialize(fg)
 
     def serialize_error(
