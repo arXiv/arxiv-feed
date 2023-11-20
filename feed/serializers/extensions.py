@@ -53,11 +53,6 @@ class ArxivExtension(BaseExtension):
         """
         return {
             "arxiv": "http://arxiv.org/schemas/atom",
-            #"content": "http://purl.org/rss/1.0/modules/content/",
-            #"taxo": "http://purl.org/rss/1.0/modules/taxonomy/",
-            #"syn": "http://purl.org/rss/1.0/modules/syndication/",
-            #"admin": "http://webns.net/mvcb/",
-            #"media": "http://search.yahoo.com/mrss/",
             "dc": "http://purl.org/dc/elements/1.1/"
         }
 
@@ -85,10 +80,7 @@ class ArxivEntryExtension(BaseEntryExtension):
     def __init__(self: BaseEntryExtension):
         """Initialize the member values to all be empty."""
         self.__arxiv_authors: List[Author] = []
-        self.__arxiv_media: List[Media] = []
         self.__arxiv_license: Optional[str] = None
-        self.__arxiv_comment: Optional[str] = None
-        self.__arxiv_primary_category: Optional[str] = None
         self.__arxiv_doi: Optional[str] = None
         self.__arxiv_journal_ref: Optional[str] = None
         self.__arxiv_announce_type: Optional[str] = None
@@ -146,23 +138,6 @@ class ArxivEntryExtension(BaseEntryExtension):
                     entry, "{http://arxiv.org/schemas/atom}DOI"
                 )
             doi.text=self.__arxiv_doi
-
-        # # Check each of the entry's author nodes
-        # for entry_child in entry:
-        #     if entry_child.tag == "author":
-        #         author = entry_child
-        #         for author_child in author:
-        #             # If the author's name is in the affiliation dictionary,
-        #             # add Elements for all of its affiliations.
-        #             if author_child.tag == "name":
-        #                 name = author_child.text
-        #                 affiliations = self.__arxiv_affiliations.get(name, [])
-        #                 for affiliation in affiliations:
-        #                     element = etree.SubElement(
-        #                         author,
-        #                         "{http://arxiv.org/schemas/atom}affiliation",
-        #                     )
-        #                     element.text = affiliation
 
         self.__add_authors(entry=entry)
 
@@ -234,27 +209,6 @@ class ArxivEntryExtension(BaseEntryExtension):
         """
         
         self.__arxiv_announce_type = text
-
-    def comment(self, text: str) -> None:
-        """Assign the comment value to this entry.
-
-        Parameters
-        ----------
-        text : str
-            The new comment text.
-
-        """
-        self.__arxiv_comment = text
-
-    def primary_category(self, text: str) -> None:
-        """Assign the primary_category value to this entry.
-
-        Parameters
-        ----------
-        text : str
-            The new primary_category name.
-        """
-        self.__arxiv_primary_category = text
 
     def journal_ref(self, text: str) -> None:
         """Assign the journal_ref value to this entry.

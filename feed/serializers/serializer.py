@@ -59,11 +59,6 @@ class Serializer:
         fg.link(
             href=self.link, rel="self", type=self.content_type,
         )
-        # fg.image(
-        #     url=f"https://{self.base_server}/icons/sfx.gif",
-        #     title=self.base_server,
-        #     link=self.link,
-        # )
         return fg
 
     def _serialize(self, fg: FeedGenerator, status_code: int = 200) -> Feed:
@@ -115,8 +110,6 @@ class Serializer:
         entry.guid(f"oai:arXiv.org:{full_id}", permalink=False)
         entry.title(document.title)
         entry.summary(document.abstract)
-        #entry.published(document.submitted_date)
-        #entry.updated(document.updated_date)
         entry.link(
             {
                 "type": "text/html",
@@ -130,10 +123,6 @@ class Serializer:
         for cat in document.categories:
             categories.append({"term": cat})
         entry.category ( categories)
-
-        # # Add arXiv-specific element "comment"
-        # if document.comments.strip():
-        #     entry.arxiv.comment(document.comments)
 
         # Add arXiv-specific element "journal_ref"
         entry.arxiv.announce_type(document.update_type)
