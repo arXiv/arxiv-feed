@@ -114,7 +114,6 @@ class Serializer:
         entry.id(url_for("abs", paper_id=document.arxiv_id, version=document.version))
         entry.guid(f"oai:arXiv.org:{full_id}", permalink=False)
         entry.title(document.title)
-        entry.description(document.abstract)
         entry.summary(document.abstract)
         #entry.published(document.submitted_date)
         #entry.updated(document.updated_date)
