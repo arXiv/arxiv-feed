@@ -39,7 +39,7 @@ def search(query: str, days: int) -> DocumentSet:
     archives,categories = validate_request(query)
     
     days2=5
-    records=get_records_from_db(archives,categories, days2) #TODO improve date selection
+    records=get_records_from_db(archives,categories, days)
 
     # Create a Document object for every hit that was found
     for record in records:
@@ -149,9 +149,8 @@ def get_records_from_db(archives: List[str], categories: List[str], days: int
 
     """
     #start at the start of today
-    last_date=datetime(2021, 2, 15).replace(hour=0, minute=0, second=0, microsecond=0) #TODO change when done testing
-    #last_date=get_arxiv_midnight()
-    first_date=last_date - timedelta(days=days)
+    last_date=get_arxiv_midnight()
+    first_date=last_date - timedelta(days=days-1) #-1 for inclusive date bounds
     return get_announce_papers(first_date,last_date, archives, categories)
 
 def create_document(record:Tuple[ArXivUpdate, ArXivMetadata])->Document:
