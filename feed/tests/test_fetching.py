@@ -66,5 +66,10 @@ def test_bad_cat_requests():
         validate_request("physics.AI")
     assert "Bad subject class 'AI'." in str(excinfo.value)
 
-def test_create_document(sample_arxiv_metadata, sample_arxiv_update, sample_doc):
+def test_create_document(sample_arxiv_metadata, sample_arxiv_update, sample_doc,sample_author, sample_author2):
+    #simple
+    assert sample_doc==create_document((sample_arxiv_update,sample_arxiv_metadata))
+    #multiple authors
+    sample_doc.authors=[sample_author,sample_author2]
+    sample_arxiv_metadata.authors="Very Real Sr. (Cornell University), L Emeno"
     assert sample_doc==create_document((sample_arxiv_update,sample_arxiv_metadata))

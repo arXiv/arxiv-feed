@@ -65,6 +65,15 @@ def sample_author():
     )
 
 @pytest.fixture
+def sample_author2():
+    return Author(
+        full_name= "L",
+        last_name="Emeno",
+        initials="",
+        affiliations=[]
+    )
+
+@pytest.fixture
 def sample_doc(sample_author):
     return Document(    
         arxiv_id="1234.5678",
