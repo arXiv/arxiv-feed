@@ -4,19 +4,14 @@ from datetime import timezone, datetime
 from unittest.mock import patch
 
 from feed.utils import utc_now, randomize_case, etag, get_arxiv_midnight
-from feed.tests.conftest import app
 
 # utc_now
-
-
 def test_utc_now_timezone():
     now = utc_now()
     assert now.tzinfo == timezone.utc
 
 
 # randomize_case
-
-
 def test_randomize_case_ascii():
     assert any(c.isupper() for c in randomize_case("all lowercase string"))
     assert any(c.islower() for c in randomize_case("ALL UPPERCASE STRING"))

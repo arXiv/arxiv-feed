@@ -1,6 +1,6 @@
 
 from feed.errors import FeedIndexerError
-from feed.fetch_data import validate_request
+from feed.fetch_data import validate_request,create_document
 
 from unittest.mock import patch
 import pytest
@@ -65,3 +65,6 @@ def test_bad_cat_requests():
     with pytest.raises(FeedIndexerError) as excinfo:
         validate_request("physics.AI")
     assert "Bad subject class 'AI'." in str(excinfo.value)
+
+def test_create_document(sample_arxiv_metadata, sample_arxiv_update, sample_doc):
+    assert sample_doc==create_document((sample_arxiv_update,sample_arxiv_metadata))
