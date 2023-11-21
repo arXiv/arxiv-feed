@@ -1,6 +1,4 @@
 from typing import List, Tuple
-from flask import current_app
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_, or_
 from feed.tables import ArXivUpdate, ArXivMetadata
 from datetime import datetime
@@ -34,5 +32,4 @@ def get_announce_papers(first_day: datetime, last_day: datetime, archives: List[
         )
     ).add_entity(metadata_alias).limit(result_limit).all()
 
-    #TODO any error handling?
     return query_result
