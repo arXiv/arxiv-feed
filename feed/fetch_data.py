@@ -38,7 +38,6 @@ def search(query: str, days: int) -> DocumentSet:
 
     archives,categories = validate_request(query)
     
-    days2=5
     records=get_records_from_db(archives,categories, days)
 
     # Create a Document object for every hit that was found
