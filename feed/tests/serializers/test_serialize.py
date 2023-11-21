@@ -39,7 +39,7 @@ def check_feed(
     if error is None:
         assert "https://arxiv.org/" in link
         assert "arXiv.org" in title
-        assert "updates on the arxiv.org" in description
+        assert "updates on the arXiv.org" in description
     else:
         assert "https://arxiv.org/" in link
         assert "Feed error for query" in title

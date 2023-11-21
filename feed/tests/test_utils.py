@@ -1,7 +1,10 @@
 import string
-from datetime import timezone
+from zoneinfo import ZoneInfo
+from datetime import timezone, datetime
+from unittest.mock import patch
 
-from feed.utils import utc_now, randomize_case, etag
+from feed.utils import utc_now, randomize_case, etag, get_arxiv_midnight
+from feed.tests.conftest import app
 
 # utc_now
 
@@ -40,3 +43,12 @@ def test_etag():
     assert etag("content") == etag(b"content")
     assert etag("Садржај") == etag("Садржај".encode("utf-8"))
     assert etag("foo") != etag("bar")
+
+
+@patch("feed.utils.datetime")
+def test_get_arxiv_midnight(mock_datetime, app):
+    mock_datetime.now.return_value = datetime(2023, 11, 10, 2, 30, 45, tzinfo=ZoneInfo('UTC'))
+    with app.app_context():
+        result = get_arxiv_midnight()
+
+    assert result == datetime(2023, 11, 9, 0, 0, 0, tzinfo=ZoneInfo("America/New_York"))
