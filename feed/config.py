@@ -45,7 +45,7 @@ class Config:
     )
     ELASTICSEARCH_INDEX = os.environ.get("ELASTICSEARCH_INDEX", "arxiv")
 
-    ### atempting to connect to database
+    ### database connection
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
     CLASSIC_DATABASE_URI = SQLALCHEMY_DATABASE_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -80,5 +80,7 @@ class Testing(Config):
     """Configuration for running tests."""
 
     TESTING = True
-
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///tests/data/test_data.db'
+    CLASSIC_DATABASE_URI = SQLALCHEMY_DATABASE_URI
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     CACHE_TYPE = "null"
