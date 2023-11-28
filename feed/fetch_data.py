@@ -39,11 +39,38 @@ def search(query: str, days: int) -> DocumentSet:
     archives,categories = validate_request(query)
     
     records=get_records_from_db(archives,categories, days)
+    paper_ids={}
 
     # Create a Document object for every hit that was found
     for record in records:
-        document = create_document(record)
-        documents.append(document)
+        paper_id=record[1].paper_id
+
+        if paper_id in paper_ids: # handle duplicate paperids
+            old_doc=documents[paper_ids[paper_id]]
+            update=record[0]
+            metadata=record[1]
+            #both entries are for a new paper
+            if update.action=="new" and old_doc.update_type=="new":
+                pass #only one new entry needed
+            #both entries are replacements or crosslists -> show most recent version
+            elif (update.action=="replace" and old_doc.update_type=="replace") or(update.action=="cross" and old_doc.update_type=="cross"):
+                if old_doc.version >= metadata.version:
+                    pass #keep original document
+                else:
+                    document = create_document(record)
+                    documents[paper_ids[paper_id]]=document
+            else:
+                #allow mixed entry type duplicates
+                array_loc=len(documents)
+                paper_ids[paper_id]=array_loc #latest type of entry now the one up for replacement (entries are grouped by type)
+                document = create_document(record)
+                documents.append(document)
+
+        else: #new paper_id
+            array_loc=len(documents)
+            paper_ids[paper_id]=array_loc
+            document = create_document(record)
+            documents.append(document)
 
     return DocumentSet(categories+archives, documents) 
 
