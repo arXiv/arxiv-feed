@@ -1,5 +1,4 @@
-# Provides the Feed + ElasticSearch + Kibana stack for local development. See
-# README.md for instructions on use.
+# See README.md for instructions on use.
 ---
 version: "3.5"
 services:
@@ -12,37 +11,10 @@ services:
         DEBUG: "true"
         TESTING: "true"
         CACHE_REDIS_HOST: "arxiv-feed-redis"
-        ELASTICSEARCH_HOST: "arxiv-feed-elasticsearch"
       ports:
         - "8000:8000"
       networks:
         - "arxiv_feed_network"
-  arxiv-feed-elasticsearch:
-    build:
-      context: .
-      dockerfile: "Dockerfile-elasticsearch"
-    container_name: "arxiv-feed-elasticsearch"
-    environment:
-      - "http.host=0.0.0.0"
-      - "transport.host=0.0.0.0"
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    networks:
-      - "arxiv_feed_network"
-
-  arxiv-feed-kibana:
-    image: "docker.elastic.co/kibana/kibana:6.2.4"
-    container_name: "arxiv-feed-kibana"
-    environment:
-      ELASTICSEARCH_URL: "http://arxiv-feed-elasticsearch:9200"
-    ports:
-      - "5601:5601"
-    networks:
-      - "arxiv_feed_network"
-    depends_on:
-      - "arxiv-feed-elasticsearch"
-
   arxiv-feed-redis:
       image: "redis:5.0.8"
       container_name: "arxiv-feed-redis"
