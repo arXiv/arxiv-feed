@@ -29,7 +29,7 @@ class Config:
     ]
 
     # Cache
-    CACHE_TYPE = "null"
+    CACHE_TYPE = "redis"
     CACHE_DEFAULT_TIMEOUT = int(
         os.environ.get("CACHE_DEFAULT_TIMEOUT", "86400")
     )  # 1 day
