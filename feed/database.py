@@ -42,4 +42,4 @@ def get_announce_papers(first_day: datetime, last_day: datetime, archives: List[
         )
     ).order_by(action_order).add_entity(metadata_alias).limit(result_limit).all()
 
-    return query_result
+    return query_result # type: ignore

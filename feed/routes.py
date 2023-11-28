@@ -44,7 +44,7 @@ def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
         try:
             feed = Feed.from_string(value)
         except ValueError as ex:
-            feed = serialize(ex)
+            feed = serialize(ex) # type: ignore
     else:
         # Cache failed to generate feed
         try:

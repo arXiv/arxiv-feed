@@ -1,7 +1,7 @@
 """Interface to Index Service for RSS feeds."""
 
 import logging
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 from datetime import datetime, timedelta
 
 from arxiv import taxonomy
@@ -39,7 +39,7 @@ def search(query: str, days: int) -> DocumentSet:
     archives,categories = validate_request(query)
     
     records=get_records_from_db(archives,categories, days)
-    paper_ids={}
+    paper_ids: Dict[str, int]={}
 
     # Create a Document object for every hit that was found
     for record in records:

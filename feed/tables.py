@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 metadata = MetaData()
 db= SQLAlchemy()
 
-class ArXivUpdate(db.Model):
+class ArXivUpdate(db.Model): # type: ignore
     __tablename__ = "arXiv_updates"
     __table_args__ = (db.PrimaryKeyConstraint('document_id', 'date', 'action', 'category'),)
 
@@ -20,11 +20,11 @@ class ArXivUpdate(db.Model):
     archive=Column(String(20), index=True)
     category=Column( String(20), index=True)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"ArXivUpdate(document_id={self.document_id}, version={self.version}, action={self.action}, date={self.date}, category={self.category}, archive={self.archive})"
     
 ### models for the arXiv_metadata table
-class ArXivMetadata(db.Model):
+class ArXivMetadata(db.Model): # type: ignore
     """Model for arXiv document metadata."""
 
     __tablename__ = "arXiv_metadata"
