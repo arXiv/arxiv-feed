@@ -3,18 +3,18 @@
 version: "3.5"
 services:
   arxiv-feed-app:
-      build:
-        context: .
-        dockerfile: "Dockerfile"
-      container_name: "arxiv-feed-app"
-      environment:
-        DEBUG: "true"
-        TESTING: "true"
-        CACHE_REDIS_HOST: "arxiv-feed-redis"
-      ports:
-        - "8000:8000"
-      networks:
-        - "arxiv_feed_network"
+    build:
+      context: .
+      dockerfile: "Dockerfile"
+    container_name: "arxiv-feed-app"
+    environment:
+      DEBUG: "true"
+      TESTING: "true"
+      CACHE_REDIS_HOST: "arxiv-feed-redis"
+    ports:
+      - "8000:8000"
+    networks:
+      - "arxiv_feed_network"
   arxiv-feed-redis:
       image: "redis:5.0.8"
       container_name: "arxiv-feed-redis"

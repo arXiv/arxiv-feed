@@ -31,3 +31,6 @@ check:                  ## Run code checks.
 
 format:                 ## Format the code.
 	@pipenv run black --safe --target-version=py37 --line-length=79 "$(PROJECT)"
+
+docker: 
+	docker build -f Dockerfile -t arxiv-feed-app . 
