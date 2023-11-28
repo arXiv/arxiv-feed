@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy.orm import aliased
 
 def get_announce_papers(first_day: datetime, last_day: datetime, archives: List[str], categories: List[str])->List[Tuple[ArXivUpdate, ArXivMetadata]]:
-    result_limit = 1000
+    result_limit = 2000
     version_threshold = 4
 
     action_order = case(
