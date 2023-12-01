@@ -46,7 +46,6 @@ steps:
     args: ['run', 'deploy', '${_IMAGE_NAME}-${SHORT_SHA}',
            '--image=gcr.io/${PROJECT_ID}/${_ARTIFACT_REPO}/${_IMAGE_NAME}:${COMMIT_SHA}', 
            '--region', 'us-central1', '--platform', 'managed',
-           '--update-secrets', 'SECRETS=${_IMAGE_NAME}-secrets:latest',
            '--set-env-vars', 'ENVIRONMENT=development',
            '--allow-unauthenticated']
   # [END cloudbuild_python_deploy_yaml]
