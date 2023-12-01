@@ -20,8 +20,12 @@ For other commands run:
 ```
 make help
 ```
+### testing
+testing can be run with pytest if dev packages are installed
 
-
+```bash
+pytest
+```
 ### Pre-commit hooks
 
 To run pre commit hooks install the dev dependencies:
