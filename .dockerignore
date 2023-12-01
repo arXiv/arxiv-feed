@@ -1,0 +1,8 @@
+Dockerfile
+README.md
+.mypy_cache
+.pytest_cache
+.github
+.coverage
+.gitignore
+__pycache__

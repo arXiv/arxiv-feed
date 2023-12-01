@@ -31,7 +31,7 @@ def search(query: str, days: int) -> DocumentSet:
     Returns
     -------
     documents : DocumentSet
-        The results of the ElasticSearch search as a collection of Documents.
+        The results as a collection of Documents.
 
     """
     documents: List[Document] = []
