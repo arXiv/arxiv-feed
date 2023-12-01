@@ -26,6 +26,13 @@ testing can be run with pytest if dev packages are installed
 ```bash
 pytest
 ```
+
+### deploying
+creating pull requests to the devlop branch should trigger builds and cloud run instances
+arxiv-feed in development and arxiv-feed-beta in production
+
+pushes to master branch should trigger build and deploy in arxiv-feed in production and devlopment NOT YET IMPLEMENTED
+
 ### Pre-commit hooks
 
 To run pre commit hooks install the dev dependencies:
