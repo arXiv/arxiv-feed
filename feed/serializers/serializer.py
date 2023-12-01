@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Union
 
 from flask import current_app, url_for
 from feedgen.feed import FeedGenerator
@@ -6,7 +6,7 @@ from feedgen.feed import FeedGenerator
 from feed.utils import get_arxiv_midnight
 from feed.consts import FeedVersion
 from feed.errors import FeedError, FeedVersionError
-from feed.domain import Media, Document, DocumentSet
+from feed.domain import Document, DocumentSet
 from feed.serializers import Feed
 from feed.serializers.extensions import (
     ArxivExtension,

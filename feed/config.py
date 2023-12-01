@@ -28,16 +28,6 @@ class Config:
         ("atom", "/atom/", BASE_SERVER)
     ]
 
-    # Cache
-    CACHE_TYPE = "null"
-    CACHE_DEFAULT_TIMEOUT = int(
-        os.environ.get("CACHE_DEFAULT_TIMEOUT", "86400")
-    )  # 1 day
-    CACHE_REDIS_HOST = os.environ.get("CACHE_REDIS_HOST", "127.0.0.1")
-    CACHE_REDIS_PORT = int(os.environ.get("CACHE_REDIS_PORT", "6379"))
-    CACHE_REDIS_DB = int(os.environ.get("CACHE_REDIS_DB", "0"))
-
-
     ### database connection
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
     CLASSIC_DATABASE_URI = SQLALCHEMY_DATABASE_URI
@@ -77,4 +67,3 @@ class Testing(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///tests/data/test_data.db'
     CLASSIC_DATABASE_URI = SQLALCHEMY_DATABASE_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    CACHE_TYPE = "null"

@@ -5,11 +5,12 @@ from werkzeug import Response
 from flask import request, Blueprint, make_response
 
 from feed import controller
-from feed.cache import cache
-from feed.utils import hash_query
+from datetime import datetime, timedelta
+
 from feed.consts import FeedVersion
-from feed.serializers import serialize, Feed
+from feed.serializers import serialize
 from feed.errors import FeedError, FeedVersionError
+from feed.utils import get_arxiv_midnight, utc_now
 
 
 blueprint = Blueprint("rss", __name__, url_prefix="/")
@@ -34,35 +35,23 @@ def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
         Flask response object populated with the RSS or ATOM (XML) response for
         the request and ETag header added.
     """
-    # Calculate unique key for the query
-    key = f"{hash_query(query.lower())}-{version}"
+    try:
+        version = FeedVersion.get(version)
+        documents = controller.get_documents(query)
+        feed = serialize(documents, version=version)
+    except FeedVersionError as ex:
+        feed = serialize(ex)
+    except FeedError as ex:
+        feed = serialize(ex, version=version)
 
-    # Try to get feed from cache
-    value = cache.get(key)
-
-    if value is not None:
-        try:
-            feed = Feed.from_string(value)
-        except ValueError as ex:
-            feed = serialize(ex) # type: ignore
-    else:
-        # Cache failed to generate feed
-        try:
-            version = FeedVersion.get(version)
-            documents = controller.get_documents(query)
-            feed = serialize(documents, version=version)
-        except FeedVersionError as ex:
-            feed = serialize(ex)
-        except FeedError as ex:
-            feed = serialize(ex, version=version)
-        # Save feed to cache
-        cache.set(key, feed.to_string())
 
     # Create response object from data
     response: Response = make_response(feed.content, feed.status_code)
     # Set headers
     response.headers["ETag"] = feed.etag
     response.headers["Content-Type"] = feed.content_type
+    expiration_time = (get_arxiv_midnight() + timedelta(hours=24) - utc_now()).total_seconds() #expire on next day
+    response.headers['Cache-Control'] = f"max-age={int(expiration_time)}"
     return response
 
 

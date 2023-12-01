@@ -67,30 +67,3 @@ class Feed:
             return "application/atom+xml"
         else:
             return "application/xml"
-
-    def to_string(self) -> str:
-        """Serialize feed to string.
-
-        This method is used for saving Feed objects in the Redis cache.
-        """
-        return json.dumps(
-            {
-                "content": self.content.decode("utf-8"),
-                "status_code": self.status_code,
-                "version": self.version.value,
-            },
-            indent=0,
-        )
-
-    @classmethod
-    def from_string(cls, s: str) -> "Feed":
-        """De-serialize feed object from string.
-
-        This method is used for getting Feed objects out of Redis cache.
-        """
-        data = json.loads(s)
-        return cls(
-            content=data["content"].encode("utf-8"),
-            status_code=data["status_code"],
-            version=FeedVersion(data["version"]),
-        )

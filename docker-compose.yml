@@ -15,13 +15,6 @@ services:
       - "8000:8000"
     networks:
       - "arxiv_feed_network"
-  arxiv-feed-redis:
-      image: "redis:5.0.8"
-      container_name: "arxiv-feed-redis"
-      ports:
-        - "6379:6379"
-      networks:
-        - "arxiv_feed_network"
 
 networks:
   arxiv_feed_network:
