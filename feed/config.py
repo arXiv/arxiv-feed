@@ -42,6 +42,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
     CLASSIC_DATABASE_URI = SQLALCHEMY_DATABASE_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ECHO: bool = os.environ.get("SQLALCHEMY_ECHO", "False")=="True"
 
 
 class Production(Config):
@@ -66,7 +67,7 @@ class Development(Config):
     BASE_SERVER = "127.0.0.1"
     METADATA_ENDPOINT = f"https://beta.arxiv.org"
 
-    FEED_NUM_DAYS = 100000
+    FEED_NUM_DAYS = 1 #set to a large number if you want more than one days entries
 
 
 class Testing(Config):
