@@ -3,7 +3,7 @@
 import logging
 from flask import current_app
 
-from feed import index
+from feed import fetch_data
 from feed.domain import DocumentSet
 
 
@@ -29,7 +29,7 @@ def get_documents(query: str) -> DocumentSet:
     ------
     FeedError
         Either FeedVersionError if the feed version is incorrect or
-        FeedIndexError if it fails to fetch the feed from ElasticSearch.
+        FeedIndexError if it fails to fetch the feed.
     """
     # Get the number of days for which results are to be returned
     feed_num_days: str = current_app.config["FEED_NUM_DAYS"]
@@ -43,4 +43,4 @@ def get_documents(query: str) -> DocumentSet:
         days = 1
 
     # Get the search results, pass them to the serializer, return the results
-    return index.search(query, days)
+    return fetch_data.search(query, days)

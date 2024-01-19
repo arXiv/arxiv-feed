@@ -3,6 +3,7 @@ import random
 import hashlib
 from typing import Union
 from datetime import datetime, timezone
+from flask import current_app
 
 from feed.consts import DELIMITER
 
@@ -15,6 +16,12 @@ def utc_now() -> datetime:
     """Return the current timestamp localized to UTC."""
     return datetime.now().astimezone(timezone.utc)
 
+def get_arxiv_midnight() -> datetime:
+    "returns a timestamp for the start of arxiv's day today"
+    arxiv_tz=current_app.config["ARXIV_BUSINESS_TZ"]
+    now=datetime.now().astimezone(arxiv_tz)
+    midnight=now.replace(hour=0, minute=0, second=0, microsecond=0)
+    return midnight
 
 # Used only in tests
 

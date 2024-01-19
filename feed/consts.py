@@ -1,11 +1,11 @@
 from enum import Enum
-from typing import List, Set
+from typing import List, Set, Literal
 
 from feed.errors import FeedVersionError
 
 
 FEED_NUM_DAYS = 1
-
+UpdateActions = Literal['new', 'replace', 'absonly', 'cross', 'repcro']
 DELIMITER = "+"
 
 
@@ -18,7 +18,7 @@ class Format(str, Enum):
         """Return a set of supported formats."""
         return [cls.PS, cls.PDF]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.value}"
 
 class FeedVersion(str, Enum):
@@ -32,7 +32,7 @@ class FeedVersion(str, Enum):
         """Return True if this is an RSS specification."""
         return self in (self.RSS_0_91, self.RSS_1_0, self.RSS_2_0)
     
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.value}"
 
     @property
