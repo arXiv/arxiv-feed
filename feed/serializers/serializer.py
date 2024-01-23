@@ -1,12 +1,12 @@
-from typing import Dict, Union
+from typing import Union
 
-from flask import current_app
+from flask import current_app, url_for
 from feedgen.feed import FeedGenerator
 
-from feed.utils import utc_now
+from feed.utils import get_arxiv_midnight
 from feed.consts import FeedVersion
 from feed.errors import FeedError, FeedVersionError
-from feed.domain import Media, Document, DocumentSet
+from feed.domain import Document, DocumentSet
 from feed.serializers import Feed
 from feed.serializers.extensions import (
     ArxivExtension,
@@ -33,13 +33,12 @@ class Serializer:
         """
         # Config data
         self.base_server = current_app.config["BASE_SERVER"]
-        self.urls: Dict[str, str] = current_app.config["URLS"]
 
         self.version = FeedVersion.get(version)
         self.link = (
-            f"https://{self.base_server}/atom"
+            url_for("atom")
             if version == FeedVersion.ATOM_1_0
-            else f"https://{self.base_server}/rss"
+            else url_for("rss")
         )
         self.content_type = (
             "application/atom+xml"
@@ -59,11 +58,6 @@ class Serializer:
         fg.id(self.link)
         fg.link(
             href=self.link, rel="self", type=self.content_type,
-        )
-        fg.image(
-            url=f"https://{self.base_server}/icons/sfx.gif",
-            title=self.base_server,
-            link=self.link,
         )
         return fg
 
@@ -111,81 +105,36 @@ class Serializer:
             Document that should be added to the feed.
         """
         entry = fg.add_entry()
-
-        entry.id(self.urls["abs_by_id"].format(paper_id=document.paper_id))
-        entry.guid(f"oai:arXiv.org:{document.paper_id}", permalink=False)
+        full_id=f'{document.arxiv_id}v{document.version}'
+        entry.id(url_for("abs", paper_id=document.arxiv_id, version=document.version))
+        entry.guid(f"oai:arXiv.org:{full_id}", permalink=False)
         entry.title(document.title)
         entry.summary(document.abstract)
-        entry.published(document.submitted_date)
-        entry.updated(document.updated_date)
         entry.link(
             {
                 "type": "text/html",
-                "href": self.urls["abs_by_id"].format(
-                    paper_id=document.paper_id
-                ),
+                "href": url_for("abs_by_id", paper_id=document.arxiv_id),
             }
         )
-        for fmt in document.formats:
-            media = Media(
-                title=document.title,
-                url=self.urls[f"{fmt}_by_id"].format(
-                    paper_id=document.paper_id
-                ),
-                format=fmt,
-            )
-            entry.link(
-                {
-                    "title": str(media.format),
-                    "rel": "related",
-                    "type": media.type,
-                    "href": media.url,
-                }
-            )
-            entry.enclosure(url=media.url, type=media.type)
-            entry.arxiv.media(media)
 
         # Categories
-        categories = [
-            document.primary_category
-        ] + document.secondary_categories
-        for cat in categories:
-            label = cat.name + " (" + cat.id + ")"
-            category = {
-                "term": cat.id,
-                "scheme": f"https://{self.base_server}/schemas/atom",
-                "label": label,
-            }
-            entry.category(category)
-
-        # Add arXiv-specific element "comment"
-        if document.comments.strip():
-            entry.arxiv.comment(document.comments)
+        entry.arxiv.rights(document.license)
+        categories=[]
+        for cat in document.categories:
+            categories.append({"term": cat})
+        entry.category ( categories)
 
         # Add arXiv-specific element "journal_ref"
-        if document.journal_ref.strip():
-            entry.arxiv.journal_ref(document.journal_ref)
-
-        # Add arXiv-specific element "primary_category"
-        prim_cat = document.primary_category
-        label = prim_cat.name + " (" + prim_cat.id + ")"
-        category = {
-            "term": prim_cat.id,
-            "scheme": f"https://{self.base_server}/schemas/atom",
-            "label": label,
-        }
-        entry.arxiv.primary_category(category)
+        entry.arxiv.announce_type(document.update_type)
+        if document.journal_ref:
+            entry.arxiv.journal_ref(document.journal_ref.strip())
 
         # Add arXiv-specific element "doi"
         if document.doi:
             entry.arxiv.doi(document.doi)
 
         # Add authors
-        for author in document.authors:
-            entry.author({"name": author.full_name})
-            entry.arxiv.author(author)
-            if len(author.affiliations) > 0:
-                entry.arxiv.affiliation(author.full_name, author.affiliations)
+        entry.arxiv.authors(document.authors)
 
     def serialize_documents(self, documents: DocumentSet) -> Feed:
         """Serialize feed from documents.
@@ -208,22 +157,20 @@ class Serializer:
         fg = self._create_feed_generator()
         fg.title(f"{', '.join(documents.categories)} updates on arXiv.org")
         fg.description(
-            f"{', '.join(documents.categories)} updates on the "
-            f"{self.base_server} e-print archive.",
+            f"{', '.join(documents.categories)} updates on the arXiv.org e-print archive.",
         )
-        # Timestamps
-        now = utc_now()
-        fg.pubDate(now)
-        fg.updated(now)
+        fg.id(f"{self.link}{'+'.join(documents.categories)}")
+        midnight=get_arxiv_midnight()
+        fg.pubDate(midnight)
 
         fg.language("en-us")
-        fg.managingEditor(f"www-admin@{self.base_server}")
+        fg.managingEditor("rss-help@arxiv.org")
+        fg.skipDays(["Saturday","Sunday"])
         fg.generator("")
 
         # Add each search result to the feed
         for document in documents.documents:
             self.add_document(fg, document)
-
         return self._serialize(fg)
 
     def serialize_error(
@@ -248,12 +195,11 @@ class Serializer:
         fg.title(f"Feed error for query: {self.link}")
         fg.description(error.error)
         # Timestamps
-        now = utc_now()
-        fg.pubDate(now)
-        fg.updated(now)
+        midnight=get_arxiv_midnight()
+        fg.pubDate(midnight)
 
         fg.language("en-us")
-        fg.managingEditor(f"www-admin@{self.base_server}")
+        fg.managingEditor("rss-help.arxiv.org")
         fg.generator("")
 
         return self._serialize(fg, status_code=status_code)

@@ -4,9 +4,14 @@ import os
 from flask import Flask
 from werkzeug.utils import import_string
 
-from feed import routes
-from feed.cache import cache
+from arxiv.base import Base
 
+from feed import routes
+
+from flask_sqlalchemy import SQLAlchemy
+from feed.tables import metadata
+
+db=SQLAlchemy(metadata=metadata)
 
 def create_web_app() -> Flask:
     """Initialize and configure the rss application."""
@@ -18,7 +23,8 @@ def create_web_app() -> Flask:
     app.config.from_object(
         import_string(f"feed.config.{configuration.title()}")()
     )
+    Base(app)
     app.register_blueprint(routes.blueprint)
-    cache.init_app(app)
 
+    db.init_app(app)
     return app

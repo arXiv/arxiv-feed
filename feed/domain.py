@@ -3,7 +3,7 @@
 from typing import List
 from dataclasses import dataclass
 
-from feed.consts import Format
+from feed.consts import Format, UpdateActions
 
 
 @dataclass
@@ -38,27 +38,20 @@ class Media:
             return f"application/{self.format}"
         return "text/html"
 
-
 @dataclass
 class Document:
-    """Represents an arXiv e-print."""
+    """Represents an feed item."""
 
     arxiv_id: str
-    archive_name: str
-    paper_id: str
+    version: int
+    doi:str
     title: str
     abstract: str
-    submitted_date: str
-    updated_date: str
-    comments: str
-    journal_ref: str
-    doi: str
-    formats: List[Format]
     authors: List[Author]
-    primary_category: Category
-    secondary_categories: List[Category]
-    """The categories under which this document is filed."""
-
+    categories: List[str]
+    license: str
+    journal_ref: str
+    update_type: UpdateActions
 
 @dataclass
 class DocumentSet:

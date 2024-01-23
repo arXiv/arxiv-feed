@@ -10,8 +10,8 @@ from feed.errors import FeedError, FeedVersionError
 
 
 @pytest.fixture
-def documents() -> DocumentSet:
-    return DocumentSet(categories=[], documents=[])
+def documents(sample_doc) -> DocumentSet:
+    return DocumentSet(categories=["astro-ph"], documents=[sample_doc])
 
 
 def check_feed(
@@ -39,12 +39,26 @@ def check_feed(
     if error is None:
         assert "https://arxiv.org/" in link
         assert "arXiv.org" in title
-        assert "updates on the arxiv.org" in description
+        assert "updates on the arXiv.org" in description
+        check_content(tree, version)
     else:
         assert "https://arxiv.org/" in link
         assert "Feed error for query" in title
         assert error.error == description
 
+def check_content(tree, version: FeedVersion):
+    if version.is_rss:
+        title: str=tree.findtext("channel/item/title")
+        link: str=tree.findtext("channel/item/link")
+        
+    if version.is_atom:
+        ns = "{http://www.w3.org/2005/Atom}"
+        title: str = tree.findtext(f"{ns}entry/{ns}title")
+        link_entry= tree.find(f"{ns}entry/{ns}link")
+        link = link_entry.get('href')
+
+    assert "Mysteries" in title
+    assert "arxiv.org/abs" in link and "1234.5678" in link
 
 def test_serialize_documents(app, documents):
     for version in FeedVersion.supported():
