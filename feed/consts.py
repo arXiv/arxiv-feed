@@ -5,7 +5,7 @@ from feed.errors import FeedVersionError
 
 
 FEED_NUM_DAYS = 1
-UpdateActions = Literal['new', 'replace', 'absonly', 'cross', 'repcro']
+UpdateActions = Literal['new', 'replace', 'absonly', 'cross', 'replace-cross']
 DELIMITER = "+"
 
 

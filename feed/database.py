@@ -63,7 +63,7 @@ def get_announce_papers(first_day: datetime, last_day: datetime, archives: List[
             (and_(all.c.action == 'new', all.c.is_primary == 1), 'new'),
             (or_(all.c.action == 'new', all.c.action == 'cross'), 'cross'),
             (and_(all.c.action == 'replace', all.c.is_primary == 1), 'replace'),
-            (all.c.action == 'replace', 'repcro')
+            (all.c.action == 'replace', 'replace-cross')
         ],
         else_="no_match"
     ).label('listing_type')
@@ -73,7 +73,7 @@ def get_announce_papers(first_day: datetime, last_day: datetime, archives: List[
             (listing_type == 'new', 4),
             (listing_type == 'cross', 3),
             (listing_type == 'replace', 2),
-            (listing_type == 'repcross', 1),
+            (listing_type == 'replace-cross', 1),
         ],
         else_=0 
     ).label('case_order')

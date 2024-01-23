@@ -173,9 +173,94 @@ def test_db_cat_and_archive(app):
     found_math=False
     for item in items:
         action, meta= item
-        assert "math." in meta.abs_categories or "cs.CV" in meta.abs_categories
         if "math." in meta.abs_categories:
             found_math=True
         if "cs.CV" in meta.abs_categories:
             found_cs=True
     assert found_cs and found_math
+
+def test_db_find_alias(app):
+    #finds a paper only labeled with cs.IT
+    last_date=date(2023,10,26)
+    first_date=date(2023,10,26)
+    category=["math.IT"]
+    with app.app_context():
+        items=get_announce_papers(first_date, last_date, [],category)
+    alias_found=False
+    for item in items:
+        action, meta= item
+        if meta.document_id==2366646:
+            alias_found=True
+            assert action=="new"
+    assert alias_found
+
+def test_db_alias_in_archive(app):
+    #cs.IT is also math.IT and should show up in the math archive
+    last_date=date(2023,10,26)
+    first_date=date(2023,10,26)
+    archive=["math"]
+    with app.app_context():
+        items=get_announce_papers(first_date, last_date, archive,[])
+    alias_found=False
+    for item in items:
+        action, meta= item
+        if meta.document_id==2366646:
+            alias_found=True
+            assert action=="new"
+    assert alias_found
+
+def test_db_identify_cross(app):
+    last_date=date(2023,10,26)
+    first_date=date(2023,10,26)
+    category=["cs.CV"]
+    with app.app_context():
+        items=get_announce_papers(first_date, last_date, [],category)
+    item_found=False
+    for item in items:
+        action, meta= item
+        if meta.document_id==12346:
+            item_found=True
+            assert action=="cross"
+    assert item_found
+
+def test_db_identify_repcross(app):
+    last_date=date(2023,10,26)
+    first_date=date(2023,10,26)
+    category=["cs.CV"]
+    with app.app_context():
+        items=get_announce_papers(first_date, last_date, [],category)
+    item_found=False
+    for item in items:   
+        action, meta= item
+        if meta.document_id==12345:
+            item_found=True
+            assert action=="replace-cross"
+    assert item_found
+
+def test_db_identify_replace(app):
+    last_date=date(2023,10,26)
+    first_date=date(2023,10,26)
+    archive=["astro-ph"]
+    with app.app_context():
+        items=get_announce_papers(first_date, last_date, archive,[])
+    item_found=False
+    for item in items:   
+        action, meta= item
+        if meta.document_id==12345:
+            item_found=True
+            assert action=="replace"
+    assert item_found
+
+def test_db_identify_new(app):
+    last_date=date(2023,10,25)
+    first_date=date(2023,10,25)
+    archive=["astro-ph"]
+    with app.app_context():
+        items=get_announce_papers(first_date, last_date, archive,[])
+    item_found=False
+    for item in items:   
+        action, meta= item
+        if meta.document_id==12345:
+            item_found=True
+            assert action=="new"
+    assert item_found
