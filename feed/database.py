@@ -87,7 +87,7 @@ def get_announce_papers(first_day: datetime, last_day: datetime, archives: List[
         )
         .join(meta, meta.document_id == all.c.document_id)
         .filter(meta.is_current ==1)
-        .order_by(listing_order, meta.paper_id)
+        .order_by(listing_order, meta.paper_id.desc())
         .limit(result_limit)
         .all() 
     )

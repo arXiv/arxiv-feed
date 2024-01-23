@@ -264,3 +264,26 @@ def test_db_identify_new(app):
             item_found=True
             assert action=="new"
     assert item_found
+
+def test_db_announce_type_order(app):
+    #the papers returning in backwards order means they will be printed in the correct order
+    last_date=date(2023,10,27)
+    first_date=date(2023,10,26)
+    archive=["math","cs"]
+    with app.app_context():
+        items=get_announce_papers(first_date, last_date, archive,[])
+
+    order={"new":4, "cross":3, "replace":2, "replace-cross":1}
+    current_min=1
+    last_id="9999.99999"
+    for item in items:   
+        action, meta= item
+        score=order[action]
+        assert score >= current_min
+        if score > current_min:
+            current_min=score
+            last_id="9999.99999"
+        else: #ordered by paper id within same type
+            assert meta.paper_id < last_id
+            last_id=meta.paper_id
+
