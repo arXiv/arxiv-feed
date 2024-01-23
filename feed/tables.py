@@ -1,8 +1,39 @@
 from sqlalchemy import MetaData, Integer, Column, Date, Enum, String, text, Index, ForeignKey, DateTime, Text
+from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 
 metadata = MetaData()
 db= SQLAlchemy()
+
+
+
+class Document(db.Model):
+    """Model for documents stored as part of the arXiv repository."""
+
+    __tablename__ = "arXiv_documents"
+
+    document_id = Column(Integer, primary_key=True)
+    paper_id = Column(
+        String(20), nullable=False, unique=True, server_default=text("''")
+    )
+    title = Column(String(255), nullable=False,
+                   index=True, server_default=text("''"))
+    authors = Column(Text)
+    submitter_email = Column(
+        String(64), nullable=False, index=True, server_default=text("''")
+    )
+    submitter_id = Column(ForeignKey("tapir_users.user_id"), index=True)
+    dated = Column(Integer, nullable=False, index=True,
+                   server_default=text("'0'"))
+    primary_subject_class = Column(String(16))
+    created = Column(DateTime)
+    # submitter = relationship("User")
+
+    # trackback_ping = relationship(
+    #     "TrackbackPing",
+    #     primaryjoin="foreign(TrackbackPing.document_id)==Document.document_id",
+    # )
+
 
 class ArXivUpdate(db.Model): # type: ignore
     __tablename__ = "arXiv_updates"
@@ -68,3 +99,17 @@ class ArXivMetadata(db.Model): # type: ignore
     #document = relationship("Document")
     #arXiv_license = relationship("License")
     #submitter = relationship("User")
+
+
+class DocumentCategory(db.Model): #type: ignore
+    __tablename__ = 'arXiv_document_category'
+
+    document_id = Column(ForeignKey('arXiv_documents.document_id', ondelete='CASCADE'),
+                         primary_key=True, nullable=False, index=True,
+                         server_default=text("'0'"))
+    category = Column(ForeignKey('arXiv_category_def.category'), primary_key=True,
+                      nullable=False, index=True)
+    is_primary = Column(Integer, nullable=False, server_default=text("'0'"))
+
+    #document = relationship('Document')
+

@@ -1,4 +1,4 @@
-
+from feed.consts import UpdateActions
 from feed.errors import FeedIndexerError
 from feed.fetch_data import validate_request,create_document
 from feed.database import get_announce_papers
@@ -68,13 +68,13 @@ def test_bad_cat_requests():
         validate_request("physics.AI")
     assert "Bad subject class 'AI'." in str(excinfo.value)
 
-def test_create_document(sample_arxiv_metadata, sample_arxiv_update, sample_doc,sample_author, sample_author2):
+def test_create_document(sample_arxiv_metadata, sample_doc,sample_author, sample_author2):
     #simple
-    assert sample_doc==create_document((sample_arxiv_update,sample_arxiv_metadata))
+    assert sample_doc==create_document(("new",sample_arxiv_metadata))
     #multiple authors
     sample_doc.authors=[sample_author,sample_author2]
     sample_arxiv_metadata.authors="Very Real Sr. (Cornell University), L Emeno"
-    assert sample_doc==create_document((sample_arxiv_update,sample_arxiv_metadata))
+    assert sample_doc==create_document(("new",sample_arxiv_metadata))
 
 def test_basic_db_query(app):
     last_date=date(2023,10,26)
@@ -85,17 +85,14 @@ def test_basic_db_query(app):
     #any data is returned
     assert len(items) >0
     for item in items:
-        update, meta= item
+        action, meta= item
         #no absonly entries
-        assert update.action != "absonly"
+        assert action != "absonly"
         #no updates with a version above 4
-        assert update.action != "replace" or update.version <5
+        assert action != "replace" or meta.version <5
         #correct category
-        assert update.category =="cs.CV"
-        #fetched matching metadata
-        assert update.document_id == meta.document_id
-        #correct date
-        assert update.date==last_date
+        assert "cs.CV" in meta.abs_categories
+
 
 def test_db_date_range(app):
     last_date=date(2023,10,27)
@@ -108,13 +105,14 @@ def test_db_date_range(app):
     found_26=False
     found_27=False
     for item in items:
-        update, meta= item
-        assert update.date >=first_date and update.date <= last_date
-        if update.date==first_date:
+        
+        action, meta= item
+        if meta.document_id==12346:
             found_26=True
-        if update.date==last_date:
+        if meta.document_id==12347:
             found_27=True
-    assert found_26 and found_27
+    assert found_26 
+    assert found_27
 
 def test_db_archive(app):
     last_date=date(2023,10,26)
@@ -124,8 +122,8 @@ def test_db_archive(app):
         items=get_announce_papers(first_date, last_date, archive,[])
     assert len(items) >0 
     for item in items:
-        update, meta= item
-        assert update.archive in archive
+        action, meta= item
+        assert "cs." in meta.abs_categories
 
 def test_db_multiple_archives(app):
     last_date=date(2023,10,26)
@@ -137,11 +135,11 @@ def test_db_multiple_archives(app):
     found_cs=False
     found_math=False
     for item in items:
-        update, meta= item
-        assert update.archive in archives
-        if update.archive=="math":
+        action, meta= item
+        assert any(archive in meta.abs_categories for archive in archives)
+        if "math." in meta.abs_categories:
             found_math=True
-        if update.archive=="cs":
+        if "cs.CV" in meta.abs_categories:
             found_cs=True
     assert found_cs and found_math
 
@@ -155,11 +153,11 @@ def test_db_multiple_categories(app):
     found_cs=False
     found_math=False
     for item in items:
-        update, meta= item
-        assert update.category in cats
-        if update.category=="math.NT":
+        action, meta= item
+        assert any(cat in meta.abs_categories for cat in cats)
+        if "math.NT" in meta.abs_categories:
             found_math=True
-        if update.category=="cs.CV":
+        if "cs.CV" in meta.abs_categories:
             found_cs=True
     assert found_cs and found_math
 
@@ -174,10 +172,118 @@ def test_db_cat_and_archive(app):
     found_cs=False
     found_math=False
     for item in items:
-        update, meta= item
-        assert update.category in cat or update.archive in archive
-        if update.archive=="math":
+        action, meta= item
+        if "math." in meta.abs_categories:
             found_math=True
-        if update.category=="cs.CV":
+        if "cs.CV" in meta.abs_categories:
             found_cs=True
     assert found_cs and found_math
+
+def test_db_find_alias(app):
+    #finds a paper only labeled with cs.IT
+    last_date=date(2023,10,26)
+    first_date=date(2023,10,26)
+    category=["math.IT"]
+    with app.app_context():
+        items=get_announce_papers(first_date, last_date, [],category)
+    alias_found=False
+    for item in items:
+        action, meta= item
+        if meta.document_id==2366646:
+            alias_found=True
+            assert action=="new"
+    assert alias_found
+
+def test_db_alias_in_archive(app):
+    #cs.IT is also math.IT and should show up in the math archive
+    last_date=date(2023,10,26)
+    first_date=date(2023,10,26)
+    archive=["math"]
+    with app.app_context():
+        items=get_announce_papers(first_date, last_date, archive,[])
+    alias_found=False
+    for item in items:
+        action, meta= item
+        if meta.document_id==2366646:
+            alias_found=True
+            assert action=="new"
+    assert alias_found
+
+def test_db_identify_cross(app):
+    last_date=date(2023,10,26)
+    first_date=date(2023,10,26)
+    category=["cs.CV"]
+    with app.app_context():
+        items=get_announce_papers(first_date, last_date, [],category)
+    item_found=False
+    for item in items:
+        action, meta= item
+        if meta.document_id==12346:
+            item_found=True
+            assert action=="cross"
+    assert item_found
+
+def test_db_identify_repcross(app):
+    last_date=date(2023,10,26)
+    first_date=date(2023,10,26)
+    category=["cs.CV"]
+    with app.app_context():
+        items=get_announce_papers(first_date, last_date, [],category)
+    item_found=False
+    for item in items:   
+        action, meta= item
+        if meta.document_id==12345:
+            item_found=True
+            assert action=="replace-cross"
+    assert item_found
+
+def test_db_identify_replace(app):
+    last_date=date(2023,10,26)
+    first_date=date(2023,10,26)
+    archive=["astro-ph"]
+    with app.app_context():
+        items=get_announce_papers(first_date, last_date, archive,[])
+    item_found=False
+    for item in items:   
+        action, meta= item
+        if meta.document_id==12345:
+            item_found=True
+            assert action=="replace"
+    assert item_found
+
+def test_db_identify_new(app):
+    last_date=date(2023,10,25)
+    first_date=date(2023,10,25)
+    archive=["astro-ph"]
+    with app.app_context():
+        items=get_announce_papers(first_date, last_date, archive,[])
+    item_found=False
+    for item in items:   
+        action, meta= item
+        if meta.document_id==12345:
+            item_found=True
+            assert action=="new"
+    assert item_found
+
+def test_db_announce_type_order(app):
+    #the papers returning in backwards order means they will be printed in the correct order
+    last_date=date(2023,10,27)
+    first_date=date(2023,10,26)
+    archive=["math","cs"]
+    with app.app_context():
+        items=get_announce_papers(first_date, last_date, archive,[])
+
+    order={"new":4, "cross":3, "replace":2, "replace-cross":1}
+    current_min=1
+    last_id="9999.99999"
+    for item in items:   
+        action, meta= item
+        score=order[action]
+        assert score >= current_min
+        if score > current_min:
+            current_min=score
+            last_id="9999.99999"
+        else: #ordered by paper id within same type
+            assert meta.paper_id < last_id
+            last_id=meta.paper_id
+
