@@ -1,6 +1,6 @@
 from typing import List, Tuple, Optional
-from datetime import datetime
-
+from datetime import date
+import logging 
 from werkzeug.exceptions import BadRequest
 
 from sqlalchemy.orm import aliased
@@ -13,7 +13,9 @@ from arxiv.taxonomy.definitions import CATEGORIES
 from feed.tables import db, ArXivUpdate, ArXivMetadata, DocumentCategory
 from feed.consts import UpdateActions
 
-def get_announce_papers(first_day: datetime, last_day: datetime, archives: List[str], categories: List[str])->List[Tuple[UpdateActions, ArXivMetadata]]:
+logger = logging.getLogger(__name__)
+
+def get_announce_papers(first_day: date, last_day: date, archives: List[str], categories: List[str])->List[Tuple[UpdateActions, ArXivMetadata]]:
     result_limit = 2000
     version_threshold = 6
 
@@ -91,6 +93,9 @@ def get_announce_papers(first_day: datetime, last_day: datetime, archives: List[
         .limit(result_limit)
         .all() 
     )
+
+    if len(results) <1:
+        logger.warning(f"No results for db query. first day: {first_day}, last day: {last_day}, archives: {archives}, categories: {categories}")
 
 
     return results # type: ignore
