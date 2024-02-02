@@ -2,7 +2,7 @@
 from typing import Union
 
 from werkzeug import Response
-from flask import request, Blueprint, make_response
+from flask import request, Blueprint, make_response, current_app, url_for
 
 from feed import controller
 from datetime import datetime, timedelta
@@ -54,6 +54,12 @@ def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
     response.headers['Cache-Control'] = f"max-age={int(expiration_time)}"
     return response
 
+@blueprint.route("/")
+def feed_home()-> Response:
+    """Returns a empty error page"""
+    rss=url_for('rss')
+    atom=url_for("atom")
+    return make_response(f"Please use {rss}[archive or category] for RSS 2.0 and {atom}[archive or category] for ATOM formats", 200)
 
 @blueprint.route("/rss")
 @blueprint.route("/atom")
