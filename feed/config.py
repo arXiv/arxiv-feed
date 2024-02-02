@@ -11,7 +11,7 @@ class Config:
     DEBUG = False
     TESTING = False
     VERSION = "0.3"
-    BASE_SERVER = os.environ.get("BASE_SERVER", "arxiv.org")
+    BASE_SERVER = os.environ.get("BASE_SERVER", "rss.arxiv.org")
 
     METADATA_ENDPOINT = os.environ.get(
         "METADATA_ENDPOINT", f"https://{BASE_SERVER}"

@@ -147,7 +147,7 @@ def get_records_from_db(archives: List[str], categories: List[str], days: int
     #start at the start of today
     last_date=get_arxiv_midnight()
     first_date=last_date - timedelta(days=days-1) #-1 for inclusive date bounds
-    return get_announce_papers(first_date,last_date, archives, categories)
+    return get_announce_papers(first_date.date(),last_date.date(), archives, categories)
 
 def create_document(record:Tuple[UpdateActions, ArXivMetadata])->Document:
     """Copy data from the provided database entires into a new Document and return it.
