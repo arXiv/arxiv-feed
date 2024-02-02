@@ -1,18 +1,17 @@
 """Interface to Index Service for RSS feeds."""
-
 import logging
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Literal
 from datetime import datetime, timedelta
 
 from arxiv import taxonomy
 from arxiv.util.authors import parse_author_affil
+
 from feed.utils import get_arxiv_midnight
 from feed.errors import FeedIndexerError
-from feed.consts import DELIMITER
+from feed.consts import DELIMITER, UpdateActions
 from feed.domain import Author, Document, DocumentSet
 from feed.database import get_announce_papers
-from feed.tables import ArXivUpdate, ArXivMetadata
-
+from feed.tables import ArXivMetadata
 
 logger = logging.getLogger(__name__)
 
@@ -39,39 +38,11 @@ def search(query: str, days: int) -> DocumentSet:
     archives,categories = validate_request(query)
     
     records=get_records_from_db(archives,categories, days)
-    paper_ids: Dict[str, int]={}
 
-    # Create a Document object for every hit that was found
     for record in records:
-        paper_id=record[1].paper_id
-
-        if paper_id in paper_ids: # handle duplicate paperids
-            old_doc=documents[paper_ids[paper_id]]
-            update=record[0]
-            metadata=record[1]
-            #both entries are for a new paper
-            if update.action=="new" and old_doc.update_type=="new":
-                pass #only one new entry needed
-            #both entries are replacements or crosslists -> show most recent version
-            elif (update.action=="replace" and old_doc.update_type=="replace") or(update.action=="cross" and old_doc.update_type=="cross"):
-                if old_doc.version >= metadata.version:
-                    pass #keep original document
-                else:
-                    document = create_document(record)
-                    documents[paper_ids[paper_id]]=document
-            else:
-                #allow mixed entry type duplicates
-                array_loc=len(documents)
-                paper_ids[paper_id]=array_loc #latest type of entry now the one up for replacement (entries are grouped by type)
-                document = create_document(record)
-                documents.append(document)
-
-        else: #new paper_id
-            array_loc=len(documents)
-            paper_ids[paper_id]=array_loc
-            document = create_document(record)
-            documents.append(document)
-
+        document = create_document(record)
+        documents.append(document)
+    
     return DocumentSet(categories+archives, documents) 
 
 def validate_request(query: str) -> Tuple[List[str],List[str]]:
@@ -153,7 +124,7 @@ def validate_request(query: str) -> Tuple[List[str],List[str]]:
     return archives,categories
 
 def get_records_from_db(archives: List[str], categories: List[str], days: int
-) -> List[Tuple[ArXivUpdate, ArXivMetadata]]:
+) -> List[Tuple[UpdateActions, ArXivMetadata]]:
     """Retrieve all records that match the list of categories and date range.
 
     Parameters
@@ -170,8 +141,7 @@ def get_records_from_db(archives: List[str], categories: List[str], days: int
 
     Returns
     -------
-    records : List[ArxivUpdate]
-        A list of entries from the arxiv_updates table that match the parameters
+    each row is a tuple of the AnnounceType literal and the metadata entry
 
     """
     #start at the start of today
@@ -179,13 +149,13 @@ def get_records_from_db(archives: List[str], categories: List[str], days: int
     first_date=last_date - timedelta(days=days-1) #-1 for inclusive date bounds
     return get_announce_papers(first_date.date(),last_date.date(), archives, categories)
 
-def create_document(record:Tuple[ArXivUpdate, ArXivMetadata])->Document:
+def create_document(record:Tuple[UpdateActions, ArXivMetadata])->Document:
     """Copy data from the provided database entires into a new Document and return it.
 
     Parameters
     ----------
-    record : Tuple[ArXivUpdate, ArXivMetadata]
-        Models of data from two tables containing data on the update.
+    record : Tuple[AnnounceTypes, ArXivMetadata]
+        type of announcement listing and metadata for article
 
     Returns
     -------
@@ -193,7 +163,7 @@ def create_document(record:Tuple[ArXivUpdate, ArXivMetadata])->Document:
         The new object that is created to hold the documents's data
 
     """
-    update, metadata=record
+    action, metadata=record
   
     authors=[]
     for author in parse_author_affil(metadata.authors):
@@ -211,5 +181,5 @@ def create_document(record:Tuple[ArXivUpdate, ArXivMetadata])->Document:
         license=metadata.license,
         doi=metadata.doi,
         journal_ref=metadata.journal_ref,
-        update_type=update.action
+        update_type=action
         )

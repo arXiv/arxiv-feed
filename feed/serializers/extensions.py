@@ -205,7 +205,7 @@ class ArxivEntryExtension(BaseEntryExtension):
         self.__arxiv_license = text
 
     def announce_type(self, text: str) -> None:
-        """type of anouncement, options are: 'new', 'replace', 'absonly', 'cross', 'repcro'
+        """type of anouncement, options are: 'new', 'replace', 'absonly', 'cross', 'replace-cross'
         """
         
         self.__arxiv_announce_type = text
