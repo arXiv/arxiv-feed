@@ -1,10 +1,10 @@
 from typing import List, Tuple
 from sqlalchemy import and_, or_, case
 from feed.tables import ArXivUpdate, ArXivMetadata
-from datetime import datetime
+from datetime import date
 from sqlalchemy.orm import aliased
 
-def get_announce_papers(first_day: datetime, last_day: datetime, archives: List[str], categories: List[str])->List[Tuple[ArXivUpdate, ArXivMetadata]]:
+def get_announce_papers(first_day: date, last_day: date, archives: List[str], categories: List[str])->List[Tuple[ArXivUpdate, ArXivMetadata]]:
     result_limit = 2000
     version_threshold = 4
 
