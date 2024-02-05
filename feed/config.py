@@ -11,7 +11,8 @@ class Config:
     DEBUG = False
     TESTING = False
     VERSION = "0.3"
-    BASE_SERVER = os.environ.get("BASE_SERVER", "rss.arxiv.org")
+    BASE_SERVER = os.environ.get("BASE_SERVER", "arxiv.org")
+    RSS_SERVER = os.environ.get("RSS_SERVER", "rss.arxiv.org")
 
     METADATA_ENDPOINT = os.environ.get(
         "METADATA_ENDPOINT", f"https://{BASE_SERVER}"
@@ -24,8 +25,8 @@ class Config:
     URLS =[
         ("pdf", "/pdf/<arxiv:paper_id>v<string:version>", BASE_SERVER),
         ("pdf_by_id", "/pdf/<arxiv:paper_id>", BASE_SERVER),
-        ("rss", "/rss/", BASE_SERVER),
-        ("atom", "/atom/", BASE_SERVER)
+        ("rss", "/rss", RSS_SERVER),
+        ("atom", "/atom", RSS_SERVER)
     ]
 
     ### database connection
