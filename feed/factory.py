@@ -24,6 +24,7 @@ def create_web_app() -> Flask:
         import_string(f"feed.config.{configuration.title()}")()
     )
     Base(app)
+    app.url_map.strict_slashes = False
     app.register_blueprint(routes.blueprint)
 
     db.init_app(app)
