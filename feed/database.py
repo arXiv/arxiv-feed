@@ -4,7 +4,8 @@ import logging
 from werkzeug.exceptions import BadRequest
 
 from sqlalchemy.orm import aliased
-from sqlalchemy import and_, or_, case
+from sqlalchemy.orm.query import Query
+from sqlalchemy import and_, or_, case, desc
 from sqlalchemy.sql import func
 
 from arxiv import taxonomy
@@ -82,7 +83,7 @@ def get_announce_papers(first_day: date, last_day: date, archives: List[str], ca
 
     #data for listings to be displayed
     meta = aliased(ArXivMetadata)
-    results = (
+    result_query = (
         db.session.query(
             listing_type,
             meta
@@ -90,13 +91,15 @@ def get_announce_papers(first_day: date, last_day: date, archives: List[str], ca
         .join(meta, meta.document_id == all.c.document_id)
         .filter(meta.is_current ==1)
         .order_by(listing_order, meta.paper_id.desc())
-        .limit(result_limit)
-        .all() 
+        .limit(result_limit) 
     )
 
+    results=result_query.all()
+    
     if len(results) <1:
-        logger.warning(f"No results for db query. first day: {first_day}, last day: {last_day}, archives: {archives}, categories: {categories}")
-
+        str=f"No results for db query. first day: {first_day}, last day: {last_day}, archives: {archives}, categories: {categories}\n"
+        _debug_no_response(str,result_query)
+       
 
     return results # type: ignore
 
@@ -145,3 +148,22 @@ def _check_alternate_name(category:str) -> Optional[str]:
             return key # type: ignore
 
     return None #no alternate names
+
+def _debug_no_response(msg:str, query: Query)->None:
+    
+    actual_query=str(query.statement.compile(compile_kwargs={"literal_binds": True}))
+    service_check= f"Service check result: {check_service()}\n"
+    recent_entry = (
+        db.session.query(ArXivUpdate)
+        .order_by(desc(ArXivUpdate.date))
+        .first()
+    )
+    log=msg+service_check+f"most recent entry: {recent_entry}\n"+"full query: \n"+actual_query
+    logger.warning(log)
+    return
+
+def check_service() -> str:
+    query=db.session.query(ArXivUpdate).limit(1).all()
+    if len(query)==1:
+        return "GOOD"
+    return "BAD"

@@ -42,23 +42,34 @@ def check_feed(
         assert "updates on the arXiv.org" in description
         check_content(tree, version)
     else:
-        assert "https://rss.arxiv.org/" in link
+        assert "https://rss.arxiv.org/" in link 
         assert "Feed error for query" in title
         assert error.error == description
 
 def check_content(tree, version: FeedVersion):
     if version.is_rss:
+        ns = {'dc': 'http://purl.org/dc/elements/1.1/'}
         title: str=tree.findtext("channel/item/title")
         link: str=tree.findtext("channel/item/link")
+        creator_urls = [creator_link.get('href') for creator_link in tree.findall("channel/item/dc:creator/a", namespaces=ns)]
         
     if version.is_atom:
         ns = "{http://www.w3.org/2005/Atom}"
+        dc="{http://purl.org/dc/elements/1.1/}"
         title: str = tree.findtext(f"{ns}entry/{ns}title")
         link_entry= tree.find(f"{ns}entry/{ns}link")
         link = link_entry.get('href')
+        creators=tree.findall(f"{ns}entry/{dc}creator/{ns}a")
+        creator_urls=[]
+        for creator in creators:
+            url=creator.get('href')
+            creator_urls.append(url)
 
     assert "Mysteries" in title
-    assert "arxiv.org/abs" in link and "1234.5678" in link
+    assert "://arxiv.org/abs" in link and "1234.5678" in link
+    assert len(creator_urls)>0
+    for url in creator_urls:
+        assert "://arxiv.org/search?searchtype=author&" in url
 
 def test_serialize_documents(app, documents):
     for version in FeedVersion.supported():

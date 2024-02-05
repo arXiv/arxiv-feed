@@ -10,12 +10,10 @@ class Config:
 
     DEBUG = False
     TESTING = False
-    VERSION = "0.3"
-    BASE_SERVER = os.environ.get("BASE_SERVER", "rss.arxiv.org")
+    VERSION = "1.0"
+    BASE_SERVER = os.environ.get("BASE_SERVER", "arxiv.org")
+    RSS_SERVER = os.environ.get("RSS_SERVER", "rss.arxiv.org")
 
-    METADATA_ENDPOINT = os.environ.get(
-        "METADATA_ENDPOINT", f"https://{BASE_SERVER}"
-    )
 
     FEED_NUM_DAYS = os.environ.get("FEED_NUM_DAYS", consts.FEED_NUM_DAYS)
 
@@ -24,8 +22,8 @@ class Config:
     URLS =[
         ("pdf", "/pdf/<arxiv:paper_id>v<string:version>", BASE_SERVER),
         ("pdf_by_id", "/pdf/<arxiv:paper_id>", BASE_SERVER),
-        ("rss", "/rss/", BASE_SERVER),
-        ("atom", "/atom/", BASE_SERVER)
+        ("rss", "/rss", RSS_SERVER),
+        ("atom", "/atom", RSS_SERVER)
     ]
 
     ### database connection
@@ -39,14 +37,12 @@ class Production(Config):
     """Production configuration."""
 
     BASE_SERVER = "arxiv.org"
-    METADATA_ENDPOINT = f"https://{BASE_SERVER}"
 
 
 class Beta(Config):
     """Beta environment configuration."""
 
     BASE_SERVER = "beta.arxiv.org"
-    METADATA_ENDPOINT = f"https://{BASE_SERVER}"
 
 
 class Development(Config):
@@ -55,7 +51,6 @@ class Development(Config):
     DEBUG = True
 
     BASE_SERVER = "127.0.0.1"
-    METADATA_ENDPOINT = f"https://beta.arxiv.org"
 
     FEED_NUM_DAYS = 1 #set to a large number if you want more than one days entries
 

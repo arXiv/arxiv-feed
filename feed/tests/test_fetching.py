@@ -282,7 +282,7 @@ def test_db_announce_type_order(app):
         assert score >= current_min
         if score > current_min:
             current_min=score
-            last_id="9999.99999"
+            last_id=meta.paper_id
         else: #ordered by paper id within same type
             assert meta.paper_id < last_id
             last_id=meta.paper_id
