@@ -152,13 +152,13 @@ def _check_alternate_name(category:str) -> Optional[str]:
 def _debug_no_response(msg:str, query: Query)->None:
     
     actual_query=str(query.statement.compile(compile_kwargs={"literal_binds": True}))
-    service_check= f"Service check result: {check_service()}\n"
+    
     recent_entry = (
         db.session.query(ArXivUpdate)
         .order_by(desc(ArXivUpdate.date))
         .first()
     )
-    log=msg+service_check+f"most recent entry: {recent_entry}\n"+"full query: \n"+actual_query
+    log=msg+f"most recent entry: {recent_entry}"
     logger.warning(log)
     return
 
