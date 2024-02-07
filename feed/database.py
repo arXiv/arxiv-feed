@@ -1,7 +1,6 @@
 from typing import List, Tuple, Optional
 from datetime import date
 import logging 
-from werkzeug.exceptions import BadRequest
 
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.query import Query
