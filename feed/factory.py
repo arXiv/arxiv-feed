@@ -9,9 +9,7 @@ from arxiv.base import Base
 from feed import routes
 
 from flask_sqlalchemy import SQLAlchemy
-from feed.tables import metadata
-
-db=SQLAlchemy(metadata=metadata)
+from feed.tables import db
 
 def create_web_app() -> Flask:
     """Initialize and configure the rss application."""

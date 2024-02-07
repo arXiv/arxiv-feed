@@ -6,8 +6,6 @@ PROJECT := feed
 .EXPORT_ALL_VARIABLES:
 PIPENV_VERBOSITY = -1
 ARXIV_FEED_CONFIGURATION = development
-METADATA_ENDPOINT = https://beta.arxiv.org
-
 
 help:                   ## Show help.
 	@grep -E '^[a-zA-Z2_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
