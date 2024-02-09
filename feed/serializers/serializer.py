@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Optional
 
 from flask import current_app, url_for
 from feedgen.feed import FeedGenerator
@@ -46,7 +46,7 @@ class Serializer:
             else "application/rss+xml"
         )
 
-    def _create_feed_generator(self) -> FeedGenerator:
+    def _create_feed_generator(self, categories:Optional[str]) -> FeedGenerator:
         """Creates an empty FeedGenerator and adds arxiv extensions."""
         fg = FeedGenerator()
 
@@ -55,9 +55,10 @@ class Serializer:
         fg.register_extension("arxiv", ArxivExtension, ArxivEntryExtension)
 
         # Populate the feed
-        fg.id(self.link)
+        link=self.link+"/"+categories
+        fg.id(link)
         fg.link(
-            href=self.link, rel="self", type=self.content_type,
+            href=link, rel="self", type=self.content_type,
         )
         return fg
 
@@ -154,12 +155,13 @@ class Serializer:
         FeedVersionError
             If the feed serialization format is not supported.
         """
-        fg = self._create_feed_generator()
+        cats_link='+'.join(documents.categories)
+        fg = self._create_feed_generator(cats_link)
         fg.title(f"{', '.join(documents.categories)} updates on arXiv.org")
         fg.description(
             f"{', '.join(documents.categories)} updates on the arXiv.org e-print archive.",
         )
-        fg.id(f"{self.link}/{'+'.join(documents.categories)}")
+        fg.id(self.link)
         midnight=get_arxiv_midnight()
         fg.pubDate(midnight)
 
