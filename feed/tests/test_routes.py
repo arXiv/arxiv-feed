@@ -102,8 +102,12 @@ def test_routes_bad_rss(client):
 
 def test_base(client):
     for route in [
-            "/rss",
-            "/atom",
+        "/rss/",
+        "/atom/",
+        "/rss",
+        "/atom",
+        "",
+        "/",
     ]:
         resp = client.get(route)
         resp.status_code == 200
