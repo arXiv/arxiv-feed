@@ -3,7 +3,7 @@ from typing import Union
 from datetime import timedelta
 
 from werkzeug import Response
-from flask import request, Blueprint, make_response, current_app, url_for
+from flask import request, Blueprint, make_response, redirect, url_for
 
 from arxiv.taxonomy.definitions import ARCHIVES_ACTIVE
 
@@ -88,3 +88,12 @@ def rss(query: str) -> Response:
 def atom(query: str) -> Response:
     """Return the Atom 1.0 results for the past day."""
     return _feed(query=query, version=FeedVersion.ATOM_1_0)
+
+@blueprint.route("/favicon.ico")
+@blueprint.route("/apple-touch-icon-120x120-precomposed.png")
+@blueprint.route("/apple-touch-icon-120x120.png")
+@blueprint.route("/apple-touch-icon-precomposed.png")
+def favicon() -> Response:
+    """Send favicon."""
+    url=url_for("static", file_path="browse/0.3.4/images/icons/favicon.ico")
+    return redirect(url,code=301)

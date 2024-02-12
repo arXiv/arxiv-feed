@@ -15,6 +15,7 @@ class Config:
     BASE_SERVER = os.environ.get("BASE_SERVER", "arxiv.org")
     RSS_SERVER = os.environ.get("RSS_SERVER", "rss.arxiv.org")
     INFO_SERVER = os.environ.get("INFO_SERVER", "info.arxiv.org")
+    STATIC_SERVER = os.environ.get("STATIC_SERVER", "static.arxiv.org")
 
     FEED_NUM_DAYS = os.environ.get("FEED_NUM_DAYS", consts.FEED_NUM_DAYS)
 
@@ -26,7 +27,8 @@ class Config:
         ("taxonomy", "/category_taxonomy", BASE_SERVER),
         ("rss", "/rss", RSS_SERVER),
         ("atom", "/atom", RSS_SERVER),
-        ("help","/help/rss.html", INFO_SERVER)
+        ("help","/help/rss.html", INFO_SERVER),
+        ("static","/static/<path:file_path>", STATIC_SERVER)
     ]
 
     ### database connection
