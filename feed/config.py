@@ -11,9 +11,10 @@ class Config:
     DEBUG = False
     TESTING = False
     VERSION = "1.0"
+
     BASE_SERVER = os.environ.get("BASE_SERVER", "arxiv.org")
     RSS_SERVER = os.environ.get("RSS_SERVER", "rss.arxiv.org")
-
+    INFO_SERVER = os.environ.get("INFO_SERVER", "info.arxiv.org")
 
     FEED_NUM_DAYS = os.environ.get("FEED_NUM_DAYS", consts.FEED_NUM_DAYS)
 
@@ -22,8 +23,10 @@ class Config:
     URLS =[
         ("pdf", "/pdf/<arxiv:paper_id>v<string:version>", BASE_SERVER),
         ("pdf_by_id", "/pdf/<arxiv:paper_id>", BASE_SERVER),
+        ("taxonomy", "/category_taxonomy", BASE_SERVER),
         ("rss", "/rss", RSS_SERVER),
-        ("atom", "/atom", RSS_SERVER)
+        ("atom", "/atom", RSS_SERVER),
+        ("help","/help/rss.html", INFO_SERVER)
     ]
 
     ### database connection

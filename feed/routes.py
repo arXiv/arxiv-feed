@@ -1,12 +1,13 @@
 """URL routes for RSS feeds."""
 from typing import Union
+from datetime import timedelta
 
 from werkzeug import Response
 from flask import request, Blueprint, make_response, current_app, url_for
 
-from feed import controller
-from datetime import datetime, timedelta
+from arxiv.taxonomy.definitions import ARCHIVES_ACTIVE
 
+from feed import controller
 from feed.consts import FeedVersion
 from feed.serializers import serialize
 from feed.errors import FeedError, FeedVersionError
@@ -57,16 +58,22 @@ def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
 @blueprint.route("/")
 def feed_home()-> Response:
     """Returns a empty error page"""
-    rss=url_for('rss')
-    atom=url_for("atom")
-    return make_response(f"Please use {rss}[archive or category] for RSS 2.0 and {atom}[archive or category] for ATOM formats", 200)
+    rss_url=url_for('rss')
+    atom_url=url_for("atom")
+    help_url=url_for("help")
+    rss=f"<a href='{rss_url}'>{rss_url}/[archive or category]</a>"
+    atom=f"<a href='{atom_url}'>{atom_url}/[archive or category]</a>"
+    help=f"<a href='{help_url}'>here</a>"
+    help_text=f"Please use {rss} for RSS 2.0 and {atom} for ATOM formats. See {help} for help."
+    return make_response(help_text, 200)
 
 @blueprint.route("/rss")
 @blueprint.route("/atom")
 def feed_help()-> Response:
     """Returns a empty error page"""
-    return make_response("No archive specified.", 200)
-
+    archives=', '.join(key for key in ARCHIVES_ACTIVE.keys() if key != 'test')
+    help=f"<a href='{url_for('taxonomy')}'>here</a>"
+    return make_response(f"No archive specified. Archives are: {archives}. See {help} to learn about ArXiv category taxonomy.", 200)
 
 @blueprint.route("/rss/<string:query>", methods=["GET"])
 def rss(query: str) -> Response:
