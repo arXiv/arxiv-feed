@@ -110,7 +110,20 @@ class Serializer:
         entry.id(url_for("abs", paper_id=document.arxiv_id, version=document.version))
         entry.guid(f"oai:arXiv.org:{full_id}", permalink=False)
         entry.title(document.title)
-        entry.summary(document.abstract)
+
+
+        #not all RSS readers handle the extra fields, put most important info in the description as well
+        description=f"arXiv:{full_id} Announce Type: {document.update_type}"
+        if document.journal_ref:
+            entry.arxiv.journal_ref(document.journal_ref.strip())
+            description+=f' Journal Ref: {document.journal_ref}'
+        # Add arXiv-specific element "doi"
+        if document.doi:
+            entry.arxiv.doi(document.doi)
+            description+=f' DOI: {document.doi}'
+        description+=f"\nAbstract: {document.abstract}"
+        entry.summary(description)
+        
         entry.link(
             {
                 "type": "text/html",
@@ -127,12 +140,7 @@ class Serializer:
 
         # Add arXiv-specific element "journal_ref"
         entry.arxiv.announce_type(document.update_type)
-        if document.journal_ref:
-            entry.arxiv.journal_ref(document.journal_ref.strip())
 
-        # Add arXiv-specific element "doi"
-        if document.doi:
-            entry.arxiv.doi(document.doi)
 
         # Add authors
         entry.arxiv.authors(document.authors)
