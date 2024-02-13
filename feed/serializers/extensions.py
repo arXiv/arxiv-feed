@@ -95,9 +95,8 @@ class ArxivEntryExtension(BaseEntryExtension):
             if author.initials:
                 full_name+=f" {author.initials}"
             if author.affiliations:
-                full_name+=', '.join(author.affiliations)
-            url = url_for('search_box', searchtype='author', query=full_name) #correct
-            full_text += f'{full_name} ({url}), '
+                full_name+=', '.join(author.affiliations)            
+            full_text += f'{full_name}, '
         creator_element.text=full_text[:-2]
 
     def extend_atom(self, entry: Element) -> Element:
