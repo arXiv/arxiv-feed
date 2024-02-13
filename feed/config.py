@@ -10,7 +10,7 @@ class Config:
 
     DEBUG = False
     TESTING = False
-    VERSION = "1.0"
+    VERSION = "1.1"
 
     BASE_SERVER = os.environ.get("BASE_SERVER", "arxiv.org")
     RSS_SERVER = os.environ.get("RSS_SERVER", "rss.arxiv.org")

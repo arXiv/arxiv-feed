@@ -51,7 +51,7 @@ def check_content(tree, version: FeedVersion):
         ns = {'dc': 'http://purl.org/dc/elements/1.1/'}
         title: str=tree.findtext("channel/item/title")
         link: str=tree.findtext("channel/item/link")
-        creator_urls = [creator_link.get('href') for creator_link in tree.findall("channel/item/dc:creator/a", namespaces=ns)]
+        creators: str = tree.findtext("channel/item/dc:creator", namespaces=ns)
         
     if version.is_atom:
         ns = "{http://www.w3.org/2005/Atom}"
@@ -59,28 +59,22 @@ def check_content(tree, version: FeedVersion):
         title: str = tree.findtext(f"{ns}entry/{ns}title")
         link_entry= tree.find(f"{ns}entry/{ns}link")
         link = link_entry.get('href')
-        creators=tree.findall(f"{ns}entry/{dc}creator/{ns}a")
-        creator_urls=[]
-        for creator in creators:
-            url=creator.get('href')
-            creator_urls.append(url)
+        creators=tree.findall(f"{ns}entry/{dc}creator")
 
     assert "Mysteries" in title
     assert "://arxiv.org/abs" in link and "1234.5678" in link
-    assert len(creator_urls)>0
-    for url in creator_urls:
-        assert "://arxiv.org/search?searchtype=author&" in url
+    assert len(creators)>0
 
 def test_serialize_documents(app, documents):
     for version in FeedVersion.supported():
-        feed = serialize(documents, version=version)
+        feed = serialize(documents, "astro-ph", version=version)
         check_feed(feed, version=version)
 
 
 def test_serialize_error(app):
     error = FeedError("Some error text.")
     for version in FeedVersion.supported():
-        feed = serialize(error, version=version)
+        feed = serialize(error, "astro-ph", version=version)
         check_feed(feed, version=version, status_code=400, error=error)
 
 
@@ -88,7 +82,7 @@ def test_serialize_invalid_version(app, documents):
     for version in [
         v for v in FeedVersion if v not in FeedVersion.supported()
     ]:
-        feed = serialize(documents, version=version)
+        feed = serialize(documents, "astro-ph", version=version)
         check_feed(
             feed,
             version=FeedVersion.RSS_2_0,

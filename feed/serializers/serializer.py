@@ -184,7 +184,7 @@ class Serializer:
         return self._serialize(fg)
 
     def serialize_error(
-        self, error: FeedError, status_code: int = 400
+        self, error: FeedError, query:str, status_code: int = 400
     ) -> Feed:
         """Create feed from an error.
 
@@ -200,9 +200,9 @@ class Serializer:
         Feed
             Feed object containing rss feed.
         """
-        fg = self._create_feed_generator()
+        fg = self._create_feed_generator(query)
 
-        fg.title(f"Feed error for query: {self.link}")
+        fg.title(f"Feed error for query: {self.link}/{query}")
         fg.description(error.error)
         # Timestamps
         midnight=get_arxiv_midnight()
@@ -216,8 +216,9 @@ class Serializer:
 
 
 def serialize(
-    documents_or_error: Union[DocumentSet, FeedError],
-    version: Union[str, FeedVersion] = FeedVersion.RSS_2_0,
+    documents_or_error: Union[DocumentSet, FeedError], 
+    query: str,
+    version: Union[str, FeedVersion] = FeedVersion.RSS_2_0
 ) -> Feed:
     """Serialize a document set or an error.
 
@@ -225,6 +226,7 @@ def serialize(
     ----------
     documents_or_error : Union[DocumentSet, FeedError]
         Either a document set or a Feed error object.
+    str: the original user query
     version : FeedVersion
         Serialization format.
 
@@ -238,11 +240,11 @@ def serialize(
         if isinstance(documents_or_error, DocumentSet):
             return serializer.serialize_documents(documents_or_error)
         elif isinstance(documents_or_error, FeedError):
-            return serializer.serialize_error(documents_or_error)
+            return serializer.serialize_error(documents_or_error, query)
         else:
             raise serializer.serialize_error(
-                FeedError("Internal Server Error."), status_code=500
+                FeedError("Internal Server Error."), query, status_code=500
             )
     except FeedVersionError as ex:
         serializer = Serializer(version=FeedVersion.RSS_2_0)
-        return serializer.serialize_error(ex)
+        return serializer.serialize_error(ex, query)

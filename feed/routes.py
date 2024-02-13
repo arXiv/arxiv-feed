@@ -3,7 +3,7 @@ from typing import Union
 from datetime import timedelta
 
 from werkzeug import Response
-from flask import request, Blueprint, make_response, redirect, url_for
+from flask import request, Blueprint, make_response, redirect, url_for, current_app
 
 from arxiv.taxonomy.definitions import ARCHIVES_ACTIVE
 
@@ -12,13 +12,15 @@ from feed.consts import FeedVersion
 from feed.serializers import serialize
 from feed.errors import FeedError, FeedVersionError
 from feed.utils import get_arxiv_midnight, utc_now
+from feed.database import check_service
 
 
 blueprint = Blueprint("rss", __name__, url_prefix="/")
 
 @blueprint.route("/feed/status")
 def status() -> Response:
-    return make_response("good", 200)
+    text=f"Status: {check_service()} Version: {current_app.config['VERSION']}"
+    return make_response(text, 200)
 
 
 def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
@@ -39,11 +41,11 @@ def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
     try:
         version = FeedVersion.get(version)
         documents = controller.get_documents(query)
-        feed = serialize(documents, version=version)
+        feed = serialize(documents, query=query, version=version)
     except FeedVersionError as ex:
-        feed = serialize(ex)
+        feed = serialize(ex, query=query)
     except FeedError as ex:
-        feed = serialize(ex, version=version)
+        feed = serialize(ex, query=query, version=version)
 
 
     # Create response object from data
