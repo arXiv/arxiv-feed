@@ -46,7 +46,7 @@ class Serializer:
             else "application/rss+xml"
         )
 
-    def _create_feed_generator(self, categories:Optional[str]) -> FeedGenerator:
+    def _create_feed_generator(self, cat_or_archive:str) -> FeedGenerator:
         """Creates an empty FeedGenerator and adds arxiv extensions."""
         fg = FeedGenerator()
 
@@ -55,7 +55,7 @@ class Serializer:
         fg.register_extension("arxiv", ArxivExtension, ArxivEntryExtension)
 
         # Populate the feed
-        link=self.link+categories
+        link=self.link+cat_or_archive
         fg.id(link)
         fg.link(
             href=link, rel="self", type=self.content_type,
