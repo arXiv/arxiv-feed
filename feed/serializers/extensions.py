@@ -89,16 +89,15 @@ class ArxivEntryExtension(BaseEntryExtension):
         creator_element = etree.SubElement(
             entry, "{http://purl.org/dc/elements/1.1/}creator"
         )
+        full_text=''
         for author in self.__arxiv_authors:
             full_name = f'{author.full_name} {author.last_name}'
             if author.initials:
                 full_name+=f" {author.initials}"
             if author.affiliations:
-                full_name+=', '.join(author.affiliations)
-            url = url_for('search_box', searchtype='author', query=full_name) #correct
-            author_element = etree.Element("a", href=url)
-            author_element.text = full_name
-            creator_element.append(author_element)
+                full_name+=', '.join(author.affiliations)            
+            full_text += f'{full_name}, '
+        creator_element.text=full_text[:-2]
 
     def extend_atom(self, entry: Element) -> Element:
         """
