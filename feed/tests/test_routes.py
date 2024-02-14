@@ -79,7 +79,7 @@ def test_routes_version_override(
 
         client.get(route, headers={"VERSION": version})
         get_documents.assert_called_with("cs.LO")
-        serialize.assert_called_with(documents, version=override)
+        serialize.assert_called_with(documents, query="cs.LO", version=override)
 
 
 def test_routes_unsupported_rss(client):
@@ -95,6 +95,7 @@ def test_routes_bad_rss(client):
     for route in [
             "/rss/cs.LO?version=9999",
             "/rss/cs.LO?version=bogus",
+            "/rss/heplat",
             ]:
         resp = client.get(route)
         resp.status_code == 400
@@ -102,8 +103,12 @@ def test_routes_bad_rss(client):
 
 def test_base(client):
     for route in [
-            "/rss",
-            "/atom",
+        "/rss/",
+        "/atom/",
+        "/rss",
+        "/atom",
+        "",
+        "/",
     ]:
         resp = client.get(route)
         resp.status_code == 200

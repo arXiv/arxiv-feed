@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Optional
 
 from flask import current_app, url_for
 from feedgen.feed import FeedGenerator
@@ -36,9 +36,9 @@ class Serializer:
 
         self.version = FeedVersion.get(version)
         self.link = (
-            url_for("atom")
+            url_for("feed.atom", query="", _external=True)
             if version == FeedVersion.ATOM_1_0
-            else url_for("rss")
+            else url_for("feed.rss", query="", _external=True)
         )
         self.content_type = (
             "application/atom+xml"
@@ -46,7 +46,7 @@ class Serializer:
             else "application/rss+xml"
         )
 
-    def _create_feed_generator(self) -> FeedGenerator:
+    def _create_feed_generator(self, cat_or_archive:str) -> FeedGenerator:
         """Creates an empty FeedGenerator and adds arxiv extensions."""
         fg = FeedGenerator()
 
@@ -55,9 +55,10 @@ class Serializer:
         fg.register_extension("arxiv", ArxivExtension, ArxivEntryExtension)
 
         # Populate the feed
-        fg.id(self.link)
+        link=self.link+cat_or_archive
+        fg.id(link)
         fg.link(
-            href=self.link, rel="self", type=self.content_type,
+            href=link, rel="self", type=self.content_type,
         )
         return fg
 
@@ -109,7 +110,12 @@ class Serializer:
         entry.id(url_for("abs", paper_id=document.arxiv_id, version=document.version))
         entry.guid(f"oai:arXiv.org:{full_id}", permalink=False)
         entry.title(document.title)
-        entry.summary(document.abstract)
+
+        #not all RSS readers handle the extra fields, put most important info in the description as well
+        description=f"arXiv:{full_id} Announce Type: {document.update_type}"
+        description+=f"\nAbstract: {document.abstract}"
+        entry.summary(description)
+        
         entry.link(
             {
                 "type": "text/html",
@@ -126,12 +132,7 @@ class Serializer:
 
         # Add arXiv-specific element "journal_ref"
         entry.arxiv.announce_type(document.update_type)
-        if document.journal_ref:
-            entry.arxiv.journal_ref(document.journal_ref.strip())
 
-        # Add arXiv-specific element "doi"
-        if document.doi:
-            entry.arxiv.doi(document.doi)
 
         # Add authors
         entry.arxiv.authors(document.authors)
@@ -154,12 +155,13 @@ class Serializer:
         FeedVersionError
             If the feed serialization format is not supported.
         """
-        fg = self._create_feed_generator()
+        cats_link='+'.join(documents.categories)
+        fg = self._create_feed_generator(cats_link)
         fg.title(f"{', '.join(documents.categories)} updates on arXiv.org")
         fg.description(
             f"{', '.join(documents.categories)} updates on the arXiv.org e-print archive.",
         )
-        fg.id(f"{self.link}/{'+'.join(documents.categories)}")
+        fg.id(self.link)
         midnight=get_arxiv_midnight()
         fg.pubDate(midnight)
 
@@ -174,7 +176,7 @@ class Serializer:
         return self._serialize(fg)
 
     def serialize_error(
-        self, error: FeedError, status_code: int = 400
+        self, error: FeedError, query:str, status_code: int = 400
     ) -> Feed:
         """Create feed from an error.
 
@@ -190,9 +192,9 @@ class Serializer:
         Feed
             Feed object containing rss feed.
         """
-        fg = self._create_feed_generator()
+        fg = self._create_feed_generator(query)
 
-        fg.title(f"Feed error for query: {self.link}")
+        fg.title(f"Feed error for query: {self.link}{query}")
         fg.description(error.error)
         # Timestamps
         midnight=get_arxiv_midnight()
@@ -206,8 +208,9 @@ class Serializer:
 
 
 def serialize(
-    documents_or_error: Union[DocumentSet, FeedError],
-    version: Union[str, FeedVersion] = FeedVersion.RSS_2_0,
+    documents_or_error: Union[DocumentSet, FeedError], 
+    query: str,
+    version: Union[str, FeedVersion] = FeedVersion.RSS_2_0
 ) -> Feed:
     """Serialize a document set or an error.
 
@@ -215,6 +218,7 @@ def serialize(
     ----------
     documents_or_error : Union[DocumentSet, FeedError]
         Either a document set or a Feed error object.
+    str: the original user query
     version : FeedVersion
         Serialization format.
 
@@ -228,11 +232,11 @@ def serialize(
         if isinstance(documents_or_error, DocumentSet):
             return serializer.serialize_documents(documents_or_error)
         elif isinstance(documents_or_error, FeedError):
-            return serializer.serialize_error(documents_or_error)
+            return serializer.serialize_error(documents_or_error, query)
         else:
             raise serializer.serialize_error(
-                FeedError("Internal Server Error."), status_code=500
+                FeedError("Internal Server Error."), query, status_code=500
             )
     except FeedVersionError as ex:
         serializer = Serializer(version=FeedVersion.RSS_2_0)
-        return serializer.serialize_error(ex)
+        return serializer.serialize_error(ex, query)
