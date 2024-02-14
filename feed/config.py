@@ -25,8 +25,6 @@ class Config:
         ("pdf", "/pdf/<arxiv:paper_id>v<string:version>", BASE_SERVER),
         ("pdf_by_id", "/pdf/<arxiv:paper_id>", BASE_SERVER),
         ("taxonomy", "/category_taxonomy", BASE_SERVER),
-        ("rss", "/rss", RSS_SERVER),
-        ("atom", "/atom", RSS_SERVER),
         ("help","/help/rss.html", INFO_SERVER),
         ("static","/static/<path:file_path>", STATIC_SERVER)
     ]

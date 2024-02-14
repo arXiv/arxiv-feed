@@ -36,9 +36,9 @@ class Serializer:
 
         self.version = FeedVersion.get(version)
         self.link = (
-            url_for("atom")
+            url_for("feed.atom", query="", _external=True)
             if version == FeedVersion.ATOM_1_0
-            else url_for("rss")
+            else url_for("feed.rss", query="", _external=True)
         )
         self.content_type = (
             "application/atom+xml"
@@ -55,7 +55,7 @@ class Serializer:
         fg.register_extension("arxiv", ArxivExtension, ArxivEntryExtension)
 
         # Populate the feed
-        link=self.link+"/"+categories
+        link=self.link+categories
         fg.id(link)
         fg.link(
             href=link, rel="self", type=self.content_type,
@@ -111,16 +111,8 @@ class Serializer:
         entry.guid(f"oai:arXiv.org:{full_id}", permalink=False)
         entry.title(document.title)
 
-
         #not all RSS readers handle the extra fields, put most important info in the description as well
         description=f"arXiv:{full_id} Announce Type: {document.update_type}"
-        if document.journal_ref:
-            entry.arxiv.journal_ref(document.journal_ref.strip())
-            description+=f' Journal Ref: {document.journal_ref}'
-        # Add arXiv-specific element "doi"
-        if document.doi:
-            entry.arxiv.doi(document.doi)
-            description+=f' DOI: {document.doi}'
         description+=f"\nAbstract: {document.abstract}"
         entry.summary(description)
         
@@ -202,7 +194,7 @@ class Serializer:
         """
         fg = self._create_feed_generator(query)
 
-        fg.title(f"Feed error for query: {self.link}/{query}")
+        fg.title(f"Feed error for query: {self.link}{query}")
         fg.description(error.error)
         # Timestamps
         midnight=get_arxiv_midnight()

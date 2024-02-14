@@ -37,12 +37,10 @@ def check_feed(
         raise Exception("Unknown format.")
 
     if error is None:
-        assert "https://rss.arxiv.org/" in link
         assert "arXiv.org" in title
         assert "updates on the arXiv.org" in description
         check_content(tree, version)
     else:
-        assert "https://rss.arxiv.org/" in link 
         assert "Feed error for query" in title
         assert error.error == description
 

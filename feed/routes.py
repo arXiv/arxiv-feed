@@ -15,7 +15,7 @@ from feed.utils import get_arxiv_midnight, utc_now
 from feed.database import check_service
 
 
-blueprint = Blueprint("rss", __name__, url_prefix="/")
+blueprint = Blueprint("feed", __name__, url_prefix="/")
 
 @blueprint.route("/feed/status")
 def status() -> Response:
@@ -60,11 +60,11 @@ def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
 @blueprint.route("/")
 def feed_home()-> Response:
     """Returns a empty error page"""
-    rss_url=url_for('rss')
-    atom_url=url_for("atom")
+    rss_url=url_for("feed.rss", query="", _external=True)
+    atom_url=url_for("feed.atom", query="", _external=True)
     help_url=url_for("help")
-    rss=f"<a href='{rss_url}'>{rss_url}/[archive or category]</a>"
-    atom=f"<a href='{atom_url}'>{atom_url}/[archive or category]</a>"
+    rss=f"<a href='{rss_url}'>{rss_url}[archive or category]</a>"
+    atom=f"<a href='{atom_url}'>{atom_url}[archive or category]</a>"
     help=f"<a href='{help_url}'>here</a>"
     help_text=f"Please use {rss} for RSS 2.0 and {atom} for ATOM formats. See {help} for help."
     return make_response(help_text, 200)
