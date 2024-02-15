@@ -113,9 +113,14 @@ class Serializer:
 
         #not all RSS readers handle the extra fields, put most important info in the description as well
         description=f"arXiv:{full_id} Announce Type: {document.update_type}"
-        description+=f"\nAbstract: {document.abstract}"
+        description+=f" \nAbstract: {document.abstract}"
         entry.summary(description)
-        
+
+        if document.journal_ref:
+            entry.arxiv.journal_ref(document.journal_ref.strip())
+        if document.doi:
+            entry.arxiv.doi(document.doi)
+
         entry.link(
             {
                 "type": "text/html",
