@@ -13,6 +13,9 @@ from feed.errors import FeedError, FeedVersionError
 def documents(sample_doc) -> DocumentSet:
     return DocumentSet(categories=["astro-ph"], documents=[sample_doc])
 
+@pytest.fixture
+def jref_documents(sample_doc_jref) -> DocumentSet:
+    return DocumentSet(categories=["astro-ph"], documents=[sample_doc_jref])
 
 def check_feed(
     feed: Feed,
@@ -89,3 +92,27 @@ def test_serialize_invalid_version(app, documents):
                 version=version, supported=FeedVersion.supported()
             ),
         )
+
+def test_doi_jref(app, jref_documents, documents):
+    for version in FeedVersion.supported():
+        #rjref and DOI in feed where applicable
+        feed1 = serialize(jref_documents, "astro-ph", version=version)
+        check_feed(feed1, version=version)
+        assert b"<arxiv:journal_reference>Very Impressive Journal</arxiv:journal_reference>" in feed1.content
+
+        #no element where not apllicable
+        feed2 = serialize(documents, "astro-ph", version=version)
+        check_feed(feed2, version=version)
+        assert b"<arxiv:journal_reference>" not in feed2.content
+        
+def test_announce_type(app, documents):
+    for version in FeedVersion.supported():
+        feed = serialize(documents, "astro-ph", version=version)
+        check_feed(feed, version=version)
+        assert b"<arxiv:announce_type>new</arxiv:announce_type>" in feed.content
+
+def test_description_extras(app, documents):
+    for version in FeedVersion.supported():
+        feed = serialize(documents, "astro-ph", version=version)
+        check_feed(feed, version=version)
+        assert b"arXiv:1234.5678v3 Announce Type: new \nAbstract:" in feed.content

@@ -46,7 +46,7 @@ def sample_arxiv_metadata():
             msc_class = "A",
             acm_class = "",
             journal_ref = "",
-            doi = "10.0000/00-AAA0000",
+            doi = "",
             abstract = "This whole concept is abstract.",
             license = "http://creativecommons.org/licenses/by/4.0/",
             version = 3,
@@ -83,7 +83,22 @@ def sample_doc(sample_author):
         authors=[sample_author],
         categories=["astro-ph","math.NT"],
         license="http://creativecommons.org/licenses/by/4.0/",
-        doi="10.0000/00-AAA0000",
+        doi="",
         journal_ref="",
+        update_type="new"
+        )
+
+@pytest.fixture
+def sample_doc_jref(sample_author):
+    return Document(    
+        arxiv_id="1234.5678",
+        version=3,
+        title="Mysteries of the Universe",
+        abstract="This whole concept is abstract.",
+        authors=[sample_author],
+        categories=["astro-ph","math.NT"],
+        license="http://creativecommons.org/licenses/by/4.0/",
+        doi="10.0000/00-AAA0000",
+        journal_ref="Very Impressive Journal",
         update_type="new"
         )
