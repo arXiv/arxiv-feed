@@ -166,7 +166,6 @@ class Serializer:
         fg.description(
             f"{', '.join(documents.categories)} updates on the arXiv.org e-print archive.",
         )
-        fg.id(self.link)
         midnight=get_arxiv_midnight()
         fg.pubDate(midnight)
 
