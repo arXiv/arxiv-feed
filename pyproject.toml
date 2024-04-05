@@ -1,22 +1,26 @@
-[[source]]
-url = "https://pypi.org/simple"
-verify_ssl = true
-name = "pypi"
+[tool.poetry]
+name = "feed"
+version = "1.0.6"
+description = "arXiv feeds."
+authors = []
 
-[packages]
+[tool.poetry.dependencies]
+python = "^3.11"
 arxiv-base = "==0.17.4post2"
-feedgen = "==0.9.0"
-flask-caching = "==1.8.0"
-werkzeug = "==1.0.1"
-flask = "==1.1.4"
-markupsafe = "==2.0.1"
+arxiv-db = "~=0.11.0"
 certifi = "*"
+
+feedgen = "==0.9.0"
+flask = "==1.1.4"
+flask-caching = "==1.8.0"
 Flask-SQLAlchemy = "~=2.4"  
 SQLAlchemy = "~=1.4"
-arxiv-db = "~=0.11.0"
+markupsafe = "==2.0.1"
 mysqlclient = "~=2.2.0"
+werkzeug = "==1.0.1"
 
-[dev-packages]
+[tool.poetry.dev-dependencies]
+
 mypy = "==1.6"
 flake8 = "==3.7.9"
 flask-testing = "==0.8.0"
@@ -27,6 +31,3 @@ pytest = "==7.4.3"
 pytest-cov = "==2.8.1"
 pytest-flask = "==1.0.0"
 pytest-mock = "==3.12.0"
-
-[requires]
-python_version = "3.11"

@@ -2,6 +2,28 @@
 
 This is a RSS and Atom feed service that reads from the production database and produces feeds.
 
+## to install
+poetry install
+
+## to run
+python main.py
+
+note that without a database connection running feed locally isn't very interesting, the most recent local data is 2023-20-27 in the math category
+
+## to run connected to GCP databases
+export SQLALCHEMY_DATABASE_URI to the main gcp database URI
+
+## to test
+unset SQLALCHEMY_DATABASE_URI
+
+pytest
+
+
+
+
+
+### below is things left over from the original build of feed - unsure of current use/ functionality, but keeping in case they are useful
+
 ## Development environment
 
 ### Running the development server
