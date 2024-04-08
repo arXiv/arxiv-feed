@@ -23,11 +23,9 @@ def get_announce_papers(first_day: date, last_day: date, archives: List[Archive]
 
     up=aliased(ArXivUpdate)
     case_order = case(
-        [
             (up.action == 'new', 0),
             (up.action == 'cross', 1),
             (up.action == 'replace', 2),
-        ],
         else_=3 
     ).label('case_order')
  
@@ -61,22 +59,18 @@ def get_announce_papers(first_day: date, last_day: date, archives: List[Archive]
 
     #sorting and counting by type of listing
     listing_type = case(
-        [
             (and_(all.c.action == 'new', all.c.is_primary == 1), 'new'),
             (or_(all.c.action == 'new', all.c.action == 'cross'), 'cross'),
             (and_(all.c.action == 'replace', all.c.is_primary == 1), 'replace'),
-            (all.c.action == 'replace', 'replace-cross')
-        ],
+            (all.c.action == 'replace', 'replace-cross'),
         else_="no_match"
     ).label('listing_type')
 
     listing_order = case(
-        [
             (listing_type == 'new', 4),
             (listing_type == 'cross', 3),
             (listing_type == 'replace', 2),
             (listing_type == 'replace-cross', 1),
-        ],
         else_=0 
     ).label('case_order')
 
