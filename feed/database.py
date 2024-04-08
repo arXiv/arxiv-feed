@@ -9,19 +9,20 @@ from sqlalchemy.sql import func
 
 from arxiv.taxonomy.definitions import ARCHIVES_SUBSUMED
 from arxiv.taxonomy.category import Archive, Category
+from arxiv.db import session
+from arxiv.db.models import Metadata, Updates, DocumentCategory
 
-from feed.tables import db, ArXivUpdate, ArXivMetadata, DocumentCategory
 from feed.consts import UpdateActions
 
 logger = logging.getLogger(__name__)
 
-def get_announce_papers(first_day: date, last_day: date, archives: List[Archive], categories: List[Category])->List[Tuple[UpdateActions, ArXivMetadata]]:
+def get_announce_papers(first_day: date, last_day: date, archives: List[Archive], categories: List[Category])->List[Tuple[UpdateActions, Metadata]]:
     result_limit = 2000
     version_threshold = 6
 
     category_list=_all_possible_categories(archives, categories)
 
-    up=aliased(ArXivUpdate)
+    up=aliased(Updates)
     case_order = case(
             (up.action == 'new', 0),
             (up.action == 'cross', 1),
@@ -30,7 +31,7 @@ def get_announce_papers(first_day: date, last_day: date, archives: List[Archive]
     ).label('case_order')
  
     doc_ids=(
-        db.session.query(
+        session.query(
             up.document_id,
             up.action
         )
@@ -46,7 +47,7 @@ def get_announce_papers(first_day: date, last_day: date, archives: List[Archive]
     dc = aliased(DocumentCategory)
     #all listings for the specific category set
     all = (
-        db.session.query(
+        session.query(
             doc_ids.c.document_id, 
             doc_ids.c.action,  
             func.max(dc.is_primary).label('is_primary')
@@ -75,9 +76,9 @@ def get_announce_papers(first_day: date, last_day: date, archives: List[Archive]
     ).label('case_order')
 
     #data for listings to be displayed
-    meta = aliased(ArXivMetadata)
+    meta = aliased(Metadata)
     result_query = (
-        db.session.query(
+        session.query(
             listing_type,
             meta
         )
@@ -119,8 +120,8 @@ def _debug_no_response(msg:str, query: Query)->None:
     actual_query=str(query.statement.compile(compile_kwargs={"literal_binds": True}))
     
     recent_entry = (
-        db.session.query(ArXivUpdate)
-        .order_by(desc(ArXivUpdate.date))
+        session.query(Updates)
+        .order_by(desc(Updates.date))
         .first()
     )
     log=msg+f"most recent entry: {recent_entry}"
@@ -128,7 +129,7 @@ def _debug_no_response(msg:str, query: Query)->None:
     return
 
 def check_service() -> str:
-    query=db.session.query(ArXivUpdate).limit(1).all()
+    query=session.query(Updates).limit(1).all()
     if len(query)==1:
         return "GOOD"
     return "BAD"

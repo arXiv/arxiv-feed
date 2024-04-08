@@ -6,13 +6,13 @@ from datetime import timedelta
 from arxiv.taxonomy.category import Category, Archive
 from arxiv.taxonomy.definitions import ARCHIVES, CATEGORIES, ARCHIVES_ACTIVE
 from arxiv.authors import parse_author_affil
+from arxiv.db.models import Metadata
 
 from feed.utils import get_arxiv_midnight
 from feed.errors import FeedIndexerError
 from feed.consts import DELIMITER, UpdateActions
 from feed.domain import Author, Document, DocumentSet
 from feed.database import get_announce_papers
-from feed.tables import ArXivMetadata
 
 logger = logging.getLogger(__name__)
 
@@ -129,7 +129,7 @@ def validate_request(query: str) -> Tuple[List[Category],List[Archive]]:
     return archives,categories
 
 def get_records_from_db(archives: List[Archive], categories: List[Category], days: int
-) -> List[Tuple[UpdateActions, ArXivMetadata]]:
+) -> List[Tuple[UpdateActions, Metadata]]:
     """Retrieve all records that match the list of categories and date range.
 
     Parameters
@@ -154,7 +154,7 @@ def get_records_from_db(archives: List[Archive], categories: List[Category], day
     first_date=last_date - timedelta(days=days-1) #-1 for inclusive date bounds
     return get_announce_papers(first_date.date(),last_date.date(), archives, categories)
 
-def create_document(record:Tuple[UpdateActions, ArXivMetadata])->Document:
+def create_document(record:Tuple[UpdateActions, Metadata])->Document:
     """Copy data from the provided database entires into a new Document and return it.
 
     Parameters

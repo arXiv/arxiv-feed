@@ -1,10 +1,10 @@
 import pytest
 from datetime import datetime
 
+from arxiv.db.models import Updates, Metadata
+
 from feed.domain import Document, Author
 from feed.factory import create_web_app
-from feed.tables import ArXivMetadata, ArXivUpdate
-
 
 @pytest.fixture
 def app():
@@ -14,7 +14,7 @@ def app():
 #set of database data and matching documents
 @pytest.fixture
 def sample_arxiv_update():
-    return ArXivUpdate(
+    return Updates(
         document_id=111111111111,
         version=3,
         date=datetime(2020, 1, 1, 0, 0, 0),
@@ -25,7 +25,7 @@ def sample_arxiv_update():
 
 @pytest.fixture
 def sample_arxiv_metadata():
-    return ArXivMetadata(
+    return Metadata(
             metadata_id = 222222,
             document_id = 111111111111,
             paper_id = "1234.5678",

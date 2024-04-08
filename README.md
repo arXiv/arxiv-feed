@@ -6,6 +6,7 @@ This is a RSS and Atom feed service that reads from the production database and 
 poetry install
 
 ## to run
+export CLASSIC_DB_URI='sqlite:///feed/tests/data/test_data.db'
 python main.py
 
 note that without a database connection running feed locally isn't very interesting, the most recent local data is 2023-20-27 in the math category
@@ -14,7 +15,7 @@ note that without a database connection running feed locally isn't very interest
 export SQLALCHEMY_DATABASE_URI to the main gcp database URI
 
 ## to test
-unset SQLALCHEMY_DATABASE_URI
+export CLASSIC_DB_URI='sqlite:///feed/tests/data/test_data.db'
 
 pytest
 

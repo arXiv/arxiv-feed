@@ -8,9 +8,6 @@ from arxiv.base import Base
 
 from feed import routes
 
-from flask_sqlalchemy import SQLAlchemy
-from feed.tables import db
-
 def create_web_app() -> Flask:
     """Initialize and configure the rss application."""
     app = Flask("feed")
@@ -24,6 +21,4 @@ def create_web_app() -> Flask:
     Base(app)
     app.url_map.strict_slashes = False
     app.register_blueprint(routes.blueprint)
-
-    db.init_app(app)
     return app
