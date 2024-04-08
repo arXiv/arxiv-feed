@@ -91,7 +91,9 @@ def get_announce_papers(first_day: date, last_day: date, archives: List[Archive]
     results=result_query.all()
     
     if len(results) <1:
-        str=f"No results for db query. first day: {first_day}, last day: {last_day}, archives: {archives}, categories: {categories}\n"
+        archive_ids = ', '.join(archive.id for archive in archives)
+        category_ids = ', '.join(category.id for category in categories)
+        str=f"No results for db query. first day: {first_day}, last day: {last_day}, archives: [{archive_ids}], categories: [{category_ids}]\n"
         _debug_no_response(str,result_query)
        
 
