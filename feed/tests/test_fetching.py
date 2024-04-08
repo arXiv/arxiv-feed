@@ -142,7 +142,7 @@ def test_db_multiple_archives(app):
     found_math=False
     for item in items:
         action, meta= item
-        assert any(archive in meta.abs_categories for archive in archives)
+        assert any(archive.id in meta.abs_categories for archive in archives)
         if "math." in meta.abs_categories:
             found_math=True
         if "cs.CV" in meta.abs_categories:
@@ -160,7 +160,7 @@ def test_db_multiple_categories(app):
     found_math=False
     for item in items:
         action, meta= item
-        assert any(cat in meta.abs_categories for cat in cats)
+        assert any(cat.id in meta.abs_categories for cat in cats)
         if "math.NT" in meta.abs_categories:
             found_math=True
         if "cs.CV" in meta.abs_categories:
