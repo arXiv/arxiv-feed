@@ -1,33 +1,28 @@
 [tool.poetry]
 name = "feed"
-version = "1.0.6"
-description = "arXiv feeds."
+version = "1.1.2"
+description = "arXiv feeds"
 authors = []
 
 [tool.poetry.dependencies]
 python = "^3.11"
-arxiv-base = "==0.17.4post2"
-arxiv-db = "~=0.11.0"
-certifi = "*"
-
+arxiv-base = {git = "https://github.com/arXiv/arxiv-base.git", rev = "3e19d4dd0e8d042a9ac6f9b0c1a9370a7d69aab0"}
 feedgen = "==0.9.0"
-flask = "==1.1.4"
-flask-caching = "==1.8.0"
-Flask-SQLAlchemy = "~=2.4"  
-SQLAlchemy = "~=1.4"
-markupsafe = "==2.0.1"
+flask = "^3"
+Flask-SQLAlchemy = "^3"  
+SQLAlchemy = "^2"
 mysqlclient = "~=2.2.0"
-werkzeug = "==1.0.1"
+werkzeug = "*"
 
 [tool.poetry.dev-dependencies]
 
-mypy = "==1.6"
-flake8 = "==3.7.9"
-flask-testing = "==0.8.0"
-pre-commit = "==2.2.0"
-pydocstyle = "==5.0.2"
-pylint = "==2.4.4"
-pytest = "==7.4.3"
-pytest-cov = "==2.8.1"
-pytest-flask = "==1.0.0"
-pytest-mock = "==3.12.0"
+mypy = "*"
+flake8 = "^3"
+flask-testing = "^0.8"
+pre-commit = "^2"
+pydocstyle = "^5"
+pylint = "^2"
+pytest = "^7"
+pytest-cov = "^2"
+pytest-flask = "^1"
+pytest-mock = "^3"
