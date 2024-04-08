@@ -107,7 +107,7 @@ class Serializer:
         """
         entry = fg.add_entry()
         full_id=f'{document.arxiv_id}v{document.version}'
-        entry.id(url_for("abs", paper_id=document.arxiv_id, version=document.version))
+        entry.id(url_for("canonical_pdf", paper_id=document.arxiv_id, version=document.version))
         entry.guid(f"oai:arXiv.org:{full_id}", permalink=False)
         entry.title(document.title)
 

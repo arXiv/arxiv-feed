@@ -3,7 +3,6 @@ from typing import Dict, List, Optional
 
 from lxml import etree
 from lxml.etree import Element
-from flask import url_for
 from feedgen.ext.base import BaseEntryExtension, BaseExtension
 
 from feed.domain import Author

@@ -62,7 +62,7 @@ def feed_home()-> Response:
     """Returns a empty error page"""
     rss_url=url_for("feed.rss", query="", _external=True)
     atom_url=url_for("feed.atom", query="", _external=True)
-    help_url=url_for("help")
+    help_url=url_for("help")+"/rss.html"
     rss=f"<a href='{rss_url}'>{rss_url}[archive or category]</a>"
     atom=f"<a href='{atom_url}'>{atom_url}[archive or category]</a>"
     help=f"<a href='{help_url}'>here</a>"
