@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Union
 
 from flask import current_app, url_for
 from feedgen.feed import FeedGenerator

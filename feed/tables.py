@@ -1,5 +1,4 @@
 from sqlalchemy import MetaData, Integer, Column, Date, Enum, String, text, Index, ForeignKey, DateTime, Text
-from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 
 metadata = MetaData()

@@ -1,10 +1,11 @@
 """Interface to Index Service for RSS feeds."""
 import logging
-from typing import List, Tuple, Dict, Literal
-from datetime import datetime, timedelta
+from typing import List, Tuple
+from datetime import timedelta
 
-from arxiv import taxonomy
-from arxiv.util.authors import parse_author_affil
+from arxiv.taxonomy.category import Category, Archive
+from arxiv.taxonomy.definitions import ARCHIVES, CATEGORIES, ARCHIVES_ACTIVE
+from arxiv.authors import parse_author_affil
 
 from feed.utils import get_arxiv_midnight
 from feed.errors import FeedIndexerError
@@ -34,18 +35,21 @@ def search(query: str, days: int) -> DocumentSet:
 
     """
     documents: List[Document] = []
-
     archives,categories = validate_request(query)
-    
     records=get_records_from_db(archives,categories, days)
 
     for record in records:
         document = create_document(record)
         documents.append(document)
     
-    return DocumentSet(categories+archives, documents) 
+    topics=[]
+    for archive in archives:
+        topics.append(archive.id)
+    for cat in categories:
+        topics.append(cat.id)
+    return DocumentSet(topics, documents) 
 
-def validate_request(query: str) -> Tuple[List[str],List[str]]:
+def validate_request(query: str) -> Tuple[List[Category],List[Archive]]:
     """Validate the provided archive/category specification.
 
     Return a list of its named archives and categories.
@@ -64,7 +68,7 @@ def validate_request(query: str) -> Tuple[List[str],List[str]]:
 
     Returns
     -------
-    request_categories : List[str] and request_archives : List[str]
+    request_categories : List[Category] and request_archives : List[Archive]
         If validation was as successful, a tuple of a list of archive and category names.
         Otherwise, and empty list.
 
@@ -85,45 +89,46 @@ def validate_request(query: str) -> Tuple[List[str],List[str]]:
             f"geometry from computer science)."
         )
 
-    archives=[]
-    categories=[]
+    archives: List[Archive]=[]
+    categories: List[Category]=[]
 
     # Are each of the archives and subjects valid?
     for category in request_categories:
+
         parts = category.split(".")
         if len(parts)>2:
             raise FeedIndexerError(
                 f"Bad archive/subject class structure '{category}'. Valid names include an archive, possibly followed by a single period and subject class."
             )
-        if not parts[0].lower() in taxonomy.ARCHIVES:
+        
+        request_arch=parts[0].lower()
+        if not request_arch in ARCHIVES:
             raise FeedIndexerError(
-                f"Bad archive '{parts[0]}'. Valid archive names are: "
-                f"{', '.join(taxonomy.ARCHIVES.keys())}."
+                f"Bad archive '{request_arch}'. Valid archive names are: "
+                f"{', '.join(ARCHIVES_ACTIVE.keys())}."
             )
+        
         if len(parts)==1:
-            archives.append(category.lower())
-        if len(parts) == 2:
-            category_upper=parts[0].lower()+"."+parts[1].upper()
-            category_lower=parts[0].lower()+"."+parts[1].lower()
-            if category_upper in taxonomy.CATEGORIES:
-                categories.append(category_upper)
-            elif category_lower in taxonomy.CATEGORIES:
-                categories.append(category_lower)
+            archives.append(ARCHIVES[request_arch])
+        elif len(parts) == 2:
+            category_upper=request_arch+"."+parts[1].upper()
+            category_lower=request_arch+"."+parts[1].lower()
+            if category_upper in CATEGORIES:
+                categories.append(CATEGORIES[category_upper])
+            elif category_lower in CATEGORIES:
+                categories.append(CATEGORIES[category_lower])
             else:
-                skip = len(parts[0]) + 1
-                groups = [
-                    key[skip:]
-                    for key in taxonomy.CATEGORIES.keys()
-                    if key.startswith(parts[0].lower() + ".")
-                ]
+                possible_cats=[]
+                for cat in ARCHIVES[request_arch].get_categories():
+                    possible_cats.append(cat.id)
                 raise FeedIndexerError(
                     f"Bad subject class '{parts[1]}'. Valid subject classes for "
-                    f"the archive '{parts[0]}' are: {', '.join(groups)}."
+                    f"the archive '{request_arch}' are: {', '.join(possible_cats)}."
                 )
 
     return archives,categories
 
-def get_records_from_db(archives: List[str], categories: List[str], days: int
+def get_records_from_db(archives: List[Archive], categories: List[Category], days: int
 ) -> List[Tuple[UpdateActions, ArXivMetadata]]:
     """Retrieve all records that match the list of categories and date range.
 

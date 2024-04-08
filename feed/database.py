@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 from datetime import date
 import logging 
 
@@ -7,15 +7,15 @@ from sqlalchemy.orm.query import Query
 from sqlalchemy import and_, or_, case, desc
 from sqlalchemy.sql import func
 
-from arxiv import taxonomy
-from arxiv.taxonomy.definitions import CATEGORIES
+from arxiv.taxonomy.definitions import ARCHIVES_SUBSUMED
+from arxiv.taxonomy.category import Archive, Category
 
 from feed.tables import db, ArXivUpdate, ArXivMetadata, DocumentCategory
 from feed.consts import UpdateActions
 
 logger = logging.getLogger(__name__)
 
-def get_announce_papers(first_day: date, last_day: date, archives: List[str], categories: List[str])->List[Tuple[UpdateActions, ArXivMetadata]]:
+def get_announce_papers(first_day: date, last_day: date, archives: List[Archive], categories: List[Category])->List[Tuple[UpdateActions, ArXivMetadata]]:
     result_limit = 2000
     version_threshold = 6
 
@@ -102,51 +102,23 @@ def get_announce_papers(first_day: date, last_day: date, archives: List[str], ca
 
     return results # type: ignore
 
-def _all_possible_categories(archives:List[str], categories:List[str]) -> List[str]:
-    """returns a set of all categories in the lists of archvies and categories, 
-    this includes alternate names of categories from aliases and subsumed archives
+def _all_possible_categories(archives:List[Archive], categories:List[Category]) -> List[str]:
+    """returns a list of all category ids that may be relevant for list of archives and categories, 
+    including aliases and previously subsumed archives
     """
-    total_set=set()
+    all=set()
     for archive in archives:
-        total_set.update(get_categories_from_archive(archive))
+        for category in archive.get_categories(True):
+            all.add(category.id)
+            if category.alt_name and category.id not in ARCHIVES_SUBSUMED.keys():
+                all.add(category.alt_name)
     for category in categories:
-        total_set.add(category)
-        second_name=_check_alternate_name(category)
-        if second_name:
-            total_set.add(second_name)
-    return list(total_set)
-    
-def get_categories_from_archive(archive:str) ->List[str]:
-    """returns a list names of all categories under an archive
-    includes older names that make no longer be active
-    """
-    list=[]
-    for category in CATEGORIES.keys():
-        if CATEGORIES[category]["in_archive"] == archive:
-            list.append(category)
-            second_name=_check_alternate_name(category)
-            if second_name:
-                list.append(second_name)
+        all.add(category.id)
+        if category.alt_name and category.id not in ARCHIVES_SUBSUMED.keys():
+            all.add(category.alt_name)
 
-    return list
+    return list(all)
 
-def _check_alternate_name(category:str) -> Optional[str]:
-    # returns alternate name for aliases
-    #returns previous name if archive was subsumed
-
-    #check for aliases
-    for key, value in taxonomy.CATEGORY_ALIASES.items():
-        if category == key: #old alias name provided
-            return value # type: ignore
-        elif category == value: #new alias name provided
-            return key # type: ignore
-        
-    #check for subsumed archives
-    for key, value in taxonomy.ARCHIVES_SUBSUMED.items():
-        if category == value: #has old archive name
-            return key # type: ignore
-
-    return None #no alternate names
 
 def _debug_no_response(msg:str, query: Query)->None:
     
