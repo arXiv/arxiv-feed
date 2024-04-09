@@ -1,12 +1,11 @@
 import pytest
-from unittest.mock import patch, MagicMock
-
+from unittest.mock import patch
 from werkzeug import Response
 
-from feed.serializers import Feed
+from feed.serializers.feed import Feed
 from feed.domain import DocumentSet
 from feed.consts import FeedVersion
-from feed.errors import FeedVersionError
+
 
 
 @pytest.fixture

@@ -1,13 +1,11 @@
-from arxiv.taxonomy.definitions import CATEGORIES, ARCHIVES
-
+import pytest
+from datetime import  date
 
 from feed.errors import FeedIndexerError
 from feed.fetch_data import validate_request,create_document
 from feed.database import get_announce_papers
 
-from unittest.mock import patch
-import pytest
-from datetime import  date
+from arxiv.taxonomy.definitions import CATEGORIES, ARCHIVES
 
 math=ARCHIVES["math"]
 cs=ARCHIVES["cs"]

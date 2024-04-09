@@ -3,7 +3,7 @@
 from typing import List
 from dataclasses import dataclass
 
-from feed.consts import Format, UpdateActions
+from feed.consts import UpdateActions
 
 
 @dataclass
