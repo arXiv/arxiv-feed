@@ -15,15 +15,12 @@ class Settings(arxiv_base.Settings):
     TESTING = False
     VERSION = "1.1"
 
-    BASE_SERVER = os.environ.get("BASE_SERVER", "arxiv.org")
-    RSS_SERVER = os.environ.get("RSS_SERVER", "rss.arxiv.org")
     STATIC_SERVER = os.environ.get("STATIC_SERVER", "static.arxiv.org")
 
     FEED_NUM_DAYS = os.environ.get("FEED_NUM_DAYS", consts.FEED_NUM_DAYS)
 
-    ###add to the 
+    ###add to the default URLS
     URLS: List[Tuple[str, str, str]] = [
-        ("taxonomy", "/category_taxonomy", BASE_SERVER),
         ("static","/static/<path:file_path>", STATIC_SERVER)
     ]
 

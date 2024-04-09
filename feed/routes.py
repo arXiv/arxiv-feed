@@ -74,7 +74,7 @@ def feed_home()-> Response:
 def feed_help()-> Response:
     """Returns a empty error page"""
     archives=', '.join(key for key in ARCHIVES_ACTIVE.keys() if key != 'test')
-    help=f"<a href='{url_for('taxonomy')}'>here</a>"
+    help=f"<a href='{url_for('home')}category_taxonomy'>here</a>"
     return make_response(f"No archive specified. Archives are: {archives}. See {help} to learn about ArXiv category taxonomy.", 200)
 
 @blueprint.route("/rss/<string:query>", methods=["GET"])
