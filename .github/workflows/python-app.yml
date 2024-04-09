@@ -31,5 +31,5 @@ jobs:
 
     - name: Test with pytest
       run: |
-        echo "CLASSIC_DB_URI='sqlite:///feed/tests/data/test_data.db'" >> $GITHUB_ENV
+        export CLASSIC_DB_URI='sqlite:///feed/tests/data/test_data.db'
         poetry run pytest
