@@ -49,7 +49,7 @@ def search(query: str, days: int) -> DocumentSet:
         topics.append(cat.id)
     return DocumentSet(topics, documents) 
 
-def validate_request(query: str) -> Tuple[List[Category],List[Archive]]:
+def validate_request(query: str) -> Tuple[List[Archive],List[Category]]:
     """Validate the provided archive/category specification.
 
     Return a list of its named archives and categories.
@@ -171,19 +171,20 @@ def create_document(record:Tuple[UpdateActions, Metadata])->Document:
     action, metadata=record
   
     authors=[]
-    for author in parse_author_affil(metadata.authors):
-        authors.append(Author(author[0],author[1],author[2],author[3:]))
+    if metadata.authors:
+        for author in parse_author_affil(metadata.authors):
+            authors.append(Author(author[0],author[1],author[2],author[3:]))
 
-    categories=metadata.abs_categories.split(" ")
+    categories = metadata.abs_categories.split(" ") if metadata.abs_categories else []
 
     return Document(    
         arxiv_id=metadata.paper_id,
         version=metadata.version,
-        title=metadata.title,
-        abstract=metadata.abstract,
+        title=metadata.title if metadata.title else "",
+        abstract=metadata.abstract if metadata.abstract else "",
         authors=authors,
         categories=categories,
-        license=metadata.license,
+        license=metadata.license if metadata.license else "",
         doi=metadata.doi,
         journal_ref=metadata.journal_ref,
         update_type=action
