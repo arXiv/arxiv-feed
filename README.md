@@ -19,39 +19,9 @@ export CLASSIC_DB_URI='sqlite:///feed/tests/data/test_data.db'
 
 pytest
 
-
-
-
-
-### below is things left over from the original build of feed - unsure of current use/ functionality, but keeping in case they are useful
-
-## Development environment
-
-### Running the development server
-
-To run the development enter:
-
-```
-make run
-```
-
-This will start the flask development server on port 5000.
-
-
-For other commands run:
-
-```
-make help
-```
-### testing
-testing can be run with pytest if dev packages are installed
-
-```bash
-pytest
-```
-
 ### deploying
-creating pull requests to the devlop branch should trigger builds and cloud run instances
-arxiv-feed in development and arxiv-feed-beta in production
+a PR to develop should run tests and build and deploy arxiv-feed in GCP development
 
-pushes to master branch should trigger build and deploy in arxiv-feed in production and devlopment NOT YET IMPLEMENTED
+merging/pushing to develop should trigger a build in production GCP to arxiv-feed-beta
+
+pushes to master branch should trigger build and deploy in arxiv-feed in production
