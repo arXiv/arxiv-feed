@@ -10,13 +10,15 @@ ENV LC_ALL=en_US.utf8 \
 
 FROM base as python-deps
 
-RUN pip install pipenv
-RUN apt-get update
 # Install python dependencies in /.venv
-COPY Pipfile .
-#COPY Pipfile.lock .
-RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
+RUN python -m venv "/.venv"
 ENV PATH="/.venv/bin:$PATH"
+
+RUN pip install poetry
+COPY poetry.lock pyproject.toml ./
+RUN poetry config virtualenvs.create false && \
+    poetry install --no-interaction --no-ansi
+
 RUN pip install "gunicorn==20.1.0"
 
 FROM base as runtime
@@ -30,7 +32,6 @@ ENV PYTHONFAULTHANDLER=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONHASHSEED=random \
     APP_HOME=/opt/arxiv
-
 
 
 # add python application and configuration
