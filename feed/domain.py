@@ -17,28 +17,6 @@ class Author:
 
 
 @dataclass
-class Category:
-    """Represents an arXiv category."""
-
-    id: str
-    name: str
-
-
-@dataclass
-class Media:
-    """Represents a media item."""
-
-    title: str
-    url: str
-    format: Format
-
-    @property
-    def type(self) -> str:
-        if self.format in {Format.PDF, Format.PS}:
-            return f"application/{self.format}"
-        return "text/html"
-
-@dataclass
 class Document:
     """Represents an feed item."""
 

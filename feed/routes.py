@@ -62,7 +62,7 @@ def feed_home()-> Response:
     """Returns a empty error page"""
     rss_url=url_for("feed.rss", query="", _external=True)
     atom_url=url_for("feed.atom", query="", _external=True)
-    help_url=url_for("help")
+    help_url=url_for("help")+"/rss.html"
     rss=f"<a href='{rss_url}'>{rss_url}[archive or category]</a>"
     atom=f"<a href='{atom_url}'>{atom_url}[archive or category]</a>"
     help=f"<a href='{help_url}'>here</a>"
@@ -74,7 +74,7 @@ def feed_home()-> Response:
 def feed_help()-> Response:
     """Returns a empty error page"""
     archives=', '.join(key for key in ARCHIVES_ACTIVE.keys() if key != 'test')
-    help=f"<a href='{url_for('taxonomy')}'>here</a>"
+    help=f"<a href='{url_for('home')}category_taxonomy'>here</a>"
     return make_response(f"No archive specified. Archives are: {archives}. See {help} to learn about ArXiv category taxonomy.", 200)
 
 @blueprint.route("/rss/<string:query>", methods=["GET"])

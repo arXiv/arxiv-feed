@@ -1,11 +1,17 @@
-from feed.consts import UpdateActions
+from arxiv.taxonomy.definitions import CATEGORIES, ARCHIVES
+
+
 from feed.errors import FeedIndexerError
 from feed.fetch_data import validate_request,create_document
 from feed.database import get_announce_papers
 
 from unittest.mock import patch
 import pytest
-from datetime import datetime, date
+from datetime import  date
+
+math=ARCHIVES["math"]
+cs=ARCHIVES["cs"]
+cs_cv=CATEGORIES["cs.CV"]
 
 def test_no_request_cat():
     with pytest.raises(FeedIndexerError) as excinfo:
@@ -16,18 +22,18 @@ def test_no_request_cat():
     assert "Invalid archive specification" in str(excinfo.value)
 
 def test_categories_not_case_sensitive():
-    expected= ([],["cs.AI"])
+    expected= ([],[CATEGORIES["cs.AI"]])
     assert validate_request("cs.ai") == expected
     assert validate_request("CS.ai") == expected
     assert validate_request("cs.AI") == expected
     assert validate_request("CS.AI") == expected
 
-    expected= (["physics"],[])
+    expected= ([ARCHIVES["physics"]],[])
     assert validate_request("physics") == expected
     assert validate_request("PhYsiCs") == expected
 
 def test_seperates_categories_and_archives():
-    assert validate_request("cs.CV+math+hep-lat+cs.CG")==(["math","hep-lat"],["cs.CV","cs.CG"])
+    assert validate_request("cs.CV+math+hep-lat+cs.CG")==([math,ARCHIVES["hep-lat"]],[cs_cv,CATEGORIES["cs.CG"]])
 
 def test_bad_cat_requests():
     #bad category form
@@ -79,7 +85,7 @@ def test_create_document(sample_arxiv_metadata, sample_doc,sample_author, sample
 def test_basic_db_query(app):
     last_date=date(2023,10,26)
     first_date=date(2023,10,26)
-    category=["cs.CV"]
+    category=[cs_cv]
     with app.app_context():
         items=get_announce_papers(first_date, last_date, [],category)
     #any data is returned
@@ -97,7 +103,7 @@ def test_basic_db_query(app):
 def test_db_date_range(app):
     last_date=date(2023,10,27)
     first_date=date(2023,10,26)
-    category=["cs.CV"]
+    category=[cs_cv]
     with app.app_context():
         items=get_announce_papers(first_date, last_date, [],category)
     
@@ -117,7 +123,7 @@ def test_db_date_range(app):
 def test_db_archive(app):
     last_date=date(2023,10,26)
     first_date=date(2023,10,26)
-    archive=["cs"]
+    archive=[cs]
     with app.app_context():
         items=get_announce_papers(first_date, last_date, archive,[])
     assert len(items) >0 
@@ -128,7 +134,7 @@ def test_db_archive(app):
 def test_db_multiple_archives(app):
     last_date=date(2023,10,26)
     first_date=date(2023,10,26)
-    archives=["cs", "math"]
+    archives=[cs, math]
     with app.app_context():
         items=get_announce_papers(first_date, last_date, archives,[])
     assert len(items) >0 
@@ -136,7 +142,7 @@ def test_db_multiple_archives(app):
     found_math=False
     for item in items:
         action, meta= item
-        assert any(archive in meta.abs_categories for archive in archives)
+        assert any(archive.id in meta.abs_categories for archive in archives)
         if "math." in meta.abs_categories:
             found_math=True
         if "cs.CV" in meta.abs_categories:
@@ -146,7 +152,7 @@ def test_db_multiple_archives(app):
 def test_db_multiple_categories(app):
     last_date=date(2023,10,26)
     first_date=date(2023,10,26)
-    cats=["cs.CV", "math.NT"]
+    cats=[cs_cv, CATEGORIES["math.NT"]]
     with app.app_context():
         items=get_announce_papers(first_date, last_date, [],cats)
     assert len(items) >0 
@@ -154,7 +160,7 @@ def test_db_multiple_categories(app):
     found_math=False
     for item in items:
         action, meta= item
-        assert any(cat in meta.abs_categories for cat in cats)
+        assert any(cat.id in meta.abs_categories for cat in cats)
         if "math.NT" in meta.abs_categories:
             found_math=True
         if "cs.CV" in meta.abs_categories:
@@ -164,8 +170,8 @@ def test_db_multiple_categories(app):
 def test_db_cat_and_archive(app):
     last_date=date(2023,10,26)
     first_date=date(2023,10,26)
-    cat=["cs.CV"]
-    archive=["math"]
+    cat=[cs_cv]
+    archive=[math]
     with app.app_context():
         items=get_announce_papers(first_date, last_date, archive,cat)
     assert len(items) >0 
@@ -183,7 +189,7 @@ def test_db_find_alias(app):
     #finds a paper only labeled with cs.IT
     last_date=date(2023,10,26)
     first_date=date(2023,10,26)
-    category=["math.IT"]
+    category=[CATEGORIES["math.IT"]]
     with app.app_context():
         items=get_announce_papers(first_date, last_date, [],category)
     alias_found=False
@@ -198,7 +204,7 @@ def test_db_alias_in_archive(app):
     #cs.IT is also math.IT and should show up in the math archive
     last_date=date(2023,10,26)
     first_date=date(2023,10,26)
-    archive=["math"]
+    archive=[math]
     with app.app_context():
         items=get_announce_papers(first_date, last_date, archive,[])
     alias_found=False
@@ -212,7 +218,7 @@ def test_db_alias_in_archive(app):
 def test_db_identify_cross(app):
     last_date=date(2023,10,26)
     first_date=date(2023,10,26)
-    category=["cs.CV"]
+    category=[cs_cv]
     with app.app_context():
         items=get_announce_papers(first_date, last_date, [],category)
     item_found=False
@@ -226,7 +232,7 @@ def test_db_identify_cross(app):
 def test_db_identify_repcross(app):
     last_date=date(2023,10,26)
     first_date=date(2023,10,26)
-    category=["cs.CV"]
+    category=[cs_cv]
     with app.app_context():
         items=get_announce_papers(first_date, last_date, [],category)
     item_found=False
@@ -240,7 +246,7 @@ def test_db_identify_repcross(app):
 def test_db_identify_replace(app):
     last_date=date(2023,10,26)
     first_date=date(2023,10,26)
-    archive=["astro-ph"]
+    archive=[ARCHIVES["astro-ph"]]
     with app.app_context():
         items=get_announce_papers(first_date, last_date, archive,[])
     item_found=False
@@ -254,7 +260,7 @@ def test_db_identify_replace(app):
 def test_db_identify_new(app):
     last_date=date(2023,10,25)
     first_date=date(2023,10,25)
-    archive=["astro-ph"]
+    archive=[ARCHIVES["astro-ph"]]
     with app.app_context():
         items=get_announce_papers(first_date, last_date, archive,[])
     item_found=False
@@ -269,7 +275,7 @@ def test_db_announce_type_order(app):
     #the papers returning in backwards order means they will be printed in the correct order
     last_date=date(2023,10,27)
     first_date=date(2023,10,26)
-    archive=["math","cs"]
+    archive=[math,cs]
     with app.app_context():
         items=get_announce_papers(first_date, last_date, archive,[])
 
