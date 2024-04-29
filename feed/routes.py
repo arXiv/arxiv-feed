@@ -9,7 +9,7 @@ from arxiv.taxonomy.definitions import ARCHIVES_ACTIVE
 
 from feed import controller
 from feed.consts import FeedVersion
-from feed.serializers import serialize
+from feed.serializers.serializer import serialize
 from feed.errors import FeedError, FeedVersionError
 from feed.utils import get_arxiv_midnight, utc_now
 from feed.database import check_service

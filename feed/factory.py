@@ -1,8 +1,6 @@
 """Application factory for rss app."""
 import os
-
 from flask import Flask
-from werkzeug.utils import import_string
 
 from arxiv.base import Base
 

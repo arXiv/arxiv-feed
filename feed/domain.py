@@ -1,9 +1,9 @@
 """Domain classes for the RSS feed."""
 
-from typing import List
+from typing import List, Optional
 from dataclasses import dataclass
 
-from feed.consts import Format, UpdateActions
+from feed.consts import UpdateActions
 
 
 @dataclass
@@ -22,13 +22,13 @@ class Document:
 
     arxiv_id: str
     version: int
-    doi:str
+    doi:Optional[str]
     title: str
     abstract: str
     authors: List[Author]
     categories: List[str]
     license: str
-    journal_ref: str
+    journal_ref: Optional[str]
     update_type: UpdateActions
 
 @dataclass
