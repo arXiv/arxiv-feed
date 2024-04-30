@@ -3,78 +3,48 @@
 This is a RSS and Atom feed service that reads from the production database and produces feeds.
 
 ## to install
+```
+pip install poetry
 poetry install
-
-## to run
+```
+## to run locally
+```
 export CLASSIC_DB_URI='sqlite:///feed/tests/data/test_data.db'
 python main.py
-
+```
 note that without a database connection running feed locally isn't very interesting, the most recent local data is 2023-20-27 in the math category
 
 ## to run connected to GCP databases
-export SQLALCHEMY_DATABASE_URI to the main gcp database URI
+export CLASSIC_DB_URI to the main gcp database URI
 
 ## to test
+```
 export CLASSIC_DB_URI='sqlite:///feed/tests/data/test_data.db'
-
-pytest
-
-
-
-
-
-### below is things left over from the original build of feed - unsure of current use/ functionality, but keeping in case they are useful
-
-## Development environment
-
-### Running the development server
-
-To run the development enter:
-
-```
-make run
-```
-
-This will start the flask development server on port 5000.
-
-
-For other commands run:
-
-```
-make help
-```
-### testing
-testing can be run with pytest if dev packages are installed
-
-```bash
 pytest
 ```
 
 ### deploying
-creating pull requests to the devlop branch should trigger builds and cloud run instances
-arxiv-feed in development and arxiv-feed-beta in production
+a PR to develop should run tests and build and deploy arxiv-feed in GCP development
 
-pushes to master branch should trigger build and deploy in arxiv-feed in production and devlopment NOT YET IMPLEMENTED
+merging/pushing to develop should trigger a build in production GCP to arxiv-feed-beta
 
-### Pre-commit hooks
+pushes to master branch should trigger build and deploy in arxiv-feed in production
 
-To run pre commit hooks install the dev dependencies:
 
-```bash
-pipenv install --dev
+### running in docker
+
+build image with this command:
+
+`docker build -t feed .`
+
+## to run
+Create a docker.env file with any enviroment variables you want to set. Here is an example one for running of the local database:
+
 ```
-
-After that you'll need to install the pre commit hooks:
-
-```bash
-pipenv run pre-commit install
+DEBUG=True
+TESTING=True
+FEED_NUM_DAYS=300
+CLASSIC_DB_URI=sqlite:///feed/tests/data/test_data.db 
 ```
-
-Git will run all the pre-commit hooks on all changed files before you are
-allowed to commit. You will be allowed to commit only if all checks pass.
-
-You can also run the pre commit hooks manually with:
-
-```bash
-pipenv run pre-commit run
-```
+this can be run with
+`docker run --env-file docker.env -p 8080:8080 feed`

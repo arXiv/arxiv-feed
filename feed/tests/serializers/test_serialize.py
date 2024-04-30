@@ -5,7 +5,8 @@ from lxml import etree
 
 from feed.domain import DocumentSet
 from feed.consts import FeedVersion
-from feed.serializers import serialize, Feed
+from feed.serializers.feed import Feed
+from feed.serializers.serializer import serialize
 from feed.errors import FeedError, FeedVersionError
 
 

@@ -7,7 +7,7 @@ from feed.utils import get_arxiv_midnight
 from feed.consts import FeedVersion
 from feed.errors import FeedError, FeedVersionError
 from feed.domain import Document, DocumentSet
-from feed.serializers import Feed
+from feed.serializers.feed import Feed
 from feed.serializers.extensions import (
     ArxivExtension,
     ArxivAtomExtension,

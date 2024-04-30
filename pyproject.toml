@@ -17,10 +17,6 @@ werkzeug = "*"
 [tool.poetry.dev-dependencies]
 
 mypy = "*"
-flake8 = "^3"
-flask-testing = "^0.8"
-pre-commit = "^2"
-pydocstyle = "^5"
 pylint = "^2"
 pytest = "^7"
 pytest-cov = "^2"

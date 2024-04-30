@@ -1,7 +1,7 @@
 import pytest
 
 from feed import utils
-from feed.serializers import Feed
+from feed.serializers.feed import Feed
 from feed.consts import FeedVersion
 from feed.errors import FeedVersionError
 
