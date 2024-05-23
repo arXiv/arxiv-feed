@@ -6,6 +6,7 @@ from werkzeug import Response
 from flask import request, Blueprint, make_response, redirect, url_for, current_app
 
 from arxiv.taxonomy.definitions import ARCHIVES_ACTIVE
+from arxiv.integration.fastly.headers import add_surrogate_key
 
 from feed import controller
 from feed.consts import FeedVersion
@@ -55,6 +56,7 @@ def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
     response.headers["Content-Type"] = feed.content_type
     expiration_time = (get_arxiv_midnight() + timedelta(hours=24) - utc_now()).total_seconds() #expire on next day
     response.headers['Cache-Control'] = f"max-age={int(expiration_time)}"
+    response.headers=add_surrogate_key(response.headers,["announce", "feed"]) #type: ignore
     return response
 
 @blueprint.route("/")
@@ -82,14 +84,18 @@ def rss(query: str) -> Response:
     """Return the RSS results for the past day.
 
     Defaults to RSS 2.0 and only supports 2.0. 0.91 and 1.0 will raise errors."""
-    return _feed(query=query,
+    response= _feed(query=query,
                  version=request.args.get("version", default="2.0", type=str))
+    response.headers=add_surrogate_key(response.headers,["feed-rss"]) #type: ignore
+    return response
 
 
 @blueprint.route("/atom/<string:query>", methods=["GET"])
 def atom(query: str) -> Response:
     """Return the Atom 1.0 results for the past day."""
-    return _feed(query=query, version=FeedVersion.ATOM_1_0)
+    response= _feed(query=query, version=FeedVersion.ATOM_1_0)
+    response.headers=add_surrogate_key(response.headers,["feed-atom"]) #type: ignore
+    return response
 
 @blueprint.route("/favicon.ico")
 @blueprint.route("/apple-touch-icon-120x120-precomposed.png")
