@@ -56,7 +56,7 @@ def _feed(query: str, version: Union[str, FeedVersion]) -> Response:
     response.headers["Content-Type"] = feed.content_type
     expiration_time = (get_arxiv_midnight() + timedelta(hours=24) - utc_now()).total_seconds() #expire on next day
     response.headers['Cache-Control'] = f"max-age={int(expiration_time)}"
-    response.headers=add_surrogate_key(response.headers,["announce", "feed"]) #type: ignore
+    response.headers=add_surrogate_key(response.headers,["announce", "feed"]) 
     return response
 
 @blueprint.route("/")
@@ -86,7 +86,7 @@ def rss(query: str) -> Response:
     Defaults to RSS 2.0 and only supports 2.0. 0.91 and 1.0 will raise errors."""
     response= _feed(query=query,
                  version=request.args.get("version", default="2.0", type=str))
-    response.headers=add_surrogate_key(response.headers,["feed-rss"]) #type: ignore
+    response.headers=add_surrogate_key(response.headers,["feed-rss"]) 
     return response
 
 
@@ -94,7 +94,7 @@ def rss(query: str) -> Response:
 def atom(query: str) -> Response:
     """Return the Atom 1.0 results for the past day."""
     response= _feed(query=query, version=FeedVersion.ATOM_1_0)
-    response.headers=add_surrogate_key(response.headers,["feed-atom"]) #type: ignore
+    response.headers=add_surrogate_key(response.headers,["feed-atom"]) 
     return response
 
 @blueprint.route("/favicon.ico")
