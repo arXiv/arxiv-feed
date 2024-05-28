@@ -6,7 +6,7 @@ authors = []
 
 [tool.poetry.dependencies]
 python = "^3.11"
-arxiv-base = {git = "https://github.com/arXiv/arxiv-base.git", rev = "3e19d4dd0e8d042a9ac6f9b0c1a9370a7d69aab0"}
+arxiv-base = {git = "https://github.com/arXiv/arxiv-base.git", rev = "5926b21"}
 feedgen = "==0.9.0"
 flask = "^3"
 Flask-SQLAlchemy = "^3"  
