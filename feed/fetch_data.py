@@ -177,11 +177,12 @@ def create_document(record:Tuple[UpdateActions, Metadata])->Document:
 
     categories = metadata.abs_categories.split(" ") if metadata.abs_categories else []
 
-    return Document(    
+    return Document(
         arxiv_id=metadata.paper_id,
         version=metadata.version,
         title=metadata.title if metadata.title else "",
         abstract=metadata.abstract if metadata.abstract else "",
+        created=metadata.created,
         authors=authors,
         categories=categories,
         license=metadata.license if metadata.license else "",

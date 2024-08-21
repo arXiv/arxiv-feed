@@ -75,11 +75,12 @@ def sample_author2():
 
 @pytest.fixture
 def sample_doc(sample_author):
-    return Document(    
+    return Document(
         arxiv_id="1234.5678",
         version=3,
         title="Mysteries of the Universe",
         abstract="This whole concept is abstract.",
+        created=datetime(2019, 10, 10, 0, 0, 0),
         authors=[sample_author],
         categories=["astro-ph","math.NT"],
         license="http://creativecommons.org/licenses/by/4.0/",
@@ -90,11 +91,12 @@ def sample_doc(sample_author):
 
 @pytest.fixture
 def sample_doc_jref(sample_author):
-    return Document(    
+    return Document(
         arxiv_id="1234.5678",
         version=3,
         title="Mysteries of the Universe",
         abstract="This whole concept is abstract.",
+        created=datetime(2019, 10, 10, 0, 0, 0),
         authors=[sample_author],
         categories=["astro-ph","math.NT"],
         license="http://creativecommons.org/licenses/by/4.0/",

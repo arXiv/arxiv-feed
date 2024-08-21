@@ -1,4 +1,5 @@
 from typing import Union
+from datetime import UTC
 
 from flask import current_app, url_for
 from feedgen.feed import FeedGenerator
@@ -120,6 +121,8 @@ class Serializer:
             entry.arxiv.journal_ref(document.journal_ref.strip())
         if document.doi:
             entry.arxiv.doi(document.doi)
+        if document.created:
+            entry.published(document.created.replace(tzinfo=UTC))
 
         entry.link(
             {

@@ -2,6 +2,7 @@
 
 from typing import List, Optional
 from dataclasses import dataclass
+from datetime import datetime
 
 from feed.consts import UpdateActions
 
@@ -22,9 +23,10 @@ class Document:
 
     arxiv_id: str
     version: int
-    doi:Optional[str]
+    doi: Optional[str]
     title: str
     abstract: str
+    created: Optional[datetime]
     authors: List[Author]
     categories: List[str]
     license: str

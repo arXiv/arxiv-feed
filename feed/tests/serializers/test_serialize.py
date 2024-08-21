@@ -1,4 +1,6 @@
 from typing import Optional
+from datetime import datetime, UTC
+from email.utils import parsedate_to_datetime as rfc822_to_datetime
 
 import pytest
 from lxml import etree
@@ -53,19 +55,23 @@ def check_content(tree, version: FeedVersion):
         ns = {'dc': 'http://purl.org/dc/elements/1.1/'}
         title: str=tree.findtext("channel/item/title")
         link: str=tree.findtext("channel/item/link")
+        pub_date = rfc822_to_datetime(tree.findtext("channel/item/pubDate"))
         creators: str = tree.findtext("channel/item/dc:creator", namespaces=ns)
-        
+
     if version.is_atom:
         ns = "{http://www.w3.org/2005/Atom}"
         dc="{http://purl.org/dc/elements/1.1/}"
         title: str = tree.findtext(f"{ns}entry/{ns}title")
         link_entry= tree.find(f"{ns}entry/{ns}link")
         link = link_entry.get('href')
+        pub_date = datetime.fromisoformat(tree.findtext(f"{ns}entry/{ns}published"))
         creators=tree.findall(f"{ns}entry/{dc}creator")
 
     assert "Mysteries" in title
     assert "://arxiv.org/abs" in link and "1234.5678" in link
     assert len(creators)>0
+    assert pub_date.tzinfo == UTC
+    assert pub_date == datetime(2019, 10, 10, 0, 0, 0, 0, UTC)
 
 def test_serialize_documents(app, documents):
     for version in FeedVersion.supported():
