@@ -43,7 +43,7 @@ Create a docker.env file with any enviroment variables you want to set. Here is 
 ```
 DEBUG=True
 TESTING=True
-FEED_NUM_DAYS=300
+FEED_NUM_DAYS=600
 CLASSIC_DB_URI=sqlite:///feed/tests/data/test_data.db 
 ```
 this can be run with
