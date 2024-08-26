@@ -142,6 +142,9 @@ class Serializer:
         # Add authors
         entry.arxiv.authors(document.authors)
 
+        midnight=get_arxiv_midnight()
+        entry.published(midnight)
+
     def serialize_documents(self, documents: DocumentSet) -> Feed:
         """Serialize feed from documents.
 
