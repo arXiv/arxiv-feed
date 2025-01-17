@@ -1,5 +1,6 @@
 from typing import Optional
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import pytest
 from lxml import etree
 
@@ -27,17 +28,15 @@ def check_feed(
     assert feed.version == version
     assert feed.status_code == status_code
 
-    today=datetime.today()
+    today=datetime.now(ZoneInfo("America/New_York")).replace(hour=0, minute=0, second=0, microsecond=0)
     tree = etree.fromstring(feed.content)
     if version.is_rss:
         link: str = tree.findtext("channel/link")
         title: str = tree.findtext("channel/title")
         description: str = tree.findtext("channel/description")
         pub_date: str = tree.findtext("channel/pubDate")
-        formatted_date = today.strftime('%a, %d %b %Y')
-        formatted_date1 =formatted_date+" 00:00:00 -0400"
-        formatted_date2 =formatted_date+" 00:00:00 -0500"
-        assert pub_date==formatted_date1 or pub_date==formatted_date2
+        formatted_date = today.strftime('%a, %d %b %Y %H:%M:%S %z')
+        assert pub_date==formatted_date
 
     elif version.is_atom:
         ns = "{http://www.w3.org/2005/Atom}"
@@ -56,17 +55,15 @@ def check_feed(
         assert error.error == description
 
 def check_content(tree, version: FeedVersion):
-    today=datetime.today()
+    today=datetime.now(ZoneInfo("America/New_York")).replace(hour=0, minute=0, second=0, microsecond=0)
     if version.is_rss:
         ns = {'dc': 'http://purl.org/dc/elements/1.1/'}
         title: str=tree.findtext("channel/item/title")
         link: str=tree.findtext("channel/item/link")
         creators: str = tree.findtext("channel/item/dc:creator", namespaces=ns)
         pub_date: str = tree.findtext("channel/item/pubDate")
-        formatted_date = today.strftime('%a, %d %b %Y')
-        formatted_date1 =formatted_date+" 00:00:00 -0400"
-        formatted_date2 =formatted_date+" 00:00:00 -0500"
-        assert pub_date==formatted_date1 or pub_date==formatted_date2
+        formatted_date = today.strftime('%a, %d %b %Y %H:%M:%S %z')
+        assert pub_date==formatted_date
         
     if version.is_atom:
         ns = "{http://www.w3.org/2005/Atom}"
@@ -76,7 +73,7 @@ def check_content(tree, version: FeedVersion):
         link = link_entry.get('href')
         creators=tree.findall(f"{ns}entry/{dc}creator")
         pub_date: str = tree.findtext(f"{ns}entry/{ns}published")
-        assert f"{today.year:04d}-{today.month:02d}-{today.day:02d}T00:00:00-04:00" in pub_date or f"{today.year:04d}-{today.month:02d}-{today.day:02d}T00:00:00-05:00" in pub_date
+        assert f"{today.year:04d}-{today.month:02d}-{today.day:02d}T00:00:00{today.strftime('%z')[:3]}:00" in pub_date
 
     assert "Mysteries" in title
     assert "://arxiv.org/abs" in link and "1234.5678" in link
