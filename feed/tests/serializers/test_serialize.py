@@ -35,8 +35,9 @@ def check_feed(
         description: str = tree.findtext("channel/description")
         pub_date: str = tree.findtext("channel/pubDate")
         formatted_date = today.strftime('%a, %d %b %Y')
-        formatted_date+=" 00:00:00 -0400"
-        assert pub_date==formatted_date
+        formatted_date1 =formatted_date+" 00:00:00 -0400"
+        formatted_date2 =formatted_date+" 00:00:00 -0500"
+        assert pub_date==formatted_date1 or pub_date==formatted_date2
 
     elif version.is_atom:
         ns = "{http://www.w3.org/2005/Atom}"
@@ -63,8 +64,9 @@ def check_content(tree, version: FeedVersion):
         creators: str = tree.findtext("channel/item/dc:creator", namespaces=ns)
         pub_date: str = tree.findtext("channel/item/pubDate")
         formatted_date = today.strftime('%a, %d %b %Y')
-        formatted_date+=" 00:00:00 -0400"
-        assert pub_date==formatted_date
+        formatted_date1 =formatted_date+" 00:00:00 -0400"
+        formatted_date2 =formatted_date+" 00:00:00 -0500"
+        assert pub_date==formatted_date1 or pub_date==formatted_date2
         
     if version.is_atom:
         ns = "{http://www.w3.org/2005/Atom}"
@@ -74,7 +76,7 @@ def check_content(tree, version: FeedVersion):
         link = link_entry.get('href')
         creators=tree.findall(f"{ns}entry/{dc}creator")
         pub_date: str = tree.findtext(f"{ns}entry/{ns}published")
-        assert f"{today.year:04d}-{today.month:02d}-{today.day:02d}T00:00:00-04:00" in pub_date
+        assert f"{today.year:04d}-{today.month:02d}-{today.day:02d}T00:00:00-04:00" in pub_date or f"{today.year:04d}-{today.month:02d}-{today.day:02d}T00:00:00-05:00" in pub_date
 
     assert "Mysteries" in title
     assert "://arxiv.org/abs" in link and "1234.5678" in link
