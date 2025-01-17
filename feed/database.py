@@ -9,7 +9,7 @@ from sqlalchemy.sql import func
 
 from arxiv.taxonomy.definitions import ARCHIVES_SUBSUMED
 from arxiv.taxonomy.category import Archive, Category
-from arxiv.db import session
+from arxiv.db import Session
 from arxiv.db.models import Metadata, Updates, DocumentCategory
 
 from feed.consts import UpdateActions
@@ -31,7 +31,7 @@ def get_announce_papers(first_day: date, last_day: date, archives: List[Archive]
     ).label('case_order')
  
     doc_ids=(
-        session.query(
+        Session.query(
             up.document_id,
             up.action
         )
@@ -47,7 +47,7 @@ def get_announce_papers(first_day: date, last_day: date, archives: List[Archive]
     dc = aliased(DocumentCategory)
     #all listings for the specific category set
     all = (
-        session.query(
+        Session.query(
             doc_ids.c.document_id, 
             doc_ids.c.action,  
             func.max(dc.is_primary).label('is_primary')
@@ -78,7 +78,7 @@ def get_announce_papers(first_day: date, last_day: date, archives: List[Archive]
     #data for listings to be displayed
     meta = aliased(Metadata)
     result_query = (
-        session.query(
+        Session.query(
             listing_type,
             meta
         )
@@ -122,7 +122,7 @@ def _debug_no_response(msg:str, query: Query)->None:
     actual_query=str(query.statement.compile(compile_kwargs={"literal_binds": True}))
     
     recent_entry = (
-        session.query(Updates)
+        Session.query(Updates)
         .order_by(desc(Updates.date))
         .first()
     )
@@ -131,7 +131,7 @@ def _debug_no_response(msg:str, query: Query)->None:
     return
 
 def check_service() -> str:
-    query=session.query(Updates).limit(1).all()
+    query=Session.query(Updates).limit(1).all()
     if len(query)==1:
         return "GOOD"
     return "BAD"
