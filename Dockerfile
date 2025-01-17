@@ -14,7 +14,7 @@ FROM base as python-deps
 RUN python -m venv "/.venv"
 ENV PATH="/.venv/bin:$PATH"
 
-RUN pip install poetry
+RUN pip install poetry ==1.3.2
 COPY poetry.lock pyproject.toml ./
 RUN poetry config virtualenvs.create false && \
     poetry install --no-interaction --no-ansi
