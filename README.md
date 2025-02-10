@@ -18,6 +18,7 @@ note that without a database connection running feed locally isn't very interest
 export CLASSIC_DB_URI to the main gcp database URI
 
 ## to test
+make sure to run this from the top level folder
 ```
 export CLASSIC_DB_URI='sqlite:///feed/tests/data/test_data.db'
 pytest
