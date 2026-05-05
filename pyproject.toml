@@ -18,7 +18,7 @@ werkzeug = "*"
 
 mypy = "*"
 pylint = "^2"
-pytest = "^7"
+pytest = "^9"
 pytest-cov = "^2"
 pytest-flask = "^1"
 pytest-mock = "^3"
