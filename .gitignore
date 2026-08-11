@@ -106,3 +106,7 @@ mypy_test_errors.txt
 # PyCharm files
 .idea/
 docker.env
+
+# agent working notes
+.claude/
+.vscode/settings.json
