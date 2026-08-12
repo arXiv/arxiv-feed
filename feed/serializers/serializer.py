@@ -105,7 +105,7 @@ class Serializer:
         document : Document
             Document that should be added to the feed.
         """
-        entry = fg.add_entry()
+        entry = fg.add_entry(order='append') #rows already arrive in display order
         full_id=f'{document.arxiv_id}v{document.version}'
         entry.id(url_for("canonical_pdf", paper_id=document.arxiv_id, version=document.version))
         entry.guid(f"oai:arXiv.org:{full_id}", permalink=False)
