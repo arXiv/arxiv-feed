@@ -270,7 +270,7 @@ def test_db_identify_new(app):
     assert item_found
 
 def test_db_announce_type_order(app):
-    #the papers returning in backwards order means they will be printed in the correct order
+    #the papers return in display order and the serializer appends them, so the feed keeps this order
     last_date=date(2023,10,27)
     first_date=date(2023,10,26)
     archive=[math,cs]
@@ -278,16 +278,16 @@ def test_db_announce_type_order(app):
         items=get_announce_papers(first_date, last_date, archive,[])
 
     order={"new":4, "cross":3, "replace":2, "replace-cross":1}
-    current_min=1
-    last_id="9999.99999"
-    for item in items:   
+    current_max=4
+    last_id="0000.00000"
+    for item in items:
         action, meta= item
         score=order[action]
-        assert score >= current_min
-        if score > current_min:
-            current_min=score
+        assert score <= current_max
+        if score < current_max:
+            current_max=score
             last_id=meta.paper_id
         else: #ordered by paper id within same type
-            assert meta.paper_id < last_id
+            assert meta.paper_id > last_id
             last_id=meta.paper_id
 

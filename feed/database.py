@@ -84,7 +84,7 @@ def get_announce_papers(first_day: date, last_day: date, archives: List[Archive]
         )
         .join(meta, meta.document_id == all.c.document_id)
         .filter(meta.is_current ==1)
-        .order_by(listing_order, meta.paper_id.desc())
+        .order_by(listing_order.desc(), meta.paper_id) #display order, so the limit trims replace-cross and not new
         .limit(result_limit) 
     )
 
