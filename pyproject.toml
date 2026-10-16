@@ -11,7 +11,7 @@ feedgen = "==0.9.0"
 flask = "^3"
 Flask-SQLAlchemy = "^3"  
 SQLAlchemy = "^2"
-mysqlclient = "~=2.2.0"
+mysqlclient = "^2.2"
 werkzeug = "*"
 
 [tool.poetry.dev-dependencies]
