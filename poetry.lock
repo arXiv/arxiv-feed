@@ -58,8 +58,8 @@ sphinx = ["sphinx", "sphinx-autodoc-typehints", "sphinxcontrib-websupport"]
 [package.source]
 type = "git"
 url = "https://github.com/arXiv/arxiv-base.git"
-reference = "639006fb013d244f641991039635172cc72c7cdf"
-resolved_reference = "639006fb013d244f641991039635172cc72c7cdf"
+reference = "35c5a3fc59f7a8dd7dda562fb88f3a5f76e0adfe"
+resolved_reference = "35c5a3fc59f7a8dd7dda562fb88f3a5f76e0adfe"
 
 [[package]]
 name = "astroid"
@@ -2735,4 +2735,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "7931e198fd0c69aaf3af633626e7be45eabb67882212f00f16046b14ee7d0342"
+content-hash = "234d2ee90f8a71466064e75ceeba8461daea550c61504b2d5f0297e4c29938e3"
