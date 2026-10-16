@@ -796,13 +796,13 @@ urllib3 = ">=1.25.3"
 
 [[package]]
 name = "feedgen"
-version = "0.9.0"
+version = "1.0.0"
 description = "Feed Generator (ATOM, RSS, Podcasts)"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "feedgen-0.9.0.tar.gz", hash = "sha256:8e811bdbbed6570034950db23a4388453628a70e689a6e8303ccec430f5a804a"},
+    {file = "feedgen-1.0.0.tar.gz", hash = "sha256:d9bd51c3b5e956a2a52998c3708c4d2c729f2fcc311188e1e5d3b9726393546a"},
 ]
 
 [package.dependencies]
@@ -3140,4 +3140,4 @@ email = ["email-validator (>=2.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "05589496681dd11005cdb054248508e2d29f2abcd529076bf2be1b603dd8f0e1"
+content-hash = "d4ad4e29b6e16169f1850b70e94148cc9c29c7db5a62a8a68cacb9668250e4a1"
