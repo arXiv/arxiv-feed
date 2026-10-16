@@ -40,8 +40,6 @@ pydantic = "^2.11.7"
 pydantic-settings = "^2.5.2"
 pyjwt = "^2.9.0"
 pytz = "*"
-redis = "==2.10.6"
-redis-py-cluster = "==1.3.6"
 retry = "^0.9.2"
 ruamel-yaml = "^0.18.6"
 setuptools = "^78.1.1"
@@ -58,8 +56,8 @@ sphinx = ["sphinx", "sphinx-autodoc-typehints", "sphinxcontrib-websupport"]
 [package.source]
 type = "git"
 url = "https://github.com/arXiv/arxiv-base.git"
-reference = "35c5a3fc59f7a8dd7dda562fb88f3a5f76e0adfe"
-resolved_reference = "35c5a3fc59f7a8dd7dda562fb88f3a5f76e0adfe"
+reference = "8841f53ba87e1cc4694a7d9e35d6fa5dd0bb240b"
+resolved_reference = "8841f53ba87e1cc4694a7d9e35d6fa5dd0bb240b"
 
 [[package]]
 name = "ast-serialize"
@@ -917,7 +915,7 @@ description = "Google API client core library"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "python_version < \"3.14\""
+markers = "python_version <= \"3.13\""
 files = [
     {file = "google_api_core-2.33.0-py3-none-any.whl", hash = "sha256:a2e22a0c1d0f03eafff1858b38cf46f832d5902b0c052235bf0ab8402929fbdc"},
     {file = "google_api_core-2.33.0.tar.gz", hash = "sha256:3a36bcc3e319783f4c97da41f6f45ea6ffcaa55848e341de16e09cb70243c2bb"},
@@ -1039,7 +1037,7 @@ description = "Google Cloud API client core library"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "python_version < \"3.14\""
+markers = "python_version <= \"3.13\""
 files = [
     {file = "google_cloud_core-2.8.0-py3-none-any.whl", hash = "sha256:e235b0952f7ffe7b9c71a4cf96b506d9cfb557e22557c412f0df9b7068b5d007"},
     {file = "google_cloud_core-2.8.0.tar.gz", hash = "sha256:365f8e4518ae81c8101b8dea5fc1c32a960badedb8b511f19db2843cbbd285d2"},
@@ -1174,7 +1172,7 @@ description = "Google Cloud Storage API client library"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "python_version < \"3.14\""
+markers = "python_version <= \"3.13\""
 files = [
     {file = "google_cloud_storage-3.16.0-py3-none-any.whl", hash = "sha256:59e54ff1f7f8a7253c01f593f79d253728c122a8901b83f68fe7464a4131539f"},
     {file = "google_cloud_storage-3.16.0.tar.gz", hash = "sha256:3f75cf8ad345d68ef33f0c69db8a8b3f34f160b1524e75d73890602b7b8a4d6e"},
@@ -2444,7 +2442,7 @@ files = [
     {file = "pycparser-2.23-py3-none-any.whl", hash = "sha256:e5c6e8d3fbad53479cab09ac03729e0a9faf2bee3db8208a550daf5af81a5934"},
     {file = "pycparser-2.23.tar.gz", hash = "sha256:78816d4f24add8f10a06d6f05b4d424ad9e96cfebf68a4ddc99c65c0720d00c2"},
 ]
-markers = {main = "implementation_name != \"PyPy\" and platform_python_implementation != \"PyPy\""}
+markers = {main = "platform_python_implementation != \"PyPy\" and implementation_name != \"PyPy\""}
 
 [[package]]
 name = "pydantic"
@@ -2806,32 +2804,6 @@ files = [
 ]
 
 [[package]]
-name = "redis"
-version = "2.10.6"
-description = "Python client for Redis key-value store"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "redis-2.10.6-py2.py3-none-any.whl", hash = "sha256:8a1900a9f2a0a44ecf6e8b5eb3e967a9909dfed219ad66df094f27f7d6f330fb"},
-    {file = "redis-2.10.6.tar.gz", hash = "sha256:a22ca993cea2962dbb588f9f30d0015ac4afcc45bee27d3978c0dbe9e97c6c0f"},
-]
-
-[[package]]
-name = "redis-py-cluster"
-version = "1.3.6"
-description = "Library for communicating with Redis Clusters. Built on top of redis-py lib"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "redis-py-cluster-1.3.6.tar.gz", hash = "sha256:7db54b1de60bd34da3806676b112f07fc9afae556d8260ac02c3335d574ee42c"},
-]
-
-[package.dependencies]
-redis = "2.10.6"
-
-[[package]]
 name = "requests"
 version = "2.34.2"
 description = "Python HTTP for Humans."
@@ -2895,7 +2867,7 @@ description = "C version of reader, parser and emitter for ruamel.yaml derived f
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "python_version <= \"3.14\" and platform_python_implementation == \"CPython\""
+markers = "platform_python_implementation == \"CPython\" and python_version < \"3.15\""
 files = [
     {file = "ruamel_yaml_clib-0.2.15-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:88eea8baf72f0ccf232c22124d122a7f26e8a24110a0273d9bcddcb0f7e1fa03"},
     {file = "ruamel_yaml_clib-0.2.15-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:9b6f7d74d094d1f3a4e157278da97752f16ee230080ae331fcc219056ca54f77"},
@@ -3250,4 +3222,4 @@ email = ["email-validator (>=2.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "50c7248fae6cc87a6231959744ad843d0a0869fb569ec31bc84cb444fc92ced8"
+content-hash = "05589496681dd11005cdb054248508e2d29f2abcd529076bf2be1b603dd8f0e1"
